@@ -1,0 +1,6 @@
+<div class="search-overlay" id="searchOverlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="searchTitle"><div class="search-shell">
+  <button class="search-close" data-search-close aria-label="إغلاق البحث"><i data-lucide="x" aria-hidden="true"></i></button>
+  <span class="eyebrow">اعثر على ما تحتاجه</span><h2 id="searchTitle">ابحث في عالم ROCKS</h2>
+  <div class="search-field"><span><i data-lucide="search" aria-hidden="true"></i></span><input id="liveSearch" type="search" autocomplete="off" placeholder="اكتب اسم المنتج أو الكود…" data-url="{% url 'catalog:suggestions' %}"></div>
+  <div id="searchResults" class="search-results"><p>جرّب: لمبة LED، مشترك، مفتاح مودرن</p><div class="popular-searches"><a href="{% url 'catalog:list' %}?q=LED">LED</a><a href="{% url 'catalog:list' %}?q=مشترك">مشتركات</a><a href="{% url 'catalog:list' %}?q=مفتاح">مفاتيح</a></div></div>
+</div></div>

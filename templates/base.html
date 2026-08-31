@@ -1,0 +1,35 @@
+{% load static %}
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}ROCKS ELECTRIC | حلول كهربائية موثوقة{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}منتجات ومستلزمات كهربائية مختارة تجمع بين الأمان، الجودة والتصميم الحديث.{% endblock %}">
+  <meta name="theme-color" content="#021108">
+  <meta property="og:type" content="website"><meta property="og:locale" content="ar_EG">
+  <meta property="og:title" content="ROCKS ELECTRIC"><meta property="og:description" content="قوة موثوقة لكل توصيلة.">
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@500;600;700;800&family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/variables.css' %}"><link rel="stylesheet" href="{% static 'css/site.css' %}"><link rel="stylesheet" href="{% static 'css/polish.css' %}">
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  <a class="skip-link" href="#main">انتقل إلى المحتوى</a>
+  {% include 'includes/header.html' %}
+  <main id="main">{% block content %}{% endblock %}</main>
+  {% include 'includes/footer.html' %}
+  {% include 'includes/search_overlay.html' %}
+  <div class="toast-stack" id="toastStack" aria-live="polite">
+    {% for message in messages %}<div class="toast toast--{{ message.tags }}">{{ message }}</div>{% endfor %}
+  </div>
+  <nav class="mobile-bottom" aria-label="التنقل السريع">
+    <a href="{% url 'core:home' %}"><i data-lucide="house" aria-hidden="true"></i><span>الرئيسية</span></a><a href="{% url 'catalog:list' %}"><i data-lucide="layout-grid" aria-hidden="true"></i><span>التصنيفات</span></a>
+    <button type="button" data-search-open><i data-lucide="search" aria-hidden="true"></i><span>البحث</span></button><a href="{% url 'core:wishlist' %}"><i data-lucide="heart" aria-hidden="true"></i><span>المفضلة</span></a>
+    <a href="{% url 'cart:detail' %}"><i data-lucide="shopping-bag" aria-hidden="true"></i><span>السلة</span><b data-cart-count>{{ cart_count }}</b></a>
+  </nav>
+  <script src="{% static 'js/vendor/lucide.min.js' %}" defer></script>
+  <script src="{% static 'js/main.js' %}" defer></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>
