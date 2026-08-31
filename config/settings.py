@@ -48,10 +48,17 @@ USE_TZ = True
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
-STORAGES = {"staticfiles": {"BACKEND": (
-    "django.contrib.staticfiles.storage.StaticFilesStorage" if DEBUG
-    else "whitenoise.storage.CompressedManifestStaticFilesStorage"
-)}}
+# PythonAnywhere serves STATIC_ROOT directly through its /static/ mapping.
+# Using manifest storage there can make the entire page fail when a newly
+# deployed asset has not yet been added to an older manifest.
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
