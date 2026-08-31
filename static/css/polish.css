@@ -42,3 +42,29 @@ html{scroll-padding-top:110px}body{min-width:320px}main{isolation:isolate}.secti
 @media(max-width:430px){.brand-logo-official{width:118px}.footer .brand-logo-official{width:190px}.device-logo-official{top:28px;width:88px}.story-art,.story-art>img{height:220px;min-height:220px}}
 @media(max-width:360px){.brand-logo-official{width:105px}.footer .brand-logo-official{width:176px}}
 .story-art{background:none}.story-art>img{opacity:1}
+.brand-logo-official{border-radius:14px}.footer .brand-logo-official{border-radius:18px}.device-logo-official{border-radius:9px}.story-art>img{border-radius:28px}.product-art b{border-radius:8px;overflow:hidden}
+@media(max-width:430px){.brand-logo-official{border-radius:10px}.footer .brand-logo-official{border-radius:14px}.story-art>img{border-radius:20px}}
+
+/* Keep the full “نبني الثقة” artwork rounded, including its own background. */
+.story-art{
+  min-height:0!important;
+  overflow:hidden;
+  border-radius:30px;
+  clip-path:inset(0 round 30px);
+  background:var(--deep-green);
+  box-shadow:0 24px 70px rgba(2,17,8,.28);
+  isolation:isolate;
+}
+.story-art>img{
+  display:block;
+  width:100%;
+  height:auto!important;
+  min-height:0!important;
+  border-radius:inherit;
+}
+@media(max-width:430px){
+  .story-art{
+    border-radius:20px;
+    clip-path:inset(0 round 20px);
+  }
+}
