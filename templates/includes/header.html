@@ -2,7 +2,7 @@
 {% load static %}
 <header class="site-header" id="siteHeader">
   <div class="container nav-wrap">
-    <a class="brand" href="{% url 'core:home' %}" aria-label="ROCKS Electric - الرئيسية"><span class="brand-logo-viewport"><img src="{% static 'images/rocks-logo-source.png' %}" alt="" width="3000" height="3000"></span><span class="brand-name"><b>ROCKS</b><small>ELECTRIC</small></span></a>
+    <a class="brand" href="{% url 'core:home' %}" aria-label="ROCKS Electric - الرئيسية"><img class="brand-logo-official" src="{% static 'images/rocks-logo-official.png' %}" alt="ROCKS Electric" width="2376" height="992"></a>
     <nav class="desktop-nav" aria-label="التنقل الرئيسي">
       <a href="{% url 'core:home' %}">الرئيسية</a>
       <div class="nav-mega"><a href="{% url 'catalog:list' %}">المنتجات <span>⌄</span></a><div class="mega-panel"><div><strong>حلول الطاقة</strong><a href="{% url 'catalog:list' %}?category=switches-sockets">مفاتيح وبرايز</a><a href="{% url 'catalog:list' %}?category=power-strips">مشتركات كهربائية</a><a href="{% url 'catalog:list' %}?category=cables">وصلات وكابلات</a></div><div><strong>عالم الإضاءة</strong><a href="{% url 'catalog:list' %}?category=lighting">إضاءة داخلية وخارجية</a><a href="{% url 'catalog:list' %}?category=led">لمبات LED</a><a href="{% url 'catalog:list' %}?sort=newest">وصل حديثًا</a></div><div class="mega-feature"><b>اختيار ROCKS</b><p>منتجات مختبرة لأداء يدوم.</p><a class="text-link" href="{% url 'catalog:list' %}">استكشف المجموعة ←</a></div></div></div>
