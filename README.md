@@ -45,6 +45,30 @@ python manage.py runserver
 8. راجع نصوص الخصوصية والشروط والشحن والاسترجاع مع مستشار قانوني حسب السوق الفعلي.
 9. اختبر نسخ قاعدة البيانات واستعادتها دوريًا، وانسخ مجلد media بصورة مستقلة.
 
+### إعداد PythonAnywhere
+
+ملف WSGI يقرأ إعدادات الإنتاج من `/home/rocksev/rocks-store/.env`. متغيرات
+`export` التي تُكتب داخل Bash console لا تنتقل تلقائيًا إلى Web worker. أنشئ
+مفتاحًا آمنًا مرة واحدة:
+
+```bash
+cd /home/rocksev/rocks-store
+python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+```
+
+ثم أنشئ ملف `.env` بصلاحيات خاصة وضع فيه الناتج بدل القيمة التوضيحية:
+
+```dotenv
+SECRET_KEY=ضع-هنا-المفتاح-الذي-تم-توليده
+DEBUG=False
+ALLOWED_HOSTS=rocksev.pythonanywhere.com
+CSRF_TRUSTED_ORIGINS=https://rocksev.pythonanywhere.com
+SQLITE_PATH=/home/rocksev/rocks-store/db.sqlite3
+```
+
+نفّذ `chmod 600 .env`، ثم من تبويب Web أعد تحميل التطبيق. لا تضف `.env` إلى Git
+ولا تغيّر المفتاح بعد بدء استخدام الموقع، لأن تغييره يبطل الجلسات الحالية.
+
 ## نسخ SQLite احتياطيًا
 
 الأمر يستخدم SQLite Online Backup API ويصلح أثناء عمل الموقع:
