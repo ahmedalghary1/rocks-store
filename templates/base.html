@@ -4,7 +4,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script nonce="{{ csp_nonce }}">document.documentElement.classList.add('motion-enabled');window.setTimeout(function(){document.documentElement.classList.add('page-ready')},1800);</script>
+  <script nonce="{{ csp_nonce }}">document.documentElement.classList.add('motion-enabled');window.setTimeout(function(){document.documentElement.classList.add('page-ready')},650);</script>
+  <style nonce="{{ csp_nonce }}">html.motion-enabled:not(.page-ready),html.motion-enabled:not(.page-ready) body{background:#021108}.page-intro{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;background:#021108;color:#fff;opacity:1;visibility:visible;transition:opacity .38s ease,visibility 0s linear .38s}.page-intro__brand{font:800 clamp(1.4rem,4vw,2.3rem)/1 Arial,sans-serif;letter-spacing:.18em}.page-intro__energy{display:flex;justify-content:center;gap:5px;margin-top:18px}.page-intro__energy i{display:block;width:5px;height:24px;border-radius:8px;background:#f6b51e;animation:intro-energy .6s ease-in-out infinite alternate}.page-intro__energy i:nth-child(2){animation-delay:.12s}.page-intro__energy i:nth-child(3){animation-delay:.24s}html.page-ready .page-intro{opacity:0;visibility:hidden}@keyframes intro-energy{from{transform:scaleY(.35);opacity:.45}to{transform:scaleY(1);opacity:1}}@media(prefers-reduced-motion:reduce){.page-intro{display:none!important}html.motion-enabled,html.motion-enabled body{background:initial!important}}</style>
   <title>{% block title %}ROCKS ELECTRIC | حلول كهربائية موثوقة{% endblock %}</title>
   <meta name="description" content="{% block meta_description %}منتجات ومستلزمات كهربائية مختارة تجمع بين الأمان، الجودة والتصميم الحديث.{% endblock %}">
   <meta name="robots" content="{% block robots %}index,follow,max-image-preview:large{% endblock %}">
@@ -20,6 +21,7 @@
   {% block extra_head %}{% endblock %}
 </head>
 <body class="{% block body_class %}{% endblock %}">
+  <div class="page-intro" aria-hidden="true"><div><div class="page-intro__brand">ROCKS</div><div class="page-intro__energy"><i></i><i></i><i></i></div></div></div>
   <a class="skip-link" href="#main">انتقل إلى المحتوى</a>
   {% include 'includes/header.html' %}
   <main id="main">{% block content %}{% endblock %}</main>
