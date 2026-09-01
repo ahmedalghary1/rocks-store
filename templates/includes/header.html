@@ -1,4 +1,4 @@
-<div class="topbar"><div class="container"><span>⚡ {{ site_settings.shipping_message|default:"شحن سريع لكل محافظات مصر" }}</span><span class="topbar-links">للتواصل: {{ site_settings.phone|default:"0100 000 0000" }} · <a href="{% url 'core:contact' %}">مساعدة</a></span></div></div>
+<div class="topbar"><div class="container"><span>⚡ {{ site_settings.shipping_message|default:"شحن سريع لكل محافظات مصر" }}</span><span class="topbar-links">{% if site_settings.phone %}للتواصل: <a href="tel:{{ site_settings.phone }}">{{ site_settings.phone }}</a> · {% endif %}<a href="{% url 'core:contact' %}">مساعدة</a></span></div></div>
 {% load static %}
 <header class="site-header" id="siteHeader">
   <div class="container nav-wrap">

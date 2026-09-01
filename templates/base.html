@@ -6,10 +6,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}ROCKS ELECTRIC | حلول كهربائية موثوقة{% endblock %}</title>
   <meta name="description" content="{% block meta_description %}منتجات ومستلزمات كهربائية مختارة تجمع بين الأمان، الجودة والتصميم الحديث.{% endblock %}">
+  <meta name="robots" content="{% block robots %}index,follow,max-image-preview:large{% endblock %}">
+  <link rel="canonical" href="{{ canonical_url }}">
   <meta name="theme-color" content="#021108">
   <link rel="icon" type="image/png" href="{% static 'images/rocks-logo-official.png' %}">
-  <meta property="og:type" content="website"><meta property="og:locale" content="ar_EG">
-  <meta property="og:title" content="ROCKS ELECTRIC"><meta property="og:description" content="قوة موثوقة لكل توصيلة.">
+  <meta property="og:type" content="{% block og_type %}website{% endblock %}"><meta property="og:locale" content="ar_EG"><meta property="og:url" content="{{ canonical_url }}">
+  <meta property="og:title" content="{% block og_title %}ROCKS ELECTRIC{% endblock %}"><meta property="og:description" content="{% block og_description %}قوة موثوقة لكل توصيلة.{% endblock %}"><meta property="og:image" content="{% block og_image %}{{ default_og_image }}{% endblock %}">
+  <meta name="twitter:card" content="summary_large_image">
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@500;600;700;800&family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/variables.css' %}"><link rel="stylesheet" href="{% static 'css/site.css' %}"><link rel="stylesheet" href="{% static 'css/polish.css' %}">

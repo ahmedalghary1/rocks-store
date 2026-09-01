@@ -1,6 +1,6 @@
 # ROCKS ELECTRIC
 
-متجر عربي RTL مبني بـ Django وHTML/CSS وJavaScript بدون أطر واجهات.
+متجر عربي RTL مبني بـDjango ويستخدم SQLite مع حماية ذرّية للمخزون والكوبونات ومنع تكرار الطلب.
 
 ## التشغيل المحلي
 
@@ -8,19 +8,62 @@
 python -m venv .venv
 .venv\Scripts\Activate.ps1
 pip install -r requirements.txt
+Copy-Item .env.example .env
+```
+
+غيّر `.env` إلى `DEBUG=True` وعيّن مفتاحًا محليًا، ثم:
+
+```powershell
 python manage.py migrate
 python manage.py seed_store
 python manage.py createsuperuser
 python manage.py runserver
 ```
 
-ثم افتح `http://127.0.0.1:8000/`. لوحة الإدارة في `/admin/`.
+## قائمة نشر الإنتاج
 
-## الاختبار
+1. أنشئ `.env` خارج Git بقيم حقيقية لـ`SECRET_KEY` و`ALLOWED_HOSTS` و`CSRF_TRUSTED_ORIGINS` والبريد.
+2. ضع `SQLITE_PATH` على قرص دائم، ولا تضع قاعدة البيانات داخل مجلد مؤقت.
+3. استخدم عملية تطبيق واحدة عند تشغيل Gunicorn مع SQLite:
 
-```powershell
-python manage.py test
-python manage.py check --deploy
+   ```bash
+   gunicorn config.wsgi:application --workers 1 --threads 4 --timeout 60
+   ```
+
+4. نفّذ قبل تحويل الزيارات إلى الإصدار الجديد، وبالترتيب التالي:
+
+   ```bash
+   python manage.py migrate --noinput
+   python manage.py collectstatic --noinput --clear
+   python manage.py check --deploy
+   python manage.py test
+   ```
+
+5. في PythonAnywhere اربط `/media/` بمجلد `MEDIA_ROOT` الدائم. اترك `/static/` يمر عبر WhiteNoise للاستفادة من الضغط والتخزين المؤقت، أو اضبط Cache-Control لمدة طويلة إذا استخدمت static mapping مباشرًا.
+6. اضبط بريد الطلبات في `ORDER_NOTIFICATION_EMAIL` وبيانات SMTP. بدونها تُحفظ الطلبات لكن لن تصل إشعارات بريدية.
+7. أدخل الهاتف وواتساب والبريد والعنوان وروابط السوشيال وتعليمات التحويل البنكي من لوحة الإدارة. خيار التحويل البنكي لا يظهر قبل إدخال تعليماته.
+8. راجع نصوص الخصوصية والشروط والشحن والاسترجاع مع مستشار قانوني حسب السوق الفعلي.
+9. اختبر نسخ قاعدة البيانات واستعادتها دوريًا، وانسخ مجلد media بصورة مستقلة.
+
+## نسخ SQLite احتياطيًا
+
+الأمر يستخدم SQLite Online Backup API ويصلح أثناء عمل الموقع:
+
+```bash
+python manage.py backup_database --directory /absolute/persistent/backups
 ```
 
-للنشر، انسخ `.env.example` إلى `.env` واضبط مفتاحًا سريًا حقيقيًا، `DEBUG=False`، النطاقات المسموح بها وقاعدة PostgreSQL. شغّل `collectstatic` وقدّم التطبيق عبر Gunicorn خلف Nginx أو منصة Django مُدارة.
+جدوله يوميًا، واحتفظ بنسخة خارج الخادم. اختبر الاستعادة على بيئة منفصلة كل شهر.
+
+## التحقق والمراقبة
+
+- فحص الخدمة: `/health/`
+- لوحة الإدارة: `/admin/`
+- sitemap: `/sitemap.xml`
+- robots: `/robots.txt`
+
+GitHub Actions يشغّل migrations والفحوصات والاختبارات و`collectstatic` آليًا. السجلات تخرج إلى stdout لتلتقطها منصة الاستضافة.
+
+## ملاحظات SQLite
+
+SQLite مناسب لحجم صغير إلى متوسط مع كتابة محدودة. تحديثات المخزون والكوبون في هذا المشروع ذرّية، ومدة انتظار القفل 30 ثانية. أبقِ المعاملات قصيرة وعملية التطبيق واحدة، وراقب أخطاء `database is locked`. إذا زاد ضغط الكتابة بوضوح ستكون ترقية قاعدة البيانات قرارًا تشغيليًا لاحقًا، وليست مطلوبة لتشغيل النسخة الحالية.

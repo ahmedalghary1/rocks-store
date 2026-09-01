@@ -1,13 +1,25 @@
 from django.db import models
+from django.core.exceptions import ValidationError
+from django.core.validators import URLValidator
+from catalog.validators import validate_image_size
+
+
+def validate_banner_link(value):
+    if not value or value.startswith("/") or value.startswith("#"):
+        return
+    try:
+        URLValidator(schemes=("http", "https"))(value)
+    except ValidationError:
+        raise ValidationError("استخدم رابطًا داخليًا أو رابط HTTP/HTTPS صالحًا.")
 
 
 class Banner(models.Model):
     LOCATIONS = [("hero", "الرئيسية"), ("offer", "عرض"), ("promo", "ترويجي")]
     title = models.CharField(max_length=160)
     subtitle = models.CharField(max_length=255, blank=True)
-    image = models.ImageField(upload_to="banners/", blank=True)
-    mobile_image = models.ImageField(upload_to="banners/", blank=True)
-    link = models.CharField(max_length=255, blank=True)
+    image = models.ImageField(upload_to="banners/", blank=True, validators=[validate_image_size])
+    mobile_image = models.ImageField(upload_to="banners/", blank=True, validators=[validate_image_size])
+    link = models.CharField(max_length=255, blank=True, validators=[validate_banner_link])
     button_text = models.CharField(max_length=60, blank=True)
     location = models.CharField(max_length=20, choices=LOCATIONS, default="promo")
     sort_order = models.PositiveIntegerField(default=0)
@@ -20,3 +32,15 @@ class Banner(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class Subscriber(models.Model):
+    email = models.EmailField(unique=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("-created_at",)
+
+    def __str__(self):
+        return self.email

@@ -1,22 +1,23 @@
 {% extends 'base.html' %}
 {% block title %}سلة التسوق | ROCKS{% endblock %}
+{% block robots %}noindex,nofollow{% endblock %}
 {% block content %}
 <section class="page-hero page-hero--small"><div class="container"><nav class="breadcrumb"><a href="{% url 'core:home' %}">الرئيسية</a><span>←</span><b>سلة التسوق</b></nav><h1>سلتك.</h1><p>راجع اختياراتك قبل إتمام الطلب.</p></div></section>
 <section class="cart-page section"><div class="container">
 {% if cart_items %}<div class="cart-layout">
-  <div class="cart-lines"><div class="cart-title"><h2>المنتجات <span>{{ cart_items|length }}</span></h2><a href="{% url 'catalog:list' %}">مواصلة التسوق</a></div>
+  <div class="cart-lines"><div class="cart-title"><h2>المنتجات <span data-cart-items-count>{{ cart.count }}</span></h2><a href="{% url 'catalog:list' %}">مواصلة التسوق</a></div>
   {% for item in cart_items %}<article class="cart-item">
     <a class="cart-thumb product-visual--{{ item.product.category.slug }}" href="{{ item.product.get_absolute_url }}">{% if item.product.main_image %}<img src="{{ item.product.main_image.url }}" alt="{{ item.product.name }}">{% else %}<div class="product-art"><span><i data-lucide="{{ item.product.category.icon|default:'zap' }}" aria-hidden="true"></i></span><b>ROCKS</b></div>{% endif %}</a>
-    <div class="cart-product"><span>{{ item.product.category.name }}</span><h3><a href="{{ item.product.get_absolute_url }}">{{ item.product.name }}</a></h3><small>{{ item.product.sku }}</small></div>
-    <form action="{% url 'cart:update' item.product.id %}" method="post" class="cart-quantity">{% csrf_token %}<input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.product.stock_quantity }}" aria-label="كمية {{ item.product.name }}"><button>تحديث</button></form>
-    <strong class="cart-line-price">{{ item.total|floatformat:0 }} {{ site_settings.currency|default:"ج.م" }}</strong>
-    <form action="{% url 'cart:remove' item.product.id %}" method="post">{% csrf_token %}<button class="remove-item" aria-label="حذف {{ item.product.name }}">×</button></form>
+    <div class="cart-product"><span>{{ item.product.category.name }}</span><h3><a href="{{ item.product.get_absolute_url }}">{{ item.product.name }}{% if item.variant %} — {{ item.variant.label }}{% endif %}</a></h3><small>{{ item.sku }}</small></div>
+    <form action="{% url 'cart:update' item.key %}" method="post" class="cart-quantity" data-cart-update>{% csrf_token %}<button type="button" data-cart-qty-minus aria-label="تقليل كمية {{ item.product.name }}">−</button><input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.stock_quantity }}" data-cart-qty-input aria-label="كمية {{ item.product.name }}"><button type="button" data-cart-qty-plus aria-label="زيادة كمية {{ item.product.name }}">+</button><button type="submit" class="cart-quantity-save">تحديث</button></form>
+    <strong class="cart-line-price" data-cart-line-total>{{ item.total|floatformat:2 }} {{ site_settings.currency|default:"ج.م" }}</strong>
+    <form action="{% url 'cart:remove' item.key %}" method="post">{% csrf_token %}<button class="remove-item" aria-label="حذف {{ item.product.name }}">×</button></form>
   </article>{% endfor %}</div>
   <aside class="order-summary"><span class="eyebrow">ملخص الطلب</span><h2>إجمالي السلة</h2>
-    <div><span>قيمة المنتجات</span><b>{{ cart.subtotal|floatformat:0 }} ج.م</b></div><div><span>الشحن</span><b>{% if cart.shipping %}{{ cart.shipping|floatformat:0 }} ج.م{% else %}مجاني{% endif %}</b></div>
-    <form class="coupon-form" action="{% url 'cart:apply_coupon' %}" method="post">{% csrf_token %}<label for="coupon">هل لديك كوبون؟</label><div><input id="coupon" name="code" placeholder="اكتب الكود"><button type="submit">تطبيق</button></div>{% if cart.coupon %}<small>الكوبون {{ cart.coupon.code }} وفر لك {{ cart.discount|floatformat:0 }} ج.م</small>{% endif %}</form>
-    {% if cart.discount %}<div><span>الخصم</span><b>-{{ cart.discount|floatformat:0 }} ج.م</b></div>{% endif %}
-    <div class="summary-total"><span>الإجمالي</span><strong>{{ cart.total|floatformat:0 }} ج.م</strong></div><a class="btn btn-gold" href="{% url 'orders:checkout' %}">إتمام الطلب بأمان ←</a><p>◇ الدفع عند الاستلام متاح</p>
+    <div><span>قيمة المنتجات</span><b data-cart-subtotal>{{ cart.subtotal|floatformat:2 }} ج.م</b></div><div><span>الشحن</span><b data-cart-shipping>{% if cart.shipping %}{{ cart.shipping|floatformat:2 }} ج.م{% else %}مجاني{% endif %}</b></div>
+    <form class="coupon-form" action="{% url 'cart:apply_coupon' %}" method="post">{% csrf_token %}<label for="coupon">هل لديك كوبون؟</label><div><input id="coupon" name="code" placeholder="اكتب الكود"><button type="submit">تطبيق</button></div>{% if cart.coupon %}<small>الكوبون {{ cart.coupon.code }} وفر لك <span data-coupon-saving>{{ cart.discount|floatformat:2 }} ج.م</span></small>{% endif %}</form>
+    <div data-cart-discount-row {% if not cart.discount %}hidden{% endif %}><span>الخصم</span><b data-cart-discount>-{{ cart.discount|floatformat:2 }} ج.م</b></div>
+    <div class="summary-total"><span>الإجمالي</span><strong data-cart-total>{{ cart.total|floatformat:2 }} ج.م</strong></div><a class="btn btn-gold cart-checkout-link" href="{% url 'orders:checkout' %}">إتمام الطلب بأمان ←</a><p>◇ الدفع عند الاستلام متاح</p>
   </aside>
 </div>{% else %}<div class="empty-state"><span>▱</span><h2>سلتك تنتظر أول اختيار.</h2><p>استكشف مجموعتنا واختر ما يمنح مساحتك طاقة أكثر أمانًا.</p><a class="btn btn-dark" href="{% url 'catalog:list' %}">ابدأ التسوق</a></div>{% endif %}
 </div></section>
