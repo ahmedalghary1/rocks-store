@@ -178,6 +178,37 @@ $('.zoom-btn')?.addEventListener('click', event => {
 });
 $$('[data-submit-once]').forEach(button => button.closest('form').addEventListener('submit', () => { button.disabled = true; button.textContent = 'جارٍ تأكيد الطلب…'; }));
 
-const observer = new IntersectionObserver(entries => entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('visible'); observer.unobserve(entry.target); } }), { threshold: .08 });
-$$('.reveal').forEach(el => observer.observe(el));
+const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const motionDirections = ['right', 'left', 'bottom', 'top'];
+const motionTargets = [
+  ...$$('.topbar, .site-header'),
+  ...$$('main > section'),
+  ...$$('.newsletter, .footer'),
+];
+const detailTargets = $$([
+  '.reveal', '.category-card', '.cart-item', '.checkout-fields > section',
+  '.order-summary', '.spec-grid > div', '.values-grid > article',
+  '.why-cards > article', '.order-card', '.success-grid > div',
+].join(','));
+const uniqueMotionTargets = [...new Set([...motionTargets, ...detailTargets])];
+uniqueMotionTargets.forEach((element, index) => {
+  element.classList.add('motion-item', `motion-from-${motionDirections[index % motionDirections.length]}`);
+  element.style.setProperty('--motion-delay', `${Math.min((index % 6) * 65, 325)}ms`);
+});
+
+const revealMotion = () => {
+  document.documentElement.classList.add('page-ready');
+  if (reducedMotion || !('IntersectionObserver' in window)) {
+    uniqueMotionTargets.forEach(element => element.classList.add('visible'));
+    return;
+  }
+  const observer = new IntersectionObserver(entries => entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      observer.unobserve(entry.target);
+    }
+  }), { threshold: .08, rootMargin: '0px 0px -4% 0px' });
+  uniqueMotionTargets.forEach(element => observer.observe(element));
+};
+window.setTimeout(() => requestAnimationFrame(revealMotion), reducedMotion ? 0 : 90);
 addEventListener('keydown', event => { if (event.key === 'Escape') { toggleSearch(false); toggleDrawer(false); modal?.classList.remove('open'); } });
