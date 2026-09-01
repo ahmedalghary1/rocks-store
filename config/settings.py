@@ -91,7 +91,11 @@ STORAGES = {
     },
 }
 WHITENOISE_MAX_AGE = 31536000
-WHITENOISE_KEEP_ONLY_HASHED_FILES = True
+# A stale manifest must not turn every dynamic page into a 500 response during
+# a PythonAnywhere deployment. Keep originals so WhiteNoise can fall back to
+# the unhashed URL until collectstatic has rebuilt the manifest.
+WHITENOISE_MANIFEST_STRICT = False
+WHITENOISE_KEEP_ONLY_HASHED_FILES = False
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
