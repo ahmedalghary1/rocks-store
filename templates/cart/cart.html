@@ -17,7 +17,7 @@
     <div><span>قيمة المنتجات</span><b data-cart-subtotal>{{ cart.subtotal|floatformat:2 }} ج.م</b></div><div><span>الشحن</span><b data-cart-shipping>{% if cart.shipping %}{{ cart.shipping|floatformat:2 }} ج.م{% else %}مجاني{% endif %}</b></div>
     <form class="coupon-form" action="{% url 'cart:apply_coupon' %}" method="post">{% csrf_token %}<label for="coupon">هل لديك كوبون؟</label><div><input id="coupon" name="code" placeholder="اكتب الكود"><button type="submit">تطبيق</button></div>{% if cart.coupon %}<small>الكوبون {{ cart.coupon.code }} وفر لك <span data-coupon-saving>{{ cart.discount|floatformat:2 }} ج.م</span></small>{% endif %}</form>
     <div data-cart-discount-row {% if not cart.discount %}hidden{% endif %}><span>الخصم</span><b data-cart-discount>-{{ cart.discount|floatformat:2 }} ج.م</b></div>
-    <div class="summary-total"><span>الإجمالي</span><strong data-cart-total>{{ cart.total|floatformat:2 }} ج.م</strong></div><a class="btn btn-gold cart-checkout-link" href="{% url 'orders:checkout' %}">إتمام الطلب بأمان ←</a><p>◇ الدفع عند الاستلام متاح</p>
+    <div class="summary-total"><span>الإجمالي المبدئي</span><strong data-cart-total>{{ cart.total|floatformat:2 }} ج.م</strong></div><a class="btn btn-gold cart-checkout-link" href="{% url 'orders:checkout' %}">إتمام الطلب ←</a><p>الدفع عند الاستلام · تُحسب تكلفة الشحن حسب المحافظة</p>
   </aside>
 </div>{% else %}<div class="empty-state"><span>▱</span><h2>سلتك تنتظر أول اختيار.</h2><p>استكشف مجموعتنا واختر ما يمنح مساحتك طاقة أكثر أمانًا.</p><a class="btn btn-dark" href="{% url 'catalog:list' %}">ابدأ التسوق</a></div>{% endif %}
 </div></section>

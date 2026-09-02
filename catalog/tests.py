@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.urls import reverse
-from .models import Category, Product
+from .models import Category, Product, ProductVariant
 
 
 class CatalogTests(TestCase):
@@ -21,3 +21,12 @@ class CatalogTests(TestCase):
     def test_search_suggestions(self):
         response = self.client.get(reverse("catalog:suggestions"), {"q": "لمبة"})
         self.assertEqual(response.json()["results"][0]["name"], "لمبة اختبار")
+
+    def test_available_filter_includes_product_with_stocked_variant(self):
+        product = Product.objects.create(
+            name="مفتاح بألوان", slug="variant-switch", sku="SW-BASE", category=self.category,
+            short_description="متعدد", description="وصف", price=120, stock_quantity=0,
+        )
+        ProductVariant.objects.create(product=product, sku="SW-WHITE", label="أبيض", stock_quantity=3)
+        response = self.client.get(reverse("catalog:list"), {"available": "1"})
+        self.assertContains(response, "مفتاح بألوان")

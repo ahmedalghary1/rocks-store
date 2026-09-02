@@ -13,7 +13,6 @@ class SiteSettings(models.Model):
     footer_text = models.CharField(max_length=255, default="حلول كهربائية مختارة لتدوم.")
     shipping_message = models.CharField(max_length=160, default="شحن سريع لكل محافظات مصر")
     currency = models.CharField(max_length=12, default="ج.م")
-    bank_instructions = models.TextField(blank=True, help_text="تظهر فقط عند تفعيل التحويل البنكي في صفحة الدفع.")
 
     class Meta:
         verbose_name = "إعدادات الموقع"

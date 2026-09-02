@@ -1,7 +1,10 @@
 import uuid
 from decimal import Decimal
 
+import hashlib
+
 from django.contrib import messages
+from django.core.cache import cache
 from django.db import IntegrityError, transaction
 from django.db.models import F
 from django.shortcuts import get_object_or_404, redirect, render
@@ -9,9 +12,8 @@ from django.utils import timezone
 
 from cart.service import Cart
 from catalog.models import Product, ProductVariant
-from .forms import CheckoutForm
-from .models import Coupon, Order, OrderItem
-from .services import send_order_notifications
+from .forms import CheckoutForm, TrackOrderForm
+from .models import Coupon, Order, OrderItem, OrderNotification, ShippingZone
 
 
 class InsufficientStock(Exception):
@@ -49,11 +51,12 @@ def checkout(request):
                     request.session["last_order_token"] = str(existing.public_token)
                     return redirect("orders:success", public_token=existing.public_token)
                 try:
-                    created_order = True
                     with transaction.atomic():
                         subtotal = sum((item["total"] for item in items), Decimal("0"))
-                        shipping = cart.shipping
+                        zone = ShippingZone.objects.get(name=form.cleaned_data["governorate"], is_active=True)
+                        shipping = zone.cost_for(subtotal)
                         discount = Decimal("0")
+                        claimed_coupon = None
                         coupon = cart.coupon
                         if coupon:
                             proposed = coupon.discount_for(subtotal)
@@ -65,6 +68,7 @@ def checkout(request):
                                 ).update(usage_count=F("usage_count") + 1)
                                 if claimed:
                                     discount = proposed
+                                    claimed_coupon = coupon
                         for item in items:
                             stock_model = ProductVariant if item["variant"] else Product
                             filters = {
@@ -77,7 +81,9 @@ def checkout(request):
                             if updated != 1:
                                 raise InsufficientStock
                         order = form.save(commit=False)
-                        order.payment_status = "pending" if order.payment_method == "bank" else "unpaid"
+                        order.payment_method = "cod"
+                        order.payment_status = "unpaid"
+                        order.coupon = claimed_coupon
                         order.checkout_token = token
                         order.order_number = f"RK-{timezone.now():%y%m%d}-{uuid.uuid4().hex[:12].upper()}"
                         order.user = request.user if request.user.is_authenticated else None
@@ -91,6 +97,7 @@ def checkout(request):
                                 quantity=item["quantity"], total=item["total"],
                             ) for item in items
                         ])
+                        OrderNotification.objects.create(order=order)
                 except InsufficientStock:
                     messages.error(request, "تغيّرت الكمية المتاحة لأحد المنتجات. راجع السلة وحاول مجددًا.")
                     return redirect("cart:detail")
@@ -99,15 +106,20 @@ def checkout(request):
                     if not existing:
                         raise
                     order = existing
-                    created_order = False
                 request.session["last_order_token"] = str(order.public_token)
                 request.session.pop("checkout_token", None)
                 cart.clear()
-                if created_order:
-                    transaction.on_commit(lambda: send_order_notifications(order.pk))
                 return redirect("orders:success", public_token=order.public_token)
+    shipping = cart.shipping
+    selected_governorate = request.POST.get("governorate", "")
+    if selected_governorate:
+        zone = ShippingZone.objects.filter(name=selected_governorate, is_active=True).first()
+        if zone:
+            shipping = zone.cost_for(cart.subtotal)
     return render(request, "orders/checkout.html", {
         "form": form, "cart": cart, "cart_items": items, "checkout_token": session_token,
+        "shipping_cost": shipping,
+        "checkout_total": max(Decimal("0"), cart.subtotal + shipping - cart.discount),
     })
 
 
@@ -121,3 +133,22 @@ def success(request, public_token):
     if not allowed:
         return redirect("core:home")
     return render(request, "orders/success.html", {"order": order})
+
+
+def track(request):
+    form = TrackOrderForm(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        identity = request.META.get("REMOTE_ADDR", "unknown")
+        digest = hashlib.sha256(f"track:{identity}".encode()).hexdigest()[:24]
+        if not cache.add(f"order-track:{digest}", True, timeout=3):
+            form.add_error(None, "انتظر لحظات قبل المحاولة مرة أخرى.")
+        else:
+            order = Order.objects.filter(
+                order_number__iexact=form.cleaned_data["order_number"].strip(),
+                phone=form.cleaned_data["phone"],
+            ).first()
+            if order:
+                request.session["last_order_token"] = str(order.public_token)
+                return redirect("orders:success", public_token=order.public_token)
+            form.add_error(None, "تعذر العثور على طلب بهذه البيانات.")
+    return render(request, "orders/track.html", {"form": form})

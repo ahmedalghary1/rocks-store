@@ -1,5 +1,6 @@
 import secrets
 import hashlib
+from django.conf import settings
 from django.core.cache import cache
 from django.http import HttpResponse
 
@@ -39,6 +40,10 @@ class SensitivePostRateLimitMiddleware:
     def __call__(self, request):
         if request.method == "POST" and request.path in self.protected_paths:
             identity = request.META.get("REMOTE_ADDR", "unknown")
+            if settings.TRUST_PROXY_HEADERS:
+                forwarded = request.META.get("HTTP_X_FORWARDED_FOR", "")
+                if forwarded:
+                    identity = forwarded.split(",", 1)[0].strip()
             digest = hashlib.sha256(f"{request.path}:{identity}".encode()).hexdigest()[:24]
             key = f"sensitive-post:{digest}"
             attempts = cache.get(key, 0)

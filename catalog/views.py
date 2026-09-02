@@ -15,7 +15,10 @@ def product_list(request):
     if query:
         products = products.filter(Q(name__icontains=query) | Q(short_description__icontains=query) | Q(sku__icontains=query))
     if request.GET.get("available") == "1":
-        products = products.filter(stock_quantity__gt=0)
+        products = products.filter(
+            Q(variants__isnull=True, stock_quantity__gt=0)
+            | Q(variants__is_active=True, variants__stock_quantity__gt=0)
+        ).distinct()
     sort_map = {"newest": "-created_at", "price-low": "price", "price-high": "-price", "name": "name"}
     products = products.order_by(sort_map.get(sort, "-created_at"))
     page_obj = Paginator(products, 24).get_page(request.GET.get("page"))

@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}تتبع طلبك | ROCKS{% endblock %}
+{% block robots %}noindex,nofollow{% endblock %}
+{% block content %}
+<section class="auth-page section"><div class="auth-card">
+  <span class="eyebrow">متابعة الطلب</span><h1>اعرف حالة طلبك.</h1>
+  <p>أدخل رقم الطلب ورقم الهاتف المستخدم عند الشراء.</p>
+  <form method="post" novalidate>{% csrf_token %}{{ form.as_p }}<button class="btn btn-gold" type="submit">عرض حالة الطلب</button></form>
+</div></section>
+{% endblock %}

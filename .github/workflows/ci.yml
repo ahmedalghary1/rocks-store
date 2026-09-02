@@ -18,9 +18,18 @@ jobs:
           cache: pip
       - run: python -m pip install --upgrade pip
       - run: pip install -r requirements.txt
+      - run: pip install pip-audit
+      - run: pip-audit -r requirements.txt
       - run: python manage.py makemigrations --check --dry-run
       - run: python manage.py migrate --noinput
       - run: python manage.py check
+      - run: python manage.py check --deploy --fail-level WARNING
+        env:
+          DEBUG: "False"
+          SECRET_KEY: "CI-only-deploy-check-key-with-enough-length-and-randomness-48291"
+          ALLOWED_HOSTS: "example.com"
+          SECURE_HSTS_INCLUDE_SUBDOMAINS: "True"
+          SECURE_HSTS_PRELOAD: "True"
       - run: python manage.py test
       - run: python manage.py collectstatic --noinput --clear
         env:

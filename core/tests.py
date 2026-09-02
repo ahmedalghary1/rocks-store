@@ -1,3 +1,5 @@
+from django.core.management import call_command
+from django.core.management.base import CommandError
 from django.test import TestCase
 from django.urls import reverse
 
@@ -22,3 +24,7 @@ class PublicPagesTests(TestCase):
         response = self.client.post(reverse("core:newsletter_subscribe"), {"email": "USER@example.com"})
         self.assertRedirects(response, reverse("core:home"))
         self.assertTrue(Subscriber.objects.filter(email="user@example.com", is_active=True).exists())
+
+    def test_production_readiness_rejects_incomplete_business_data(self):
+        with self.assertRaises(CommandError):
+            call_command("check_production_readiness")

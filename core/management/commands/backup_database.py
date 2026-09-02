@@ -29,6 +29,9 @@ class Command(BaseCommand):
         destination = sqlite3.connect(target)
         try:
             connection.connection.backup(destination)
+            result = destination.execute("PRAGMA integrity_check").fetchone()
+            if not result or result[0] != "ok":
+                raise CommandError("Backup integrity check failed.")
         finally:
             destination.close()
         self.stdout.write(self.style.SUCCESS(f"Backup created: {target}"))

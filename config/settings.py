@@ -102,6 +102,7 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
 DATA_UPLOAD_MAX_MEMORY_SIZE = 8 * 1024 * 1024
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 LOGIN_REDIRECT_URL = "/account/"
+LOGIN_URL = "/auth/login/"
 LOGOUT_REDIRECT_URL = "/"
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = "DENY"
@@ -125,10 +126,19 @@ EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = env_bool("EMAIL_USE_TLS", True)
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "ROCKS ELECTRIC <no-reply@localhost>")
 ORDER_NOTIFICATION_EMAIL = os.getenv("ORDER_NOTIFICATION_EMAIL", "")
+ERROR_NOTIFICATION_EMAIL = os.getenv("ERROR_NOTIFICATION_EMAIL", ORDER_NOTIFICATION_EMAIL).strip()
+ADMINS = (("ROCKS Operations", ERROR_NOTIFICATION_EMAIL),) if ERROR_NOTIFICATION_EMAIL else ()
 CART_SHIPPING_COST = os.getenv("CART_SHIPPING_COST", "75.00")
 FREE_SHIPPING_THRESHOLD = os.getenv("FREE_SHIPPING_THRESHOLD", "1500.00")
 
-CACHES = {"default": {"BACKEND": "django.core.cache.backends.locmem.LocMemCache", "LOCATION": "rocks-store"}}
+CACHES = {"default": {
+    "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
+    "LOCATION": os.getenv("CACHE_LOCATION", str(BASE_DIR / ".cache")),
+    "OPTIONS": {"MAX_ENTRIES": 10000},
+}}
+TRUST_PROXY_HEADERS = env_bool("TRUST_PROXY_HEADERS", False)
+BACKUP_DIRECTORY = os.getenv("BACKUP_DIRECTORY", "").strip()
+LEGAL_CONTENT_APPROVED = env_bool("LEGAL_CONTENT_APPROVED", False)
 
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 LOGGING = {
@@ -139,3 +149,8 @@ LOGGING = {
     "root": {"handlers": ["console"], "level": LOG_LEVEL},
     "loggers": {"django.request": {"handlers": ["console"], "level": "WARNING", "propagate": False}},
 }
+if ERROR_NOTIFICATION_EMAIL:
+    LOGGING["handlers"]["mail_admins"] = {
+        "class": "django.utils.log.AdminEmailHandler", "level": "ERROR", "include_html": False,
+    }
+    LOGGING["loggers"]["django.request"]["handlers"].append("mail_admins")

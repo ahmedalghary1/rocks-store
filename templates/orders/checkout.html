@@ -14,14 +14,15 @@
         {% if forloop.counter == 5 %}</div></section><section><h2><span>02</span> عنوان التوصيل</h2><div class="form-grid">{% endif %}
         <label class="field {% if field.errors %}field--error{% endif %}"><span>{{ field.label }}{% if field.field.required %} *{% endif %}</span>{{ field }}{% if field.help_text %}<small class="field-help">{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<small>{{ error }}</small>{% endfor %}</label>
       {% endfor %}</div></section>
+      <section><h2><span>03</span> طريقة الدفع</h2><div class="payment-cod"><strong>الدفع عند الاستلام</strong><p>ادفع قيمة الطلب نقدًا عند وصوله بعد تأكيده مع فريق ROCKS.</p></div></section>
     </div>
     <aside class="order-summary"><span class="eyebrow">طلبك</span><h2>{{ cart.count }} قطعة</h2>
       {% for item in cart_items %}<div class="checkout-item"><span>{{ item.quantity }}×</span><p>{{ item.product.name }}{% if item.variant %} — {{ item.variant.label }}{% endif %}</p><b>{{ item.total|floatformat:2 }}</b></div>{% endfor %}
-      <div><span>المنتجات</span><b>{{ cart.subtotal|floatformat:2 }} ج.م</b></div><div><span>الشحن</span><b>{% if cart.shipping %}{{ cart.shipping|floatformat:2 }} ج.م{% else %}مجاني{% endif %}</b></div>
+      <div><span>المنتجات</span><b>{{ cart.subtotal|floatformat:2 }} ج.م</b></div><div><span>الشحن</span><b>{% if shipping_cost %}{{ shipping_cost|floatformat:2 }} ج.م{% else %}مجاني{% endif %}</b></div>
       {% if cart.discount %}<div><span>الخصم</span><b>-{{ cart.discount|floatformat:2 }} ج.م</b></div>{% endif %}
-      <div class="summary-total"><span>الإجمالي</span><strong>{{ cart.total|floatformat:2 }} ج.م</strong></div>
+      <div class="summary-total"><span>الإجمالي</span><strong>{{ checkout_total|floatformat:2 }} ج.م</strong></div>
       <button class="btn btn-gold" type="submit" data-submit-once>تأكيد الطلب ←</button>
-      <p>بتأكيد الطلب أنت توافق على <a href="{% url 'core:terms' %}" target="_blank">الشروط</a> و<a href="{% url 'core:returns_policy' %}" target="_blank">سياسة الاستبدال والاسترجاع</a> و<a href="{% url 'core:privacy' %}" target="_blank">الخصوصية</a>.</p>
+      <p>بتأكيد الطلب أنت توافق على <a href="{% url 'core:terms' %}" target="_blank" rel="noopener">الشروط</a> و<a href="{% url 'core:returns_policy' %}" target="_blank" rel="noopener">سياسة الاستبدال والاسترجاع</a> و<a href="{% url 'core:privacy' %}" target="_blank" rel="noopener">الخصوصية</a>.</p>
     </aside>
   </form>
 </div></section>

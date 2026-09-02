@@ -38,12 +38,13 @@ class Coupon(models.Model):
 
 class Order(models.Model):
     STATUSES = (("pending", "قيد المراجعة"), ("confirmed", "تم التأكيد"), ("processing", "قيد التجهيز"), ("shipped", "تم الشحن"), ("delivered", "تم التسليم"), ("cancelled", "ملغي"))
-    PAYMENT = (("cod", "الدفع عند الاستلام"), ("bank", "تحويل بنكي"))
+    PAYMENT = (("cod", "الدفع عند الاستلام"),)
     PAYMENT_STATUSES = (("unpaid", "غير مدفوع"), ("pending", "قيد المراجعة"), ("paid", "مدفوع"), ("refunded", "مسترد"))
     order_number = models.CharField(max_length=40, unique=True, db_index=True)
     public_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     checkout_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="orders")
+    coupon = models.ForeignKey(Coupon, null=True, blank=True, on_delete=models.PROTECT, related_name="orders")
     customer_name = models.CharField(max_length=160)
     phone = models.CharField(max_length=30)
     email = models.EmailField(blank=True)
@@ -65,12 +66,17 @@ class Order(models.Model):
 
     class Meta:
         ordering = ("-created_at",)
+        constraints = [
+            models.CheckConstraint(condition=Q(payment_method="cod"), name="order_payment_method_cod"),
+        ]
 
     def __str__(self):
         return self.order_number
 
     def clean(self):
         super().clean()
+        if self.payment_method != "cod":
+            raise ValidationError({"payment_method": "طريقة الدفع المتاحة هي الدفع عند الاستلام فقط."})
         if self.pk:
             previous = Order.objects.filter(pk=self.pk).values_list("status", flat=True).first()
             if previous == "cancelled" and self.status != "cancelled":
@@ -79,8 +85,8 @@ class Order(models.Model):
 
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="items")
-    product = models.ForeignKey("catalog.Product", null=True, on_delete=models.SET_NULL)
-    variant = models.ForeignKey("catalog.ProductVariant", null=True, blank=True, on_delete=models.SET_NULL)
+    product = models.ForeignKey("catalog.Product", null=True, on_delete=models.PROTECT)
+    variant = models.ForeignKey("catalog.ProductVariant", null=True, blank=True, on_delete=models.PROTECT)
     product_name = models.CharField(max_length=180)
     sku = models.CharField(max_length=60)
     price = models.DecimalField(max_digits=12, decimal_places=2)
@@ -93,3 +99,48 @@ class OrderItem(models.Model):
             models.CheckConstraint(condition=Q(price__gte=0), name="order_item_price_nonnegative"),
             models.CheckConstraint(condition=Q(total__gte=0), name="order_item_total_nonnegative"),
         ]
+
+
+class ShippingZone(models.Model):
+    name = models.CharField(max_length=80, unique=True)
+    shipping_cost = models.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(Decimal("0"))])
+    free_shipping_threshold = models.DecimalField(
+        max_digits=12, decimal_places=2, null=True, blank=True,
+        validators=[MinValueValidator(Decimal("0"))],
+    )
+    is_active = models.BooleanField(default=True)
+    sort_order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ("sort_order", "name")
+        constraints = [
+            models.CheckConstraint(condition=Q(shipping_cost__gte=0), name="shipping_zone_cost_nonnegative"),
+            models.CheckConstraint(
+                condition=Q(free_shipping_threshold__isnull=True) | Q(free_shipping_threshold__gte=0),
+                name="shipping_zone_threshold_nonnegative",
+            ),
+        ]
+
+    def __str__(self):
+        return self.name
+
+    def cost_for(self, subtotal):
+        if self.free_shipping_threshold is not None and subtotal >= self.free_shipping_threshold:
+            return Decimal("0")
+        return self.shipping_cost
+
+
+class OrderNotification(models.Model):
+    STATUSES = (
+        ("pending", "قيد الإرسال"), ("sending", "جارٍ الإرسال"), ("sent", "تم الإرسال"),
+        ("failed", "فشل الإرسال"), ("skipped", "لا يوجد مستلمون"),
+    )
+    order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name="notification")
+    status = models.CharField(max_length=20, choices=STATUSES, default="pending", db_index=True)
+    attempts = models.PositiveIntegerField(default=0)
+    last_error = models.TextField(blank=True)
+    last_attempt_at = models.DateTimeField(null=True, blank=True)
+    sent_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.order.order_number}: {self.get_status_display()}"
