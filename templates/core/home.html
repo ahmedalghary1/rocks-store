@@ -1,15 +1,29 @@
-{% extends 'base.html' %}{% load static %}
+{% extends 'base.html' %}{% load static i18n %}{% get_current_language as current_language %}
 {% block title %}ROCKS | EV Charging Solutions{% endblock %}
 {% block meta_description %}High-performance EV charging cables and dependable charging solutions from ROCKS.{% endblock %}
 {% block body_class %}home-page ev-home{% endblock %}
-{% block extra_head %}<link rel="preload" as="image" type="image/webp" href="{% static 'images/home/hero-ev-desktop-corrected.webp' %}" media="(min-width: 701px)"><link rel="preload" as="image" type="image/webp" href="{% static 'images/home/hero-ev-mobile-corrected.webp' %}" media="(max-width: 700px)"><link rel="stylesheet" href="{% static 'css/home-redesign.css' %}">{% endblock %}
+{% block extra_head %}
+  {% if current_language == 'ar' %}
+    <link rel="preload" as="image" type="image/webp" href="{% static 'images/home/hero-ev-ar-desktop.webp' %}" media="(min-width: 701px)">
+    <link rel="preload" as="image" type="image/webp" href="{% static 'images/home/hero-ev-ar-mobile.webp' %}" media="(max-width: 700px)">
+  {% else %}
+    <link rel="preload" as="image" type="image/webp" href="{% static 'images/home/hero-ev-en-desktop.webp' %}" media="(min-width: 701px)">
+    <link rel="preload" as="image" type="image/webp" href="{% static 'images/home/hero-ev-en-mobile.webp' %}" media="(max-width: 700px)">
+  {% endif %}
+  <link rel="stylesheet" href="{% static 'css/home-redesign.css' %}">
+{% endblock %}
 
 {% block content %}
-<div class="rocks-home" dir="ltr">
+<div class="rocks-home" dir="{% if current_language == 'ar' %}rtl{% else %}ltr{% endif %}">
   <section class="ev-hero" aria-labelledby="hero-title">
     <picture class="ev-hero__media" aria-hidden="true">
-      <source media="(max-width: 700px)" srcset="{% static 'images/home/hero-ev-mobile-corrected.webp' %}">
-      <img src="{% static 'images/home/hero-ev-desktop-corrected.webp' %}" alt="" width="1672" height="941" fetchpriority="high">
+      {% if current_language == 'ar' %}
+        <source media="(max-width: 700px)" srcset="{% static 'images/home/hero-ev-ar-mobile.webp' %}">
+        <img src="{% static 'images/home/hero-ev-ar-desktop.webp' %}" alt="" width="1672" height="941" fetchpriority="high" decoding="async">
+      {% else %}
+        <source media="(max-width: 700px)" srcset="{% static 'images/home/hero-ev-en-mobile.webp' %}">
+        <img src="{% static 'images/home/hero-ev-en-desktop.webp' %}" alt="" width="1672" height="941" fetchpriority="high" decoding="async">
+      {% endif %}
     </picture>
     <div class="ev-hero__shade" aria-hidden="true"></div>
     <div class="container ev-hero__inner">
@@ -49,7 +63,7 @@
 
   <section class="ev-about" aria-labelledby="about-title"><div class="container ev-about__grid">
     <div class="ev-about__copy reveal"><span class="ev-kicker">ABOUT ROCKS</span><h2 id="about-title">MORE THAN<br>CABLES. A CLEANER<br>FUTURE.</h2><p>ROCKS provides high-quality EV charging solutions designed for safety, performance and global compatibility. We are committed to a smarter and greener world.</p><a class="ev-button ev-button--solid" href="{% url 'core:about' %}">Learn more <i data-lucide="arrow-right" aria-hidden="true"></i></a></div>
-    <figure class="ev-about__visual reveal"><img src="{% static 'images/home/exhibition-booth.jpeg' %}" alt="ROCKS exhibition booth for EV charging products" width="1536" height="1024" loading="lazy"></figure>
+    <figure class="ev-about__visual reveal"><img src="{% static 'images/home/exhibition-booth.png' %}" alt="ROCKS exhibition booth for EV charging products" width="1536" height="1024" loading="lazy"></figure>
     <aside class="ev-about__aside reveal"><span>VISIT OUR</span><h3>EXHIBITION BOOTH</h3><ul><li><i data-lucide="layout-template" aria-hidden="true"></i> Modern design</li><li><i data-lucide="scan-eye" aria-hidden="true"></i> Live product display</li><li><i data-lucide="badge-help" aria-hidden="true"></i> Technical support</li><li><i data-lucide="handshake" aria-hidden="true"></i> Business opportunities</li></ul><a class="ev-button ev-button--solid" href="{% url 'core:contact' %}">Contact us <i data-lucide="arrow-right" aria-hidden="true"></i></a></aside>
   </div></section>
 </div>
