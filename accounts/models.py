@@ -4,7 +4,7 @@ from django.db import models
 
 class Address(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="addresses")
-    label = models.CharField(max_length=60, default="المنزل")
+    label = models.CharField(max_length=60, default="Home")
     recipient_name = models.CharField(max_length=160)
     phone = models.CharField(max_length=30)
     governorate = models.CharField(max_length=80)

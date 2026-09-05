@@ -10,11 +10,11 @@ def validate_banner_link(value):
     try:
         URLValidator(schemes=("http", "https"))(value)
     except ValidationError:
-        raise ValidationError("استخدم رابطًا داخليًا أو رابط HTTP/HTTPS صالحًا.")
+        raise ValidationError("Use an internal link or a valid HTTP/HTTPS URL.")
 
 
 class Banner(models.Model):
-    LOCATIONS = [("hero", "الرئيسية"), ("offer", "عرض"), ("promo", "ترويجي")]
+    LOCATIONS = [("hero", "Home hero"), ("offer", "Offer"), ("promo", "Promotional")]
     title = models.CharField(max_length=160)
     subtitle = models.CharField(max_length=255, blank=True)
     image = models.ImageField(upload_to="banners/", blank=True, validators=[validate_image_size])

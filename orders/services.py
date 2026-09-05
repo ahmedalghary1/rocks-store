@@ -17,10 +17,10 @@ def send_order_notifications(order_id):
     if notification.status == "sent":
         return True
     order = Order.objects.prefetch_related("items").get(pk=order_id)
-    subject = f"طلب جديد {order.order_number}"
+    subject = f"New order {order.order_number}"
     lines = [
-        f"رقم الطلب: {order.order_number}", f"العميل: {order.customer_name}",
-        f"الهاتف: {order.phone}", f"الإجمالي: {order.total}", "", "المنتجات:",
+        f"Order number: {order.order_number}", f"Customer: {order.customer_name}",
+        f"Phone: {order.phone}", f"Total: {order.total}", "", "Products:",
     ]
     lines.extend(f"- {item.quantity} × {item.product_name} ({item.sku})" for item in order.items.all())
     recipients = list(dict.fromkeys(email for email in [order.email, settings.ORDER_NOTIFICATION_EMAIL] if email))

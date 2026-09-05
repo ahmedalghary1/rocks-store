@@ -20,7 +20,7 @@ class Cart:
         try:
             return max(1, int(value))
         except (TypeError, ValueError):
-            raise ValueError("الكمية غير صالحة.")
+            raise ValueError("Invalid quantity.")
 
     @staticmethod
     def _parse_key(key):
@@ -48,7 +48,7 @@ class Cart:
             variant = ProductVariant.objects.get(pk=variant_id, product=product, is_active=True)
         available = variant.stock_quantity if variant else product.stock_quantity
         if available <= 0:
-            raise ValueError("هذا المنتج غير متوفر حاليًا.")
+            raise ValueError("This product is currently unavailable.")
         key = self.make_key(product.id, variant.id if variant else None)
         current = self._stored_quantity(self.data.get(key, 0))
         self.data[key] = min(available, current + self._quantity(quantity))
@@ -57,11 +57,11 @@ class Cart:
     def update(self, item_key, quantity):
         product_id, variant_id = self._parse_key(item_key)
         if not product_id:
-            raise ValueError("عنصر السلة غير صالح.")
+            raise ValueError("Invalid cart item.")
         try:
             quantity = int(quantity)
         except (TypeError, ValueError):
-            raise ValueError("الكمية غير صالحة.")
+            raise ValueError("Invalid quantity.")
         if quantity <= 0:
             self.remove(item_key)
             return
@@ -70,7 +70,7 @@ class Cart:
         available = variant.stock_quantity if variant else product.stock_quantity
         if available <= 0:
             self.remove(item_key)
-            raise ValueError("نفدت الكمية المتاحة من هذا المنتج.")
+            raise ValueError("The available stock for this product has sold out.")
         self.data[str(item_key)] = min(available, quantity)
         self._save()
 

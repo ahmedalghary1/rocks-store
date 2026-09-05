@@ -32,19 +32,19 @@ def checkout(request):
     cart = Cart(request)
     items = cart.items()
     if not items:
-        messages.warning(request, "السلة فارغة. أضف منتجًا قبل إتمام الطلب.")
+        messages.warning(request, "Your cart is empty. Add a product before checkout.")
         return redirect("catalog:list")
     session_token = _checkout_token(request)
     form = CheckoutForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         posted_token = request.POST.get("checkout_token", "")
         if posted_token != session_token:
-            form.add_error(None, "انتهت جلسة تأكيد الطلب. حدّث الصفحة وحاول مرة أخرى.")
+            form.add_error(None, "Your checkout session has expired. Refresh the page and try again.")
         else:
             try:
                 token = uuid.UUID(posted_token)
             except (ValueError, TypeError):
-                form.add_error(None, "رمز تأكيد الطلب غير صالح.")
+                form.add_error(None, "The checkout token is invalid.")
             else:
                 existing = Order.objects.filter(checkout_token=token).first()
                 if existing:
@@ -99,7 +99,7 @@ def checkout(request):
                         ])
                         OrderNotification.objects.create(order=order)
                 except InsufficientStock:
-                    messages.error(request, "تغيّرت الكمية المتاحة لأحد المنتجات. راجع السلة وحاول مجددًا.")
+                    messages.error(request, "Available stock has changed. Review your cart and try again.")
                     return redirect("cart:detail")
                 except IntegrityError:
                     existing = Order.objects.filter(checkout_token=token).first()
@@ -141,7 +141,7 @@ def track(request):
         identity = request.META.get("REMOTE_ADDR", "unknown")
         digest = hashlib.sha256(f"track:{identity}".encode()).hexdigest()[:24]
         if not cache.add(f"order-track:{digest}", True, timeout=3):
-            form.add_error(None, "انتظر لحظات قبل المحاولة مرة أخرى.")
+            form.add_error(None, "Please wait a moment before trying again.")
         else:
             order = Order.objects.filter(
                 order_number__iexact=form.cleaned_data["order_number"].strip(),
@@ -150,5 +150,5 @@ def track(request):
             if order:
                 request.session["last_order_token"] = str(order.public_token)
                 return redirect("orders:success", public_token=order.public_token)
-            form.add_error(None, "تعذر العثور على طلب بهذه البيانات.")
+            form.add_error(None, "No order was found with these details.")
     return render(request, "orders/track.html", {"form": form})

@@ -9,7 +9,7 @@ from django.utils import timezone
 
 
 class Coupon(models.Model):
-    TYPES = (("percentage", "نسبة"), ("fixed", "قيمة ثابتة"))
+    TYPES = (("percentage", "Percentage"), ("fixed", "Fixed amount"))
     code = models.CharField(max_length=40, unique=True)
     discount_type = models.CharField(max_length=20, choices=TYPES)
     value = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal("0.01"))])
@@ -37,9 +37,9 @@ class Coupon(models.Model):
 
 
 class Order(models.Model):
-    STATUSES = (("pending", "قيد المراجعة"), ("confirmed", "تم التأكيد"), ("processing", "قيد التجهيز"), ("shipped", "تم الشحن"), ("delivered", "تم التسليم"), ("cancelled", "ملغي"))
-    PAYMENT = (("cod", "الدفع عند الاستلام"),)
-    PAYMENT_STATUSES = (("unpaid", "غير مدفوع"), ("pending", "قيد المراجعة"), ("paid", "مدفوع"), ("refunded", "مسترد"))
+    STATUSES = (("pending", "Under review"), ("confirmed", "Confirmed"), ("processing", "Processing"), ("shipped", "Shipped"), ("delivered", "Delivered"), ("cancelled", "Cancelled"))
+    PAYMENT = (("cod", "Cash on delivery"),)
+    PAYMENT_STATUSES = (("unpaid", "Unpaid"), ("pending", "Under review"), ("paid", "Paid"), ("refunded", "Refunded"))
     order_number = models.CharField(max_length=40, unique=True, db_index=True)
     public_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     checkout_token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
@@ -76,11 +76,11 @@ class Order(models.Model):
     def clean(self):
         super().clean()
         if self.payment_method != "cod":
-            raise ValidationError({"payment_method": "طريقة الدفع المتاحة هي الدفع عند الاستلام فقط."})
+            raise ValidationError({"payment_method": "The available payment method is cash on delivery."})
         if self.pk:
             previous = Order.objects.filter(pk=self.pk).values_list("status", flat=True).first()
             if previous == "cancelled" and self.status != "cancelled":
-                raise ValidationError({"status": "لا يمكن إعادة فتح طلب ملغي بعد إعادة المخزون."})
+                raise ValidationError({"status": "A cancelled order cannot be reopened after stock restoration."})
 
 
 class OrderItem(models.Model):
@@ -132,8 +132,8 @@ class ShippingZone(models.Model):
 
 class OrderNotification(models.Model):
     STATUSES = (
-        ("pending", "قيد الإرسال"), ("sending", "جارٍ الإرسال"), ("sent", "تم الإرسال"),
-        ("failed", "فشل الإرسال"), ("skipped", "لا يوجد مستلمون"),
+        ("pending", "Pending"), ("sending", "Sending"), ("sent", "Sent"),
+        ("failed", "Failed"), ("skipped", "No recipients"),
     )
     order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name="notification")
     status = models.CharField(max_length=20, choices=STATUSES, default="pending", db_index=True)

@@ -35,7 +35,7 @@ class ProductAdmin(admin.ModelAdmin):
     autocomplete_fields = ("category",)
     inlines = (ProductImageInline, ProductSpecificationInline, ProductVariantInline)
 
-    @admin.display(description="الصورة")
+    @admin.display(description="Image")
     def thumbnail(self, obj):
         return format_html('<img src="{}" width="44" height="44" style="object-fit:contain">', obj.main_image.url) if obj.main_image else "—"
 

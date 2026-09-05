@@ -8,8 +8,8 @@ from datetime import timedelta
 
 class CartTests(TestCase):
     def setUp(self):
-        category = Category.objects.create(name="أدوات", slug="tools")
-        self.product = Product.objects.create(name="قلم فحص", slug="tester", sku="T-1", category=category, short_description="آمن", description="وصف", price=120, stock_quantity=3)
+        category = Category.objects.create(name="Tools", slug="tools")
+        self.product = Product.objects.create(name="Voltage Tester", slug="tester", sku="T-1", category=category, short_description="Safe", description="Product description", price=120, stock_quantity=3)
 
     def test_add_and_clamp_to_stock(self):
         self.client.post(reverse("cart:add", args=[self.product.id]), {"quantity": 8})
@@ -34,7 +34,7 @@ class CartTests(TestCase):
         self.assertEqual(self.client.session.get("cart", {}), {})
 
     def test_variant_has_independent_stock(self):
-        variant = ProductVariant.objects.create(product=self.product, sku="T-1-B", label="كبير", price=175, stock_quantity=2)
+        variant = ProductVariant.objects.create(product=self.product, sku="T-1-B", label="Large", price=175, stock_quantity=2)
         self.client.post(reverse("cart:add", args=[self.product.id]), {"quantity": 5, "variant_id": variant.id})
         self.assertEqual(self.client.session["cart"][f"{self.product.id}:{variant.id}"], 2)
 

@@ -15,7 +15,7 @@ class PublicPagesTests(TestCase):
 
     def test_contact_validates_on_server(self):
         response = self.client.post(reverse("core:contact"), {
-            "name": "اختبار", "phone": "bad", "email": "bad", "subject": "سؤال", "message": "رسالة",
+            "name": "Test User", "phone": "bad", "email": "bad", "subject": "Question", "message": "Message",
         })
         self.assertEqual(response.status_code, 200)
         self.assertEqual(ContactMessage.objects.count(), 0)

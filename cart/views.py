@@ -18,12 +18,12 @@ def add(request, product_id):
     try:
         cart.add(product_id, request.POST.get("quantity", 1), request.POST.get("variant_id") or None)
     except (ValueError, Product.DoesNotExist, ProductVariant.DoesNotExist) as exc:
-        message = str(exc) or "تعذرت إضافة المنتج."
+        message = str(exc) or "Could not add this product."
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
             return JsonResponse({"ok": False, "message": message}, status=400)
         messages.error(request, message)
         return redirect("cart:detail")
-    message = "تمت إضافة المنتج إلى السلة"
+    message = "Product added to cart."
     if request.headers.get("x-requested-with") == "XMLHttpRequest":
         return JsonResponse({"ok": True, "message": message, "count": cart.count, "total": str(cart.total)})
     messages.success(request, message)
@@ -42,7 +42,7 @@ def update(request, item_key):
             updated_item = next((item for item in cart.items() if item["key"] == str(item_key)), None)
             return JsonResponse({
                 "ok": True,
-                "message": "تم تحديث الكمية",
+                "message": "Quantity updated.",
                 "quantity": updated_item["quantity"] if updated_item else 0,
                 "item_total": str(updated_item["total"]) if updated_item else "0.00",
                 "count": cart.count,
@@ -51,9 +51,9 @@ def update(request, item_key):
                 "discount": str(cart.discount),
                 "total": str(cart.total),
             })
-        messages.success(request, "تم تحديث الكمية")
+        messages.success(request, "Quantity updated.")
     except (ValueError, Product.DoesNotExist, ProductVariant.DoesNotExist) as exc:
-        message = str(exc) or "تعذر تحديث الكمية."
+        message = str(exc) or "Could not update the quantity."
         if request.headers.get("x-requested-with") == "XMLHttpRequest":
             return JsonResponse({"ok": False, "message": message}, status=400)
         messages.error(request, message)
@@ -63,21 +63,21 @@ def update(request, item_key):
 @require_POST
 def remove(request, item_key):
     Cart(request).remove(item_key)
-    messages.info(request, "تم حذف المنتج من السلة")
+    messages.info(request, "Product removed from cart.")
     return redirect("cart:detail")
 
 
 @require_POST
 def apply_coupon(request):
     if Cart(request).apply_coupon(request.POST.get("code", "")):
-        messages.success(request, "تم تطبيق كوبون الخصم")
+        messages.success(request, "Coupon applied.")
     else:
-        messages.error(request, "الكوبون غير صالح أو لا ينطبق على هذه السلة")
+        messages.error(request, "This coupon is invalid or does not apply to your cart.")
     return redirect("cart:detail")
 
 
 @require_POST
 def remove_coupon(request):
     Cart(request).remove_coupon()
-    messages.info(request, "تمت إزالة الكوبون")
+    messages.info(request, "Coupon removed.")
     return redirect("cart:detail")

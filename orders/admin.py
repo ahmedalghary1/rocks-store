@@ -16,12 +16,12 @@ class OrderAdmin(admin.ModelAdmin):
     search_fields = ("order_number", "customer_name", "phone", "email")
     inlines = (OrderItemInline,)
 
-    @admin.display(description="الإشعار")
+    @admin.display(description="Notification")
     def notification_status(self, obj):
         try:
             return obj.notification.get_status_display()
         except OrderNotification.DoesNotExist:
-            return "لم يُنشأ"
+            return "Not created"
 
     def save_model(self, request, obj, form, change):
         previous_status = Order.objects.filter(pk=obj.pk).values_list("status", flat=True).first() if change else None
@@ -42,7 +42,7 @@ class OrderNotificationAdmin(admin.ModelAdmin):
     readonly_fields = ("order", "status", "attempts", "last_error", "last_attempt_at", "sent_at")
     actions = ("retry_selected",)
 
-    @admin.action(description="إعادة محاولة إرسال الإشعارات المحددة")
+    @admin.action(description="Retry selected notifications")
     def retry_selected(self, request, queryset):
         sent = sum(1 for item in queryset if send_order_notifications(item.order_id))
-        self.message_user(request, f"تم إرسال {sent} من {queryset.count()} إشعار.")
+        self.message_user(request, f"Sent {sent} of {queryset.count()} notifications.")

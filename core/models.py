@@ -10,13 +10,13 @@ class SiteSettings(models.Model):
     facebook = models.URLField(blank=True)
     instagram = models.URLField(blank=True)
     tiktok = models.URLField(blank=True)
-    footer_text = models.CharField(max_length=255, default="حلول كهربائية مختارة لتدوم.")
-    shipping_message = models.CharField(max_length=160, default="شحن سريع لكل محافظات مصر")
-    currency = models.CharField(max_length=12, default="ج.م")
+    footer_text = models.CharField(max_length=255, default="Powering a cleaner tomorrow.")
+    shipping_message = models.CharField(max_length=160, default="Fast delivery across Egypt")
+    currency = models.CharField(max_length=12, default="EGP")
 
     class Meta:
-        verbose_name = "إعدادات الموقع"
-        verbose_name_plural = "إعدادات الموقع"
+        verbose_name = "Site settings"
+        verbose_name_plural = "Site settings"
 
     def __str__(self):
         return self.company_name

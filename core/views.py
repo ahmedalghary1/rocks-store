@@ -55,12 +55,12 @@ def contact(request):
     if request.method == "POST":
         if form.is_valid():
             if not cache.add(_rate_key(request, "contact"), True, timeout=60):
-                form.add_error(None, "انتظر دقيقة قبل إرسال رسالة أخرى.")
+                form.add_error(None, "Please wait one minute before sending another message.")
             else:
                 contact_message = form.save()
                 if settings.ORDER_NOTIFICATION_EMAIL:
                     transaction.on_commit(lambda: _notify_contact(contact_message.pk))
-                messages.success(request, "وصلت رسالتك، وسيتواصل معك فريق ROCKS قريبًا.")
+                messages.success(request, "Your message has been received. The ROCKS team will contact you shortly.")
                 return redirect("core:contact")
     return render(request, "core/contact.html", {"form": form})
 
@@ -70,8 +70,8 @@ def _notify_contact(message_id):
     item = ContactMessage.objects.get(pk=message_id)
     try:
         send_mail(
-            f"رسالة تواصل: {item.subject}",
-            f"الاسم: {item.name}\nالهاتف: {item.phone}\nالبريد: {item.email}\n\n{item.message}",
+            f"Contact message: {item.subject}",
+            f"Name: {item.name}\nPhone: {item.phone}\nEmail: {item.email}\n\n{item.message}",
             settings.DEFAULT_FROM_EMAIL, [settings.ORDER_NOTIFICATION_EMAIL], fail_silently=False,
         )
     except Exception:
@@ -82,15 +82,15 @@ def _notify_contact(message_id):
 def newsletter_subscribe(request):
     form = NewsletterForm(request.POST)
     if not form.is_valid():
-        messages.error(request, "أدخل بريدًا إلكترونيًا صحيحًا.")
+        messages.error(request, "Enter a valid email address.")
     elif not cache.add(_rate_key(request, "newsletter"), True, timeout=30):
-        messages.error(request, "انتظر قليلًا قبل المحاولة مرة أخرى.")
+        messages.error(request, "Please wait before trying again.")
     else:
         subscriber, created = Subscriber.objects.get_or_create(email=form.cleaned_data["email"].lower())
         if not subscriber.is_active:
             subscriber.is_active = True
             subscriber.save(update_fields=("is_active",))
-        messages.success(request, "تم اشتراكك بنجاح." if created else "هذا البريد مشترك بالفعل.")
+        messages.success(request, "You have successfully subscribed." if created else "This email is already subscribed.")
     next_url = request.POST.get("next", "")
     if next_url and url_has_allowed_host_and_scheme(next_url, {request.get_host()}, require_https=request.is_secure()):
         return redirect(next_url)
@@ -112,7 +112,7 @@ def wishlist_toggle(request, product_id):
         active = False
     else:
         if len(wishlist) >= 100:
-            return JsonResponse({"ok": False, "message": "وصلت القائمة إلى الحد الأقصى."}, status=400)
+            return JsonResponse({"ok": False, "message": "Your wishlist has reached its limit."}, status=400)
         wishlist.append(product_id)
         active = True
     request.session["wishlist"] = wishlist

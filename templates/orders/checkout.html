@@ -1,29 +1,4 @@
-{% extends 'base.html' %}
-{% block title %}إتمام الطلب | ROCKS{% endblock %}
-{% block robots %}noindex,nofollow{% endblock %}
-{% block body_class %}checkout-page{% endblock %}
-{% block content %}
-<section class="checkout section"><div class="container">
-  <nav class="breadcrumb"><a href="{% url 'cart:detail' %}">السلة</a><span>←</span><b>إتمام الطلب</b></nav>
-  <div class="checkout-head"><span class="eyebrow">خطوة أخيرة</span><h1>أكمل بيانات التوصيل.</h1><div class="checkout-steps"><span class="done">1 السلة</span><span class="active">2 البيانات</span><span>3 التأكيد</span></div></div>
-  <form method="post" class="checkout-layout" novalidate>{% csrf_token %}<input type="hidden" name="checkout_token" value="{{ checkout_token }}">
-    <div class="checkout-fields">
-      {% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}
-      <section><h2><span>01</span> بيانات التواصل</h2><div class="form-grid">
-      {% for field in form %}
-        {% if forloop.counter == 5 %}</div></section><section><h2><span>02</span> عنوان التوصيل</h2><div class="form-grid">{% endif %}
-        <label class="field {% if field.errors %}field--error{% endif %}"><span>{{ field.label }}{% if field.field.required %} *{% endif %}</span>{{ field }}{% if field.help_text %}<small class="field-help">{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<small>{{ error }}</small>{% endfor %}</label>
-      {% endfor %}</div></section>
-      <section><h2><span>03</span> طريقة الدفع</h2><div class="payment-cod"><strong>الدفع عند الاستلام</strong><p>ادفع قيمة الطلب نقدًا عند وصوله بعد تأكيده مع فريق ROCKS.</p></div></section>
-    </div>
-    <aside class="order-summary"><span class="eyebrow">طلبك</span><h2>{{ cart.count }} قطعة</h2>
-      {% for item in cart_items %}<div class="checkout-item"><span>{{ item.quantity }}×</span><p>{{ item.product.name }}{% if item.variant %} — {{ item.variant.label }}{% endif %}</p><b>{{ item.total|floatformat:2 }}</b></div>{% endfor %}
-      <div><span>المنتجات</span><b>{{ cart.subtotal|floatformat:2 }} ج.م</b></div><div><span>الشحن</span><b>{% if shipping_cost %}{{ shipping_cost|floatformat:2 }} ج.م{% else %}مجاني{% endif %}</b></div>
-      {% if cart.discount %}<div><span>الخصم</span><b>-{{ cart.discount|floatformat:2 }} ج.م</b></div>{% endif %}
-      <div class="summary-total"><span>الإجمالي</span><strong>{{ checkout_total|floatformat:2 }} ج.م</strong></div>
-      <button class="btn btn-gold" type="submit" data-submit-once>تأكيد الطلب ←</button>
-      <p>بتأكيد الطلب أنت توافق على <a href="{% url 'core:terms' %}" target="_blank" rel="noopener">الشروط</a> و<a href="{% url 'core:returns_policy' %}" target="_blank" rel="noopener">سياسة الاستبدال والاسترجاع</a> و<a href="{% url 'core:privacy' %}" target="_blank" rel="noopener">الخصوصية</a>.</p>
-    </aside>
-  </form>
-</div></section>
+{% extends 'base.html' %}{% block title %}Checkout | ROCKS{% endblock %}{% block robots %}noindex,nofollow{% endblock %}{% block body_class %}checkout-page{% endblock %}{% block content %}
+<section class="checkout section"><div class="container"><nav class="breadcrumb"><a href="{% url 'cart:detail' %}">Cart</a><span>›</span><b>Checkout</b></nav><div class="checkout-head"><span class="eyebrow">ONE LAST STEP</span><h1>Complete your delivery details.</h1><div class="checkout-steps"><span class="done">1 Cart</span><span class="active">2 Details</span><span>3 Confirmation</span></div></div><form method="post" class="checkout-layout" novalidate>{% csrf_token %}<input type="hidden" name="checkout_token" value="{{ checkout_token }}"><div class="checkout-fields">{% if form.non_field_errors %}<div class="form-errors">{{ form.non_field_errors }}</div>{% endif %}<section><h2><span>01</span> Contact details</h2><div class="form-grid">{% for field in form %}{% if forloop.counter == 5 %}</div></section><section><h2><span>02</span> Delivery address</h2><div class="form-grid">{% endif %}<label class="field {% if field.errors %}field--error{% endif %}"><span>{{ field.label }}{% if field.field.required %} *{% endif %}</span>{{ field }}{% if field.help_text %}<small class="field-help">{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<small>{{ error }}</small>{% endfor %}</label>{% endfor %}</div></section><section><h2><span>03</span> Payment method</h2><div class="payment-cod"><strong>Cash on delivery</strong><p>Pay in cash when your confirmed ROCKS order arrives.</p></div></section></div>
+<aside class="order-summary"><span class="eyebrow">YOUR ORDER</span><h2>{{ cart.count }} item{{ cart.count|pluralize }}</h2>{% for item in cart_items %}<div class="checkout-item"><span>{{ item.quantity }}×</span><p>{{ item.product.name }}{% if item.variant %} — {{ item.variant.label }}{% endif %}</p><b>{{ item.total|floatformat:2 }}</b></div>{% endfor %}<div><span>Products</span><b>{{ cart.subtotal|floatformat:2 }} EGP</b></div><div><span>Shipping</span><b>{% if shipping_cost %}{{ shipping_cost|floatformat:2 }} EGP{% else %}Free{% endif %}</b></div>{% if cart.discount %}<div><span>Discount</span><b>-{{ cart.discount|floatformat:2 }} EGP</b></div>{% endif %}<div class="summary-total"><span>Total</span><strong>{{ checkout_total|floatformat:2 }} EGP</strong></div><button class="btn btn-gold" type="submit" data-submit-once>Confirm order <i data-lucide="arrow-right" aria-hidden="true"></i></button><p>By confirming, you agree to our <a href="{% url 'core:terms' %}" target="_blank" rel="noopener">Terms</a>, <a href="{% url 'core:returns_policy' %}" target="_blank" rel="noopener">Returns Policy</a> and <a href="{% url 'core:privacy' %}" target="_blank" rel="noopener">Privacy Policy</a>.</p></aside></form></div></section>
 {% endblock %}

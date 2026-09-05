@@ -48,7 +48,7 @@ class SensitivePostRateLimitMiddleware:
             key = f"sensitive-post:{digest}"
             attempts = cache.get(key, 0)
             if attempts >= self.limit:
-                response = HttpResponse("محاولات كثيرة. انتظر دقيقة ثم حاول مرة أخرى.", status=429)
+                response = HttpResponse("Too many attempts. Please wait one minute and try again.", status=429)
                 response["Retry-After"] = str(self.window)
                 return response
             if not cache.add(key, 1, self.window):

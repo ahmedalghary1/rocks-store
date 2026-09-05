@@ -14,11 +14,11 @@ from .services import restore_order_stock, send_order_notifications
 class CheckoutTests(TestCase):
     def setUp(self):
         cache.clear()
-        category = Category.objects.create(name="إضاءة", slug="lighting")
-        self.product = Product.objects.create(name="لمبة 12 وات", slug="lamp-12", sku="L-12", category=category, short_description="موفرة", description="وصف", price=95, stock_quantity=5)
+        category = Category.objects.create(name="Lighting", slug="lighting")
+        self.product = Product.objects.create(name="12W Lamp", slug="lamp-12", sku="L-12", category=category, short_description="Energy efficient", description="Product description", price=95, stock_quantity=5)
 
     def checkout_payload(self, **overrides):
-        payload = {"checkout_token": self.client.session["checkout_token"], "customer_name": "محمد أحمد", "phone": "01012345678", "email": "", "second_phone": "", "governorate": "القاهرة", "city": "مدينة نصر", "address": "١ شارع الطاقة", "notes": ""}
+        payload = {"checkout_token": self.client.session["checkout_token"], "customer_name": "John Smith", "phone": "01012345678", "email": "", "second_phone": "", "governorate": "Cairo", "city": "Nasr City", "address": "1 Energy Street", "notes": ""}
         payload.update(overrides)
         return payload
 
@@ -32,20 +32,20 @@ class CheckoutTests(TestCase):
         self.assertEqual(update_response.json()["subtotal"], "190.00")
         checkout_page = self.client.get(reverse("orders:checkout"))
         self.assertContains(checkout_page, "2×")
-        self.assertContains(checkout_page, "190,00")
+        self.assertContains(checkout_page, "190.00")
         token = self.client.session["checkout_token"]
-        response = self.client.post(reverse("orders:checkout"), {"checkout_token":token, "customer_name":"محمد أحمد", "phone":"01012345678", "email":"", "second_phone":"", "governorate":"القاهرة", "city":"مدينة نصر", "address":"١ شارع الطاقة", "notes":"", "payment_method":"cod"})
+        response = self.client.post(reverse("orders:checkout"), {"checkout_token":token, "customer_name":"John Smith", "phone":"01012345678", "email":"", "second_phone":"", "governorate":"Cairo", "city":"Nasr City", "address":"1 Energy Street", "notes":"", "payment_method":"cod"})
         self.assertEqual(response.status_code, 302)
         order = Order.objects.get()
         item = order.items.get()
-        self.assertEqual(item.product_name, "لمبة 12 وات")
+        self.assertEqual(item.product_name, "12W Lamp")
         self.assertEqual(item.quantity, 2)
         self.assertEqual(item.price, 95)
         self.assertEqual(item.total, 190)
         self.assertEqual(order.subtotal, 190)
         success = self.client.get(response.url)
         self.assertContains(success, "2×")
-        self.assertContains(success, "190,00")
+        self.assertContains(success, "190.00")
         self.product.refresh_from_db()
         self.assertEqual(self.product.stock_quantity, 3)
         self.assertIn(str(order.public_token), response.url)
@@ -60,7 +60,7 @@ class CheckoutTests(TestCase):
         self.client.post(reverse("cart:add", args=[self.product.id]), {"quantity": 1})
         self.client.get(reverse("orders:checkout"))
         token = self.client.session["checkout_token"]
-        payload = {"checkout_token":token, "customer_name":"محمد", "phone":"01012345678", "email":"", "second_phone":"", "governorate":"القاهرة", "city":"القاهرة", "address":"شارع الاختبار", "notes":"", "payment_method":"cod"}
+        payload = {"checkout_token":token, "customer_name":"John", "phone":"01012345678", "email":"", "second_phone":"", "governorate":"Cairo", "city":"Cairo", "address":"Test Street", "notes":"", "payment_method":"cod"}
         self.client.post(reverse("orders:checkout"), payload)
         session = self.client.session
         session["cart"] = {str(self.product.id): 1}
@@ -75,7 +75,7 @@ class CheckoutTests(TestCase):
         self.client.post(reverse("cart:add", args=[self.product.id]), {"quantity": 2})
         self.client.get(reverse("orders:checkout"))
         token = self.client.session["checkout_token"]
-        self.client.post(reverse("orders:checkout"), {"checkout_token":token, "customer_name":"محمد", "phone":"01012345678", "email":"", "second_phone":"", "governorate":"القاهرة", "city":"القاهرة", "address":"شارع الاختبار", "notes":"", "payment_method":"cod"})
+        self.client.post(reverse("orders:checkout"), {"checkout_token":token, "customer_name":"John", "phone":"01012345678", "email":"", "second_phone":"", "governorate":"Cairo", "city":"Cairo", "address":"Test Street", "notes":"", "payment_method":"cod"})
         order = Order.objects.get()
         self.assertTrue(restore_order_stock(order.pk))
         self.assertFalse(restore_order_stock(order.pk))
@@ -90,7 +90,7 @@ class CheckoutTests(TestCase):
         self.assertEqual(Order.objects.get().payment_method, "cod")
 
     def test_shipping_zone_controls_final_shipping_cost(self):
-        ShippingZone.objects.filter(name="القاهرة").update(shipping_cost=123, free_shipping_threshold=None)
+        ShippingZone.objects.filter(name="Cairo").update(shipping_cost=123, free_shipping_threshold=None)
         self.client.post(reverse("cart:add", args=[self.product.id]), {"quantity": 1})
         self.client.get(reverse("orders:checkout"))
         self.client.post(reverse("orders:checkout"), self.checkout_payload())
@@ -99,7 +99,7 @@ class CheckoutTests(TestCase):
         self.assertEqual(order.total, 218)
 
     def test_variant_referenced_by_order_cannot_be_deleted(self):
-        variant = ProductVariant.objects.create(product=self.product, sku="L-12-W", label="أبيض", stock_quantity=2)
+        variant = ProductVariant.objects.create(product=self.product, sku="L-12-W", label="White", stock_quantity=2)
         self.client.post(reverse("cart:add", args=[self.product.id]), {"quantity": 1, "variant_id": variant.id})
         self.client.get(reverse("orders:checkout"))
         self.client.post(reverse("orders:checkout"), self.checkout_payload())

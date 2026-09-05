@@ -12,7 +12,7 @@ class AccountTests(TestCase):
         self.client.logout()
         payload["username"] = "second"
         response = self.client.post(reverse("accounts:register"), payload)
-        self.assertContains(response, "يوجد حساب بهذا البريد بالفعل")
+        self.assertContains(response, "An account with this email already exists")
 
     def test_dashboard_requires_login(self):
         response = self.client.get(reverse("accounts:dashboard"))

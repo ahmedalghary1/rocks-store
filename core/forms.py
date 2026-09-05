@@ -12,15 +12,15 @@ class ContactForm(forms.ModelForm):
     def clean_phone(self):
         phone = self.cleaned_data["phone"].replace(" ", "")
         if len(phone) < 10 or not phone.lstrip("+").isdigit():
-            raise forms.ValidationError("أدخل رقم هاتف صحيحًا.")
+            raise forms.ValidationError("Enter a valid phone number.")
         return phone
 
     def clean(self):
         cleaned = super().clean()
         if cleaned.get("website"):
-            raise forms.ValidationError("تعذر إرسال الرسالة.")
+            raise forms.ValidationError("The message could not be sent.")
         return cleaned
 
 
 class NewsletterForm(forms.Form):
-    email = forms.EmailField(label="البريد الإلكتروني", max_length=254)
+    email = forms.EmailField(label="Email address", max_length=254)

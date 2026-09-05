@@ -7,10 +7,10 @@ const iconMarkup = (name) => `<i data-lucide="${name}" aria-hidden="true"></i>`;
 const upgradeLegacyIcons = () => {
   $$('.product-art span').forEach(el => { const name = el.textContent.trim(); if (!el.querySelector('[data-lucide]') && /^[a-z-]+$/.test(name)) el.innerHTML = iconMarkup(name); });
   $$('.zoom-btn').forEach(el => { el.innerHTML = iconMarkup('zoom-in'); });
-  $$('.filter-toggle').forEach(el => { el.innerHTML = `${iconMarkup('sliders-horizontal')}<span>الفلاتر</span>`; });
+  $$('.filter-toggle').forEach(el => { el.innerHTML = `${iconMarkup('sliders-horizontal')}<span>Filters</span>`; });
   $$('.filter-close,.modal-close').forEach(el => { el.innerHTML = iconMarkup('x'); });
   $$('.remove-item').forEach(el => { el.innerHTML = iconMarkup('trash-2'); });
-  $$('.secondary-actions [data-wishlist]').forEach(el => { el.innerHTML = `${iconMarkup('heart')}<span>أضف للمفضلة</span>`; });
+  $$('.secondary-actions [data-wishlist]').forEach(el => { el.innerHTML = `${iconMarkup('heart')}<span>Add to wishlist</span>`; });
   const trustIcons = ['shield-check', 'refresh-cw', 'badge-check'];
   $$('.purchase-trust span').forEach((el, index) => { el.textContent = el.textContent.replace(/^[◇↺▣]\s*/, ''); el.insertAdjacentHTML('afterbegin', iconMarkup(trustIcons[index] || 'check')); });
   $$('.empty-state>span').forEach(el => { el.innerHTML = iconMarkup(el.closest('.wishlist-page') ? 'heart' : 'package'); });
@@ -42,13 +42,13 @@ let searchTimer;
 $('#liveSearch')?.addEventListener('input', event => {
   clearTimeout(searchTimer); const input = event.currentTarget; const target = $('#searchResults');
   searchTimer = setTimeout(async () => {
-    if (input.value.trim().length < 2) { target.innerHTML = '<p>اكتب حرفين على الأقل لبدء البحث.</p>'; return; }
-    target.innerHTML = '<p>نبحث في مجموعة ROCKS…</p>';
+    if (input.value.trim().length < 2) { target.innerHTML = '<p>Enter at least two characters to search.</p>'; return; }
+    target.innerHTML = '<p>Searching the ROCKS collection…</p>';
     try {
       const response = await fetch(`${input.dataset.url}?q=${encodeURIComponent(input.value)}`);
       const data = await response.json();
-      target.innerHTML = data.results.length ? data.results.map(item => `<a class="search-result" href="${escapeHtml(item.url)}"><span><b>${escapeHtml(item.name)}</b><small>${escapeHtml(item.category)}</small></span><strong>${Number(item.price).toLocaleString('ar-EG')} ج.م</strong></a>`).join('') : '<div class="empty-search"><b>لا توجد نتائج مطابقة</b><p>جرّب اسمًا أقصر أو ابحث بكود المنتج.</p></div>';
-    } catch { target.innerHTML = '<p>تعذّر البحث الآن. حاول مرة أخرى.</p>'; }
+      target.innerHTML = data.results.length ? data.results.map(item => `<a class="search-result" href="${escapeHtml(item.url)}"><span><b>${escapeHtml(item.name)}</b><small>${escapeHtml(item.category)}</small></span><strong>${Number(item.price).toLocaleString('en-EG')} EGP</strong></a>`).join('') : '<div class="empty-search"><b>No matching products</b><p>Try a shorter product name or search by SKU.</p></div>';
+    } catch { target.innerHTML = '<p>Search is unavailable right now. Please try again.</p>'; }
   }, 280);
 });
 
@@ -63,13 +63,13 @@ $$('.ajax-cart').forEach(form => form.addEventListener('submit', async event => 
   try {
     const response = await fetch(form.action, { method: 'POST', body: new FormData(form), headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': csrf() } });
     const data = await response.json();
-    if (!response.ok) throw new Error(data.message || 'تعذرت الإضافة.');
+    if (!response.ok) throw new Error(data.message || 'Could not add this product.');
     $$('[data-cart-count]').forEach(el => el.textContent = data.count); toast(data.message);
     button.animate([{ transform: 'scale(.9)' }, { transform: 'scale(1.08)' }, { transform: 'scale(1)' }], { duration: 380 });
-  } catch (error) { toast(error.message || 'تعذرت الإضافة. حاول مرة أخرى.'); } finally { button.disabled = false; }
+  } catch (error) { toast(error.message || 'Could not add this product. Please try again.'); } finally { button.disabled = false; }
 }));
 
-const formatMoney = value => `${Number(value).toFixed(2)} ج.م`;
+const formatMoney = value => `${Number(value).toFixed(2)} EGP`;
 let cartUpdatePending = Promise.resolve();
 const updateCartForm = form => {
   const runUpdate = async () => {
@@ -82,7 +82,7 @@ const updateCartForm = form => {
         headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': csrf() },
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.message || 'تعذر تحديث الكمية.');
+      if (!response.ok) throw new Error(data.message || 'Could not update the quantity.');
       input.value = data.quantity;
       const line = form.closest('.cart-item');
       const lineTotal = $('[data-cart-line-total]', line);
@@ -97,13 +97,13 @@ const updateCartForm = form => {
       const total = $('[data-cart-total]');
       const couponSaving = $('[data-coupon-saving]');
       if (subtotal) subtotal.textContent = formatMoney(data.subtotal);
-      if (shipping) shipping.textContent = Number(data.shipping) ? formatMoney(data.shipping) : 'مجاني';
+      if (shipping) shipping.textContent = Number(data.shipping) ? formatMoney(data.shipping) : 'Free';
       if (discount) discount.textContent = `-${formatMoney(data.discount)}`;
       if (discountRow) discountRow.hidden = !Number(data.discount);
       if (couponSaving) couponSaving.textContent = formatMoney(data.discount);
       if (total) total.textContent = formatMoney(data.total);
     } catch (error) {
-      toast(error.message || 'تعذر تحديث الكمية.');
+      toast(error.message || 'Could not update the quantity.');
     } finally {
       buttons.forEach(button => { button.disabled = false; });
     }
@@ -138,13 +138,13 @@ $$('[data-wishlist]').forEach(button => button.addEventListener('click', async (
   try {
     const response = await fetch(button.dataset.url, { method: 'POST', headers: { 'X-CSRFToken': csrf(), 'X-Requested-With': 'XMLHttpRequest' } });
     const data = await response.json(); button.classList.toggle('active', data.active); button.setAttribute('aria-pressed', String(data.active));
-    toast(data.active ? 'تمت إضافة المنتج إلى المفضلة' : 'تمت إزالة المنتج من المفضلة');
-  } catch { toast('تعذر تحديث المفضلة.'); }
+    toast(data.active ? 'Product added to wishlist.' : 'Product removed from wishlist.');
+  } catch { toast('Could not update your wishlist.'); }
 }));
 
 const modal = $('#quickModal');
 $$('[data-quick]').forEach(button => button.addEventListener('click', async () => {
-  const content = $('#quickContent'); content.innerHTML = '<p>يتم تحميل التفاصيل…</p>'; modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false');
+  const content = $('#quickContent'); content.innerHTML = '<p>Loading product details…</p>'; modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false');
   const response = await fetch(button.dataset.quick); content.innerHTML = await response.text(); renderIcons(content);
   const form = $('.ajax-cart', content); if (form) form.addEventListener('submit', async event => { event.preventDefault(); const response = await fetch(form.action, { method:'POST', body:new FormData(form), headers:{'X-Requested-With':'XMLHttpRequest','X-CSRFToken':csrf()} }); const data=await response.json(); $$('[data-cart-count]').forEach(el=>el.textContent=data.count); toast(data.message); });
 }));
@@ -161,9 +161,9 @@ variantSelect?.addEventListener('change', event => {
   const form = $('#detail-cart-form'); const quantity = $('input[name=quantity]', form); const submit = $('button[type=submit]', form);
   const selected = Boolean(option?.value); const stock = Number(option?.dataset.stock || 0);
   if (quantity && selected) { quantity.max = stock; quantity.value = Math.min(Number(quantity.value), stock); }
-  if ($('[data-product-price]') && selected) $('[data-product-price]').textContent = Number(option.dataset.price).toLocaleString('ar-EG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  if ($('[data-product-price]') && selected) $('[data-product-price]').textContent = Number(option.dataset.price).toLocaleString('en-EG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   if ($('[data-product-sku]') && selected) $('[data-product-sku]').textContent = option.dataset.sku;
-  if ($('[data-mobile-price]') && selected) $('[data-mobile-price]').textContent = Number(option.dataset.price).toLocaleString('ar-EG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  if ($('[data-mobile-price]') && selected) $('[data-mobile-price]').textContent = Number(option.dataset.price).toLocaleString('en-EG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   if ($('[data-mobile-variant]')) $('[data-mobile-variant]').value = option?.value || '';
   if (submit) submit.disabled = !selected || stock < 1;
   const mobileSubmit = $('.mobile-add button[type=submit]'); if (mobileSubmit) mobileSubmit.disabled = !selected || stock < 1;
@@ -176,7 +176,7 @@ $('.zoom-btn')?.addEventListener('click', event => {
   const target = $('[data-main-image]'); const zoomed = target?.classList.toggle('zoomed');
   event.currentTarget.setAttribute('aria-pressed', String(Boolean(zoomed)));
 });
-$$('[data-submit-once]').forEach(button => button.closest('form').addEventListener('submit', () => { button.disabled = true; button.textContent = 'جارٍ تأكيد الطلب…'; }));
+$$('[data-submit-once]').forEach(button => button.closest('form').addEventListener('submit', () => { button.disabled = true; button.textContent = 'Confirming order…'; }));
 
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const motionDirections = ['right', 'left', 'bottom', 'top'];

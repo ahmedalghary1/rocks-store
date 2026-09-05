@@ -1,16 +1,1 @@
-{% extends 'base.html' %}
-{% block title %}تفاصيل طلبك | ROCKS{% endblock %}
-{% block robots %}noindex,nofollow{% endblock %}
-{% block content %}
-<section class="success-page section"><div class="container">
-  <div class="success-mark">✓</div><span class="eyebrow">حالة الطلب: {{ order.get_status_display }}</span>
-  <h1>طلبك وصلنا.<br>والطاقة في الطريق.</h1>
-  <p>شكرًا {{ order.customer_name }}. سيتواصل معك فريقنا قريبًا لتأكيد التوصيل. الدفع نقدًا عند الاستلام.</p>
-  <div class="order-number"><span>رقم الطلب</span><strong>{{ order.order_number }}</strong></div>
-  <div class="success-grid"><div><h2>ملخص الطلب</h2>
-    {% for item in order.items.all %}<p><span>{{ item.quantity }}× {{ item.product_name }}{% if item.variant %} — {{ item.variant.label }}{% endif %}</span><b>{{ item.total|floatformat:2 }} ج.م</b></p>{% endfor %}
-    <p class="total"><span>الإجمالي</span><b>{{ order.total|floatformat:2 }} ج.م</b></p>
-  </div><div><h2>عنوان التوصيل</h2><p>{{ order.governorate }}، {{ order.city }}<br>{{ order.address }}<br>{{ order.phone }}</p><p><b>الحالة:</b> {{ order.get_status_display }}</p></div></div>
-  <a class="btn btn-dark" href="{% url 'catalog:list' %}">مواصلة التسوق</a>
-</div></section>
-{% endblock %}
+{% extends 'base.html' %}{% block title %}Order Details | ROCKS{% endblock %}{% block robots %}noindex,nofollow{% endblock %}{% block content %}<section class="success-page section"><div class="container"><div class="success-mark">✓</div><span class="eyebrow">ORDER STATUS: {{ order.get_status_display|upper }}</span><h1>Your order is confirmed.<br>Power is on the way.</h1><p>Thank you, {{ order.customer_name }}. Our team will contact you shortly to confirm delivery. Payment is due in cash on delivery.</p><div class="order-number"><span>Order number</span><strong>{{ order.order_number }}</strong></div><div class="success-grid"><div><h2>Order summary</h2>{% for item in order.items.all %}<p><span>{{ item.quantity }}× {{ item.product_name }}{% if item.variant %} — {{ item.variant.label }}{% endif %}</span><b>{{ item.total|floatformat:2 }} EGP</b></p>{% endfor %}<p class="total"><span>Total</span><b>{{ order.total|floatformat:2 }} EGP</b></p></div><div><h2>Delivery address</h2><p>{{ order.governorate }}, {{ order.city }}<br>{{ order.address }}<br>{{ order.phone }}</p><p><b>Status:</b> {{ order.get_status_display }}</p></div></div><a class="btn btn-dark" href="{% url 'catalog:list' %}">Continue shopping</a></div></section>{% endblock %}

@@ -21,7 +21,7 @@ class Category(models.Model):
     class Meta:
         ordering = ("sort_order", "name")
         indexes = [models.Index(fields=("is_active", "sort_order"))]
-        verbose_name_plural = "التصنيفات"
+        verbose_name_plural = "Categories"
 
     def __str__(self):
         return self.name

@@ -4,7 +4,7 @@ from django.contrib.auth.forms import UserCreationForm
 
 
 class RegistrationForm(UserCreationForm):
-    email = forms.EmailField(required=True, label="البريد الإلكتروني")
+    email = forms.EmailField(required=True, label="Email address")
 
     class Meta(UserCreationForm.Meta):
         model = get_user_model()
@@ -13,7 +13,7 @@ class RegistrationForm(UserCreationForm):
     def clean_email(self):
         email = self.cleaned_data["email"].strip().lower()
         if get_user_model().objects.filter(email__iexact=email).exists():
-            raise forms.ValidationError("يوجد حساب بهذا البريد بالفعل.")
+            raise forms.ValidationError("An account with this email already exists.")
         return email
 
     def save(self, commit=True):
