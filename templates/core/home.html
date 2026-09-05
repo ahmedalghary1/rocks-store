@@ -1,21 +1,56 @@
 {% extends 'base.html' %}{% load static %}
-{% block body_class %}home-page{% endblock %}
+{% block title %}ROCKS | EV Charging Solutions{% endblock %}
+{% block meta_description %}High-performance EV charging cables and dependable charging solutions from ROCKS.{% endblock %}
+{% block body_class %}home-page ev-home{% endblock %}
+{% block extra_head %}<link rel="preload" as="image" type="image/webp" href="{% static 'images/home/hero-ev-desktop.webp' %}" media="(min-width: 701px)"><link rel="preload" as="image" type="image/webp" href="{% static 'images/home/hero-ev-mobile.webp' %}" media="(max-width: 700px)"><link rel="stylesheet" href="{% static 'css/home-redesign.css' %}">{% endblock %}
+
 {% block content %}
-<section class="hero">
-  <div class="energy-grid" aria-hidden="true"></div><div class="energy-ring ring-one" aria-hidden="true"></div><div class="energy-ring ring-two" aria-hidden="true"></div>
-  <div class="container hero-grid">
-    <div class="hero-copy"><div class="hero-kicker"><i data-lucide="zap" aria-hidden="true"></i> الجيل الجديد من الحلول الكهربائية</div><h1>طاقة أقوى.<br><em>جودة تدوم.</em></h1><p>اكتشف مجموعة ROCKS من المنتجات الكهربائية المصممة للدقة، الأمان والأداء الذي يمكنك الاعتماد عليه كل يوم.</p><div class="hero-actions"><a class="btn btn-gold" href="{% url 'catalog:list' %}">تسوّق المنتجات <i data-lucide="arrow-left" aria-hidden="true"></i></a><a class="btn btn-ghost" href="#categories">استكشف التصنيفات</a></div><div class="hero-proof"><span><i data-lucide="badge-check" aria-hidden="true"></i> جودة موثوقة</span><span><i data-lucide="shield-check" aria-hidden="true"></i> منتجات مختارة</span><span><i data-lucide="headphones" aria-hidden="true"></i> دعم سريع</span></div></div>
-    <div class="hero-product" aria-label="مفتاح كهربائي ROCKS مودرن"><div class="product-glow"></div><div class="switch-shadow"></div><div class="switch-plate"><img class="device-logo-official" src="{% static 'images/rocks-logo-official.png' %}" alt="" width="2376" height="992"><button aria-label="مفتاح كهربائي توضيحي"><span></span></button><small>PREMIUM SWITCH</small></div><div class="floating-spec spec-one"><i data-lucide="shield-check" aria-hidden="true"></i><span><small>خامات آمنة</small><b>مقاومة للحرارة</b></span></div><div class="floating-spec spec-two"><i data-lucide="gauge" aria-hidden="true"></i><span><small>أداء موثوق</small><b>50,000 ضغطة</b></span></div></div>
-  </div><div class="hero-scroll"><span></span> مرّر لاكتشاف القوة</div>
-</section>
-{% if marketing_banner %}<section class="marketing-banner"><a class="container" href="{{ marketing_banner.link|default:'#categories' }}">{% if marketing_banner.image %}<img src="{{ marketing_banner.image.url }}" alt="{{ marketing_banner.title }}" loading="lazy">{% endif %}<span><strong>{{ marketing_banner.title }}</strong>{% if marketing_banner.subtitle %}<small>{{ marketing_banner.subtitle }}</small>{% endif %}{% if marketing_banner.button_text %}<b>{{ marketing_banner.button_text }} ←</b>{% endif %}</span></a></section>{% endif %}
-<section class="quick-categories section" id="categories"><div class="container"><div class="section-head compact"><div><span class="eyebrow">كل احتياجاتك في مكان واحد</span><h2>اختر طريقك إلى الطاقة.</h2></div><a class="text-link" href="{% url 'catalog:list' %}">جميع التصنيفات <i data-lucide="arrow-left" aria-hidden="true"></i></a></div><div class="category-grid">{% for category in categories %}<a class="category-card reveal" href="{{ category.get_absolute_url }}"><div class="category-icon"><i data-lucide="{{ category.icon|default:'zap' }}" aria-hidden="true"></i></div><div><h3>{{ category.name }}</h3><span>{{ category.active_product_count }} منتج</span></div><b><i data-lucide="arrow-left" aria-hidden="true"></i></b></a>{% endfor %}</div></div></section>
-{% include 'includes/product_section.html' with eyebrow="منتجات صنعت الفارق" title="مختارات ROCKS" description="حلول تجمع بين الشكل المتقن والأداء الموثوق." products=featured_products %}
-<section class="promo-band section"><div class="container promo-inner"><div class="promo-mark">ϟ</div><div><span class="eyebrow eyebrow--light">طاقة أكثر ذكاءً</span><h2>وفّر في الاستهلاك.<br>لا تتنازل عن الأداء.</h2><p>انتقل إلى إضاءة LED عالية الكفاءة واستمتع بضوء ثابت وعمر أطول.</p><a class="btn btn-gold" href="{% url 'catalog:list' %}?category=led">اكتشف إضاءة LED</a></div><div class="energy-stat"><strong>حتى 80%</strong><span>توفير في استهلاك الطاقة</span></div></div></section>
-{% include 'includes/product_section.html' with eyebrow="ثقة العملاء" title="الأكثر طلبًا" description="منتجات اختارها عملاؤنا مرارًا لأدائها الثابت." products=best_sellers %}
-<section class="why section"><div class="container"><div class="why-grid"><div class="why-copy"><span class="eyebrow">لماذا ROCKS؟</span><h2>القوة في التفاصيل<br>التي لا تراها.</h2><p>نختار كل خامة ونختبر كل نقطة اتصال، لأن الأمان الحقيقي يبدأ من الداخل.</p><a class="text-link" href="{% url 'core:about' %}">اعرف قصتنا ←</a></div><div class="why-cards"><article><b>01</b><h3>دقة في الاختيار</h3><p>مواصفات واضحة ومنتجات مناسبة للاستخدام الفعلي.</p></article><article><b>02</b><h3>جودة يمكن قياسها</h3><p>خامات متينة واختبارات أداء قبل الوصول إليك.</p></article><article><b>03</b><h3>دعم يعرف الكهرباء</h3><p>مساعدة عملية لاختيار الحل المناسب بسرعة.</p></article><article><b>04</b><h3>ضمان ROCKS</h3><p>ثقة مستمرة وخدمة ما بعد البيع دون تعقيد.</p></article></div></div></div></section>
-{% include 'includes/product_section.html' with eyebrow="وصل إلى مخازننا" title="جديد ROCKS" description="أحدث إضافاتنا لمساحات أكثر أمانًا وأناقة." products=new_products %}
-<section class="brand-story section"><div class="container story-grid"><div class="story-art"><img src="{% static 'images/rocks-logo-official.png' %}" width="2376" height="992" loading="lazy" alt="ROCKS Electric"><span class="orbit"></span></div><div><span class="eyebrow eyebrow--light">هذه ليست مجرد كهرباء</span><h2>نبني الثقة<br>مع كل توصيلة.</h2><p>بدأت ROCKS بفكرة بسيطة: أن تجمع المنتجات الكهربائية بين الأداء الصارم والتصميم الذي يليق بالمساحات الحديثة. واليوم نصنع تجربة شراء أوضح، أسرع وأكثر ثقة.</p><div class="story-numbers"><span><strong>+12</strong> فئة متخصصة</span><span><strong>100%</strong> اختيار مدروس</span><span><strong>24/7</strong> طلبات أونلاين</span></div></div></div></section>
-<section class="trust-strip"><div class="container"><div><span><i data-lucide="banknote" aria-hidden="true"></i></span><b>الدفع عند الاستلام</b><small>ادفع عند وصول طلبك</small></div><div><span><i data-lucide="refresh-cw" aria-hidden="true"></i></span><b>استبدال سهل</b><small>وفق سياسة واضحة</small></div><div><span><i data-lucide="package-check" aria-hidden="true"></i></span><b>تغليف محكم</b><small>يصل إليك بأمان</small></div><div><span><i data-lucide="headphones" aria-hidden="true"></i></span><b>دعم حقيقي</b><small>نساعدك قبل وبعد الشراء</small></div></div></section>
-<div class="quick-modal" id="quickModal" aria-hidden="true" role="dialog" aria-modal="true"><div class="quick-dialog"><button class="modal-close" aria-label="إغلاق">×</button><div id="quickContent"></div></div></div>
+<div class="rocks-home" dir="ltr">
+  <section class="ev-hero" aria-labelledby="hero-title">
+    <picture class="ev-hero__media" aria-hidden="true">
+      <source media="(max-width: 700px)" srcset="{% static 'images/home/hero-ev-mobile.webp' %}">
+      <img src="{% static 'images/home/hero-ev-desktop.webp' %}" alt="" width="1672" height="941" fetchpriority="high">
+    </picture>
+    <div class="ev-hero__shade" aria-hidden="true"></div>
+    <div class="container ev-hero__inner">
+      <div class="ev-hero__copy">
+        <span class="ev-kicker">EV CHARGING SOLUTIONS</span>
+        <h1 id="hero-title">POWER<br>TO A <em>GREENER</em><br>TOMORROW</h1>
+        <p>Reliable. Compatible. Built for the future.</p>
+        <a class="ev-button ev-button--solid" href="{% url 'catalog:list' %}">Explore products <i data-lucide="arrow-right" aria-hidden="true"></i></a>
+      </div>
+    </div>
+    <div class="container ev-feature-row" aria-label="Product benefits">
+      <article><span><i data-lucide="shield-check" aria-hidden="true"></i></span><div><b>Safe &amp; reliable</b><small>Certified quality</small></div></article>
+      <article><span><i data-lucide="plug-zap" aria-hidden="true"></i></span><div><b>Wide compatibility</b><small>Global standards</small></div></article>
+      <article><span><i data-lucide="leaf" aria-hidden="true"></i></span><div><b>Eco friendly</b><small>A cleaner tomorrow</small></div></article>
+      <article><span><i data-lucide="settings" aria-hidden="true"></i></span><div><b>Built to last</b><small>High durability</small></div></article>
+    </div>
+  </section>
+
+  <section class="ev-products" id="products" aria-labelledby="products-title">
+    <div class="container">
+      <header class="ev-section-title"><span>OUR PRODUCTS</span><h2 id="products-title">EV CHARGING CABLES</h2><p>High-performance charging cables for a connected world.</p></header>
+      <div class="ev-product-grid">
+        <article class="ev-product-card reveal"><a class="ev-product-card__image" href="{% url 'catalog:list' %}"><img src="{% static 'images/home/gbt-to-type2.jpeg' %}" alt="GB/T to Type 2 AC charging cable" width="1536" height="1024" loading="lazy"></a><div class="ev-product-card__body"><span>CHINA TO EUROPE</span><h3>GB/T to Type 2 AC Cable</h3><p>For Chinese EVs to European chargers</p><a class="ev-button ev-button--outline" href="{% url 'catalog:list' %}">View details <i data-lucide="arrow-right" aria-hidden="true"></i></a></div></article>
+        <article class="ev-product-card reveal"><a class="ev-product-card__image" href="{% url 'catalog:list' %}"><img src="{% static 'images/home/type2-to-type2.jpeg' %}" alt="Type 2 to Type 2 AC charging cable" width="1536" height="1024" loading="lazy"></a><div class="ev-product-card__body"><span>EUROPEAN STANDARD</span><h3>Type 2 to Type 2 AC Cable</h3><p>For standard European EV charging</p><a class="ev-button ev-button--outline" href="{% url 'catalog:list' %}">View details <i data-lucide="arrow-right" aria-hidden="true"></i></a></div></article>
+        <article class="ev-product-card reveal"><a class="ev-product-card__image" href="{% url 'catalog:list' %}"><img src="{% static 'images/home/type1-to-type2.jpeg' %}" alt="Type 1 to Type 2 AC charging cable" width="1536" height="1024" loading="lazy"></a><div class="ev-product-card__body"><span>NORTH AMERICA TO EUROPE</span><h3>Type 1 to Type 2 AC Cable</h3><p>For North American to European charging</p><a class="ev-button ev-button--outline" href="{% url 'catalog:list' %}">View details <i data-lucide="arrow-right" aria-hidden="true"></i></a></div></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="ev-proof" aria-label="ROCKS product standards"><div class="container ev-proof__grid">
+    <article><i data-lucide="badge-check" aria-hidden="true"></i><div><b>Premium materials</b><small>Long lifespan</small></div></article>
+    <article><i data-lucide="shield" aria-hidden="true"></i><div><b>Certified standards</b><small>IEC 62196 / GB/T 20234</small></div></article>
+    <article><i data-lucide="globe-2" aria-hidden="true"></i><div><b>Global compatibility</b><small>For all major EV brands</small></div></article>
+    <article><i data-lucide="gauge" aria-hidden="true"></i><div><b>Fast &amp; efficient</b><small>Up to 32A / 7.4 kW</small></div></article>
+    <div class="ev-proof__statement"><b>CHARGE TODAY<br>FOR A CLEANER<br>TOMORROW</b><span></span></div>
+  </div></section>
+
+  <section class="ev-about" aria-labelledby="about-title"><div class="container ev-about__grid">
+    <div class="ev-about__copy reveal"><span class="ev-kicker">ABOUT ROCKS</span><h2 id="about-title">MORE THAN<br>CABLES. A CLEANER<br>FUTURE.</h2><p>ROCKS provides high-quality EV charging solutions designed for safety, performance and global compatibility. We are committed to a smarter and greener world.</p><a class="ev-button ev-button--solid" href="{% url 'core:about' %}">Learn more <i data-lucide="arrow-right" aria-hidden="true"></i></a></div>
+    <figure class="ev-about__visual reveal"><img src="{% static 'images/home/exhibition-booth.jpeg' %}" alt="ROCKS exhibition booth for EV charging products" width="1536" height="1024" loading="lazy"></figure>
+    <aside class="ev-about__aside reveal"><span>VISIT OUR</span><h3>EXHIBITION BOOTH</h3><ul><li><i data-lucide="layout-template" aria-hidden="true"></i> Modern design</li><li><i data-lucide="scan-eye" aria-hidden="true"></i> Live product display</li><li><i data-lucide="badge-help" aria-hidden="true"></i> Technical support</li><li><i data-lucide="handshake" aria-hidden="true"></i> Business opportunities</li></ul><a class="ev-button ev-button--solid" href="{% url 'core:contact' %}">Contact us <i data-lucide="arrow-right" aria-hidden="true"></i></a></aside>
+  </div></section>
+</div>
 {% endblock %}

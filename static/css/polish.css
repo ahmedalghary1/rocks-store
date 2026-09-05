@@ -60,11 +60,11 @@ html.motion-enabled .topbar,html.motion-enabled .site-header,html.motion-enabled
 .footer .brand-logo-viewport{box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),0 10px 28px rgba(0,0,0,.22)}
 
 /* Official supplied horizontal logo — displayed unchanged everywhere. */
-.brand-logo-official{display:block;width:172px;height:auto;object-fit:contain;flex:0 0 auto}.footer .brand-logo-official{width:230px}.device-logo-official{position:absolute;top:42px;left:50%;transform:translateX(-50%);width:124px;height:auto;object-fit:contain}.story-art{min-height:360px;background:url("../images/rocks-logo-official.png") center/contain no-repeat}.story-art>img{width:100%;height:360px;object-fit:contain;opacity:0}.story-art .orbit{display:none}.product-art b{font-size:0;width:78px;height:32px;background:url("../images/rocks-logo-official.png") center/contain no-repeat}
+.brand{padding:7px 11px;border-radius:11px;background:#020705}.brand-logo-official{display:block;width:172px;height:auto;object-fit:contain;flex:0 0 auto}.footer .brand-logo-official{width:230px}.device-logo-official{position:absolute;top:42px;left:50%;transform:translateX(-50%);width:124px;height:auto;object-fit:contain;background:#020705;padding:7px;border-radius:8px}.story-art{min-height:360px;background:#020705 url("../images/rocks-logo-white.png") center/contain no-repeat}.story-art>img{width:100%;height:360px;object-fit:contain;opacity:0;background:#020705}.story-art .orbit{display:none}.product-art b{font-size:0;width:78px;height:32px;background:#020705 url("../images/rocks-logo-white.png") center/contain no-repeat;border-radius:6px}
 @media(max-width:900px){.brand-logo-official{width:148px}.footer .brand-logo-official{width:210px}.device-logo-official{top:32px;width:102px}.story-art,.story-art>img{height:280px;min-height:280px}}
 @media(max-width:430px){.brand-logo-official{width:118px}.footer .brand-logo-official{width:190px}.device-logo-official{top:28px;width:88px}.story-art,.story-art>img{height:220px;min-height:220px}}
 @media(max-width:360px){.brand-logo-official{width:105px}.footer .brand-logo-official{width:176px}}
-.story-art{background:none}.story-art>img{opacity:1}
+.story-art{background:#020705}.story-art>img{opacity:1}
 .brand-logo-official{border-radius:14px}.footer .brand-logo-official{border-radius:18px}.device-logo-official{border-radius:9px}.story-art>img{border-radius:28px}.product-art b{border-radius:8px;overflow:hidden}
 @media(max-width:430px){.brand-logo-official{border-radius:10px}.footer .brand-logo-official{border-radius:14px}.story-art>img{border-radius:20px}}
 
