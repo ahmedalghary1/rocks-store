@@ -29,3 +29,18 @@
 
 /* Show every product image in full without cropping its edges. */
 .ev-product-card__image img{object-fit:contain;object-position:center;padding:8px}
+
+/* Responsive product offers: balanced tablet grid and a clear mobile stack. */
+@media(min-width:701px) and (max-width:900px){
+  .ev-product-card:last-child{max-width:min(100%,560px)}
+}
+@media(max-width:700px){
+  .ev-product-grid{display:grid;grid-template-columns:minmax(0,1fr);overflow:visible;scroll-snap-type:none;gap:16px;margin-inline:0;padding:0}
+  .ev-product-card,.ev-product-card:last-child{width:100%;max-width:none;grid-column:auto;scroll-snap-align:none}
+  .ev-product-card__image{aspect-ratio:3/2}
+  .ev-hero__copy{padding:0 0 184px}
+  .ev-hero__copy>.ev-button{margin-top:5px;margin-bottom:22px}
+}
+@media(max-width:430px){
+  .ev-hero__copy{padding-bottom:176px}
+}
