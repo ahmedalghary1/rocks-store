@@ -55,8 +55,7 @@
 [dir=rtl] .ev-about__copy{padding:34px 0 34px 45px}
 @media(max-width:900px){[dir=rtl] .ev-proof__grid article{border-left:0}}
 @media(max-width:700px){
-  [dir=ltr] .ev-hero__media img{object-position:right top}
-  [dir=rtl] .ev-hero__media img{object-position:left top}
+  .ev-hero__media img{height:auto;aspect-ratio:3/2;object-fit:contain;object-position:center top}
   [dir=rtl] .ev-hero__shade{background:linear-gradient(180deg,rgba(3,12,10,.03) 0%,rgba(3,12,10,.12) 38%,rgba(3,12,10,.92) 66%,#06100e 100%)}
   [dir=rtl] .ev-about__copy{padding:0 0 32px}
 }

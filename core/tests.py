@@ -20,17 +20,13 @@ class PublicPagesTests(TestCase):
         self.assertContains(response, '<html lang="ar" dir="rtl">', html=False)
         self.assertContains(response, "حلول شحن السيارات الكهربائية")
         self.assertContains(response, "English")
-        self.assertContains(response, "hero-ev-ar-desktop.webp")
-        self.assertContains(response, "hero-ev-ar-mobile.webp")
-        self.assertNotContains(response, "hero-ev-en-desktop.webp")
+        self.assertContains(response, "hero-ev-original.webp")
 
         self.client.post(reverse("set_language"), {"language": "en", "next": reverse("core:home")})
         response = self.client.get(reverse("core:home"))
         self.assertContains(response, '<html lang="en" dir="ltr">', html=False)
         self.assertContains(response, "EV CHARGING SOLUTIONS")
-        self.assertContains(response, "hero-ev-en-desktop.webp")
-        self.assertContains(response, "hero-ev-en-mobile.webp")
-        self.assertNotContains(response, "hero-ev-ar-desktop.webp")
+        self.assertContains(response, "hero-ev-original.webp")
 
     def test_health_and_legal_pages(self):
         self.assertEqual(self.client.get(reverse("core:health")).status_code, 200)

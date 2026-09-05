@@ -3,13 +3,7 @@
 {% block meta_description %}High-performance EV charging cables and dependable charging solutions from ROCKS.{% endblock %}
 {% block body_class %}home-page ev-home{% endblock %}
 {% block extra_head %}
-  {% if current_language == 'ar' %}
-    <link rel="preload" as="image" type="image/webp" href="{% static 'images/home/hero-ev-ar-desktop.webp' %}" media="(min-width: 701px)">
-    <link rel="preload" as="image" type="image/webp" href="{% static 'images/home/hero-ev-ar-mobile.webp' %}" media="(max-width: 700px)">
-  {% else %}
-    <link rel="preload" as="image" type="image/webp" href="{% static 'images/home/hero-ev-en-desktop.webp' %}" media="(min-width: 701px)">
-    <link rel="preload" as="image" type="image/webp" href="{% static 'images/home/hero-ev-en-mobile.webp' %}" media="(max-width: 700px)">
-  {% endif %}
+  <link rel="preload" as="image" type="image/webp" href="{% static 'images/home/hero-ev-original.webp' %}">
   <link rel="stylesheet" href="{% static 'css/home-redesign.css' %}">
 {% endblock %}
 
@@ -17,13 +11,7 @@
 <div class="rocks-home" dir="{% if current_language == 'ar' %}rtl{% else %}ltr{% endif %}">
   <section class="ev-hero" aria-labelledby="hero-title">
     <picture class="ev-hero__media" aria-hidden="true">
-      {% if current_language == 'ar' %}
-        <source media="(max-width: 700px)" srcset="{% static 'images/home/hero-ev-ar-mobile.webp' %}">
-        <img src="{% static 'images/home/hero-ev-ar-desktop.webp' %}" alt="" width="1672" height="941" fetchpriority="high" decoding="async">
-      {% else %}
-        <source media="(max-width: 700px)" srcset="{% static 'images/home/hero-ev-en-mobile.webp' %}">
-        <img src="{% static 'images/home/hero-ev-en-desktop.webp' %}" alt="" width="1672" height="941" fetchpriority="high" decoding="async">
-      {% endif %}
+      <img src="{% static 'images/home/hero-ev-original.webp' %}" alt="" width="1536" height="1024" fetchpriority="high" decoding="async">
     </picture>
     <div class="ev-hero__shade" aria-hidden="true"></div>
     <div class="container ev-hero__inner">
