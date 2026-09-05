@@ -43,5 +43,7 @@ def suggestions(request):
     query = request.GET.get("q", "").strip()[:80]
     if len(query) < 2:
         return JsonResponse({"results": []})
-    products = Product.objects.filter(is_active=True, category__is_active=True, name__icontains=query).select_related("category")[:6]
-    return JsonResponse({"results": [{"name": p.name, "price": str(p.price), "category": p.category.name, "url": p.get_absolute_url()} for p in products]})
+    products = Product.objects.filter(is_active=True, category__is_active=True).filter(
+        Q(name__icontains=query) | Q(name_ar__icontains=query) | Q(sku__icontains=query)
+    ).select_related("category")[:6]
+    return JsonResponse({"results": [{"name": p.display_name, "price": str(p.price), "category": p.category.display_name, "url": p.get_absolute_url()} for p in products]})

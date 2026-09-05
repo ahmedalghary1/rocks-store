@@ -192,7 +192,7 @@ class ArabicGroupAdmin(ArabicAdminMixin, GroupAdmin):
 
 
 class ArabicCategoryAdmin(ArabicAdminMixin, CategoryAdmin):
-    pass
+    search_fields = ("name", "name_ar", "description", "description_ar")
 
 
 class ArabicProductImageInline(ArabicAdminMixin, ProductImageInline):
@@ -212,6 +212,7 @@ class ArabicProductAdmin(ArabicAdminMixin, ProductAdmin):
     save_on_top = True
     inlines = (ArabicProductImageInline, ArabicProductSpecificationInline, ArabicProductVariantInline)
     actions = ("activate_selected", "deactivate_selected", "feature_selected")
+    search_fields = ("name", "name_ar", "sku", "description", "description_ar")
 
     ProductAdmin.thumbnail.short_description = "الصورة"
 
@@ -319,26 +320,26 @@ class ArabicAddressAdmin(BasicArabicAdmin):
 
 class ArabicProductAttributeAdmin(BasicArabicAdmin):
     list_display = ("name", "slug")
-    search_fields = ("name", "slug")
+    search_fields = ("name", "name_ar", "slug")
     prepopulated_fields = {"slug": ("name",)}
 
 
 class ArabicProductImageAdmin(BasicArabicAdmin):
     list_display = ("product", "alt_text", "sort_order")
-    search_fields = ("product__name", "alt_text")
+    search_fields = ("product__name", "product__name_ar", "alt_text", "alt_text_ar")
     autocomplete_fields = ("product",)
 
 
 class ArabicProductSpecificationAdmin(BasicArabicAdmin):
     list_display = ("product", "name", "value", "sort_order")
-    search_fields = ("product__name", "name", "value")
+    search_fields = ("product__name", "product__name_ar", "name", "name_ar", "value", "value_ar")
     autocomplete_fields = ("product",)
 
 
 class ArabicProductVariantAdmin(BasicArabicAdmin):
     list_display = ("product", "label", "sku", "price", "stock_quantity", "is_active")
     list_filter = ("is_active",)
-    search_fields = ("product__name", "label", "sku")
+    search_fields = ("product__name", "product__name_ar", "label", "label_ar", "sku")
     autocomplete_fields = ("product",)
 
 
@@ -352,7 +353,7 @@ class ArabicCouponAdmin(BasicArabicAdmin):
 class ArabicShippingZoneAdmin(BasicArabicAdmin):
     list_display = ("name", "shipping_cost", "free_shipping_threshold", "is_active", "sort_order")
     list_filter = ("is_active",)
-    search_fields = ("name",)
+    search_fields = ("name", "name_ar")
     ordering = ("sort_order", "name")
 
 

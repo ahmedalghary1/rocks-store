@@ -4,6 +4,8 @@ from django.conf import settings
 from django.core.cache import cache
 from django.http import HttpResponse
 from django.utils import translation
+from django.utils.cache import patch_vary_headers
+from .translations import translate_markup
 
 
 class SecurityHeadersMiddleware:
@@ -72,3 +74,28 @@ class ArabicAdminLocaleMiddleware:
             with translation.override("ar"):
                 return self.get_response(request)
         return self.get_response(request)
+
+
+class StorefrontTranslationMiddleware:
+    """Translate public HTML and JSON while preserving stable storefront URLs."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        response = self.get_response(request)
+        if request.path.startswith("/admin/"):
+            return response
+        content_type = response.get("Content-Type", "")
+        if not (content_type.startswith("text/html") or content_type.startswith("application/json")):
+            return response
+        patch_vary_headers(response, ("Cookie",))
+        if translation.get_language() != "ar":
+            return response
+        if getattr(response, "streaming", False) or response.has_header("Content-Encoding"):
+            return response
+        charset = response.charset or "utf-8"
+        response.content = translate_markup(response.content.decode(charset)).encode(charset)
+        if response.has_header("Content-Length"):
+            response["Content-Length"] = str(len(response.content))
+        return response

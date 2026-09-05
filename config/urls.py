@@ -6,6 +6,7 @@ from config.admin_site import rocks_admin_site
 
 urlpatterns = [
     path("admin/", rocks_admin_site.urls),
+    path("i18n/", include("django.conf.urls.i18n")),
     path("", include("core.urls")),
     path("products/", include("catalog.urls")),
     path("cart/", include("cart.urls")),

@@ -28,6 +28,21 @@ class CatalogTests(TestCase):
         response = self.client.get(reverse("catalog:suggestions"), {"q": "Lamp"})
         self.assertEqual(response.json()["results"][0]["name"], "Test Lamp")
 
+    def test_arabic_product_content_and_search(self):
+        self.category.name_ar = "الإضاءة"
+        self.category.save(update_fields=("name_ar",))
+        self.product.name_ar = "مصباح تجريبي"
+        self.product.short_description_ar = "مصباح موثوق"
+        self.product.save(update_fields=("name_ar", "short_description_ar"))
+        self.client.post(reverse("set_language"), {"language": "ar", "next": self.product.get_absolute_url()})
+
+        response = self.client.get(self.product.get_absolute_url())
+        self.assertContains(response, "مصباح تجريبي")
+        self.assertContains(response, "الإضاءة")
+
+        response = self.client.get(reverse("catalog:suggestions"), {"q": "مصباح"})
+        self.assertEqual(response.json()["results"][0]["name"], "مصباح تجريبي")
+
     def test_available_filter_includes_product_with_stocked_variant(self):
         product = Product.objects.create(
             name="Switch with Variants", slug="variant-switch", sku="SW-BASE", category=self.category,

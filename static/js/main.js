@@ -1,5 +1,7 @@
 const $ = (selector, scope = document) => scope.querySelector(selector);
 const $$ = (selector, scope = document) => [...scope.querySelectorAll(selector)];
+const isArabic = document.documentElement.lang === 'ar';
+const t = (english, arabic) => isArabic ? arabic : english;
 const csrf = () => document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1] || '';
 const escapeHtml = value => String(value).replace(/[&<>'"]/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' })[char]);
 const renderIcons = (root = document) => window.lucide?.createIcons({ root, attrs: { 'stroke-width': 1.8, 'aria-hidden': 'true' } });
@@ -7,10 +9,10 @@ const iconMarkup = (name) => `<i data-lucide="${name}" aria-hidden="true"></i>`;
 const upgradeLegacyIcons = () => {
   $$('.product-art span').forEach(el => { const name = el.textContent.trim(); if (!el.querySelector('[data-lucide]') && /^[a-z-]+$/.test(name)) el.innerHTML = iconMarkup(name); });
   $$('.zoom-btn').forEach(el => { el.innerHTML = iconMarkup('zoom-in'); });
-  $$('.filter-toggle').forEach(el => { el.innerHTML = `${iconMarkup('sliders-horizontal')}<span>Filters</span>`; });
+  $$('.filter-toggle').forEach(el => { el.innerHTML = `${iconMarkup('sliders-horizontal')}<span>${t('Filters', 'الفلاتر')}</span>`; });
   $$('.filter-close,.modal-close').forEach(el => { el.innerHTML = iconMarkup('x'); });
   $$('.remove-item').forEach(el => { el.innerHTML = iconMarkup('trash-2'); });
-  $$('.secondary-actions [data-wishlist]').forEach(el => { el.innerHTML = `${iconMarkup('heart')}<span>Add to wishlist</span>`; });
+  $$('.secondary-actions [data-wishlist]').forEach(el => { el.innerHTML = `${iconMarkup('heart')}<span>${t('Add to wishlist', 'أضف إلى المفضلة')}</span>`; });
   const trustIcons = ['shield-check', 'refresh-cw', 'badge-check'];
   $$('.purchase-trust span').forEach((el, index) => { el.textContent = el.textContent.replace(/^[◇↺▣]\s*/, ''); el.insertAdjacentHTML('afterbegin', iconMarkup(trustIcons[index] || 'check')); });
   $$('.empty-state>span').forEach(el => { el.innerHTML = iconMarkup(el.closest('.wishlist-page') ? 'heart' : 'package'); });
@@ -42,13 +44,13 @@ let searchTimer;
 $('#liveSearch')?.addEventListener('input', event => {
   clearTimeout(searchTimer); const input = event.currentTarget; const target = $('#searchResults');
   searchTimer = setTimeout(async () => {
-    if (input.value.trim().length < 2) { target.innerHTML = '<p>Enter at least two characters to search.</p>'; return; }
-    target.innerHTML = '<p>Searching the ROCKS collection…</p>';
+    if (input.value.trim().length < 2) { target.innerHTML = `<p>${t('Enter at least two characters to search.', 'أدخل حرفين على الأقل للبحث.')}</p>`; return; }
+    target.innerHTML = `<p>${t('Searching the ROCKS collection…', 'جارٍ البحث في منتجات ROCKS…')}</p>`;
     try {
       const response = await fetch(`${input.dataset.url}?q=${encodeURIComponent(input.value)}`);
       const data = await response.json();
-      target.innerHTML = data.results.length ? data.results.map(item => `<a class="search-result" href="${escapeHtml(item.url)}"><span><b>${escapeHtml(item.name)}</b><small>${escapeHtml(item.category)}</small></span><strong>${Number(item.price).toLocaleString('en-EG')} EGP</strong></a>`).join('') : '<div class="empty-search"><b>No matching products</b><p>Try a shorter product name or search by SKU.</p></div>';
-    } catch { target.innerHTML = '<p>Search is unavailable right now. Please try again.</p>'; }
+      target.innerHTML = data.results.length ? data.results.map(item => `<a class="search-result" href="${escapeHtml(item.url)}"><span><b>${escapeHtml(item.name)}</b><small>${escapeHtml(item.category)}</small></span><strong>${Number(item.price).toLocaleString(isArabic ? 'ar-EG' : 'en-EG')} ${t('EGP', 'ج.م')}</strong></a>`).join('') : `<div class="empty-search"><b>${t('No matching products', 'لا توجد منتجات مطابقة')}</b><p>${t('Try a shorter product name or search by SKU.', 'جرّب اسمًا أقصر أو ابحث برمز المنتج.')}</p></div>`;
+    } catch { target.innerHTML = `<p>${t('Search is unavailable right now. Please try again.', 'البحث غير متاح حاليًا. يرجى المحاولة مرة أخرى.')}</p>`; }
   }, 280);
 });
 
@@ -69,7 +71,7 @@ $$('.ajax-cart').forEach(form => form.addEventListener('submit', async event => 
   } catch (error) { toast(error.message || 'Could not add this product. Please try again.'); } finally { button.disabled = false; }
 }));
 
-const formatMoney = value => `${Number(value).toFixed(2)} EGP`;
+const formatMoney = value => `${Number(value).toLocaleString(isArabic ? 'ar-EG' : 'en-EG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${t('EGP', 'ج.م')}`;
 let cartUpdatePending = Promise.resolve();
 const updateCartForm = form => {
   const runUpdate = async () => {
@@ -97,7 +99,7 @@ const updateCartForm = form => {
       const total = $('[data-cart-total]');
       const couponSaving = $('[data-coupon-saving]');
       if (subtotal) subtotal.textContent = formatMoney(data.subtotal);
-      if (shipping) shipping.textContent = Number(data.shipping) ? formatMoney(data.shipping) : 'Free';
+      if (shipping) shipping.textContent = Number(data.shipping) ? formatMoney(data.shipping) : t('Free', 'مجانًا');
       if (discount) discount.textContent = `-${formatMoney(data.discount)}`;
       if (discountRow) discountRow.hidden = !Number(data.discount);
       if (couponSaving) couponSaving.textContent = formatMoney(data.discount);
@@ -138,13 +140,13 @@ $$('[data-wishlist]').forEach(button => button.addEventListener('click', async (
   try {
     const response = await fetch(button.dataset.url, { method: 'POST', headers: { 'X-CSRFToken': csrf(), 'X-Requested-With': 'XMLHttpRequest' } });
     const data = await response.json(); button.classList.toggle('active', data.active); button.setAttribute('aria-pressed', String(data.active));
-    toast(data.active ? 'Product added to wishlist.' : 'Product removed from wishlist.');
-  } catch { toast('Could not update your wishlist.'); }
+    toast(data.active ? t('Product added to wishlist.', 'تمت إضافة المنتج إلى المفضلة.') : t('Product removed from wishlist.', 'تمت إزالة المنتج من المفضلة.'));
+  } catch { toast(t('Could not update your wishlist.', 'تعذر تحديث المفضلة.')); }
 }));
 
 const modal = $('#quickModal');
 $$('[data-quick]').forEach(button => button.addEventListener('click', async () => {
-  const content = $('#quickContent'); content.innerHTML = '<p>Loading product details…</p>'; modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false');
+  const content = $('#quickContent'); content.innerHTML = `<p>${t('Loading product details…', 'جارٍ تحميل تفاصيل المنتج…')}</p>`; modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false');
   const response = await fetch(button.dataset.quick); content.innerHTML = await response.text(); renderIcons(content);
   const form = $('.ajax-cart', content); if (form) form.addEventListener('submit', async event => { event.preventDefault(); const response = await fetch(form.action, { method:'POST', body:new FormData(form), headers:{'X-Requested-With':'XMLHttpRequest','X-CSRFToken':csrf()} }); const data=await response.json(); $$('[data-cart-count]').forEach(el=>el.textContent=data.count); toast(data.message); });
 }));
@@ -176,7 +178,7 @@ $('.zoom-btn')?.addEventListener('click', event => {
   const target = $('[data-main-image]'); const zoomed = target?.classList.toggle('zoomed');
   event.currentTarget.setAttribute('aria-pressed', String(Boolean(zoomed)));
 });
-$$('[data-submit-once]').forEach(button => button.closest('form').addEventListener('submit', () => { button.disabled = true; button.textContent = 'Confirming order…'; }));
+$$('[data-submit-once]').forEach(button => button.closest('form').addEventListener('submit', () => { button.disabled = true; button.textContent = t('Confirming order…', 'جارٍ تأكيد الطلب…'); }));
 
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const motionDirections = ['right', 'left', 'bottom', 'top'];

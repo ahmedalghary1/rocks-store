@@ -42,6 +42,7 @@ MIDDLEWARE = [
     "config.middleware.SensitivePostRateLimitMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "config.middleware.ArabicAdminLocaleMiddleware",
+    "config.middleware.StorefrontTranslationMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -73,7 +74,14 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
-LANGUAGE_CODE = "en-us"
+LANGUAGE_CODE = "en"
+LANGUAGES = (
+    ("en", "English"),
+    ("ar", "العربية"),
+)
+LANGUAGE_COOKIE_AGE = 365 * 24 * 60 * 60
+LANGUAGE_COOKIE_SAMESITE = "Lax"
+LANGUAGE_COOKIE_SECURE = not DEBUG
 TIME_ZONE = "Africa/Cairo"
 USE_I18N = True
 USE_TZ = True

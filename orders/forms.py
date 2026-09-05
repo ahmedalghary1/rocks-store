@@ -11,7 +11,7 @@ class CheckoutForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        zones = list(ShippingZone.objects.filter(is_active=True).values_list("name", "name"))
+        zones = [(zone.name, zone.display_name) for zone in ShippingZone.objects.filter(is_active=True)]
         self.fields["governorate"].widget = forms.Select(choices=[("", "Select a governorate")] + zones)
 
     def clean_phone(self):

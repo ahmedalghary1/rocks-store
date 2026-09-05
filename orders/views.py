@@ -93,7 +93,8 @@ def checkout(request):
                         OrderItem.objects.bulk_create([
                             OrderItem(
                                 order=order, product=item["product"], variant=item["variant"],
-                                product_name=item["product"].name, sku=item["sku"], price=item["price"],
+                                product_name=item["product"].name, product_name_ar=item["product"].name_ar,
+                                sku=item["sku"], price=item["price"],
                                 quantity=item["quantity"], total=item["total"],
                             ) for item in items
                         ])

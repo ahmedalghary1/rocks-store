@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import F, Q
 from django.utils import timezone
+from django.utils import translation
 
 
 class Coupon(models.Model):
@@ -88,6 +89,7 @@ class OrderItem(models.Model):
     product = models.ForeignKey("catalog.Product", null=True, on_delete=models.PROTECT)
     variant = models.ForeignKey("catalog.ProductVariant", null=True, blank=True, on_delete=models.PROTECT)
     product_name = models.CharField(max_length=180)
+    product_name_ar = models.CharField(max_length=180, blank=True)
     sku = models.CharField(max_length=60)
     price = models.DecimalField(max_digits=12, decimal_places=2)
     quantity = models.PositiveIntegerField()
@@ -100,9 +102,16 @@ class OrderItem(models.Model):
             models.CheckConstraint(condition=Q(total__gte=0), name="order_item_total_nonnegative"),
         ]
 
+    @property
+    def display_product_name(self):
+        if translation.get_language() == "ar":
+            return self.product_name_ar or self.product_name
+        return self.product_name
+
 
 class ShippingZone(models.Model):
     name = models.CharField(max_length=80, unique=True)
+    name_ar = models.CharField("اسم المحافظة بالعربية", max_length=80, blank=True)
     shipping_cost = models.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(Decimal("0"))])
     free_shipping_threshold = models.DecimalField(
         max_digits=12, decimal_places=2, null=True, blank=True,
@@ -122,6 +131,12 @@ class ShippingZone(models.Model):
         ]
 
     def __str__(self):
+        return self.name
+
+    @property
+    def display_name(self):
+        if translation.get_language() == "ar":
+            return self.name_ar or self.name
         return self.name
 
     def cost_for(self, subtotal):

@@ -9,6 +9,19 @@ from .models import ContactMessage
 
 
 class PublicPagesTests(TestCase):
+    def test_language_switch_renders_complete_arabic_shell(self):
+        response = self.client.post(reverse("set_language"), {"language": "ar", "next": reverse("core:home")})
+        self.assertRedirects(response, reverse("core:home"))
+        response = self.client.get(reverse("core:home"))
+        self.assertContains(response, '<html lang="ar" dir="rtl">', html=False)
+        self.assertContains(response, "حلول شحن السيارات الكهربائية")
+        self.assertContains(response, "English")
+
+        self.client.post(reverse("set_language"), {"language": "en", "next": reverse("core:home")})
+        response = self.client.get(reverse("core:home"))
+        self.assertContains(response, '<html lang="en" dir="ltr">', html=False)
+        self.assertContains(response, "EV CHARGING SOLUTIONS")
+
     def test_health_and_legal_pages(self):
         self.assertEqual(self.client.get(reverse("core:health")).status_code, 200)
         for name in ("privacy", "terms", "shipping_policy", "returns_policy"):
