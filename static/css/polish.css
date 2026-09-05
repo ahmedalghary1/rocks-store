@@ -100,5 +100,7 @@ html.motion-enabled .topbar,html.motion-enabled .site-header,html.motion-enabled
     clip-path:inset(0 round 20px);
   }
 }
+.footer .brand--footer{display:inline-flex;width:max-content;max-width:100%;padding:12px 14px;background:#020705}
+.footer .brand--footer .brand-logo-official{display:block;width:min(230px,100%);height:auto;aspect-ratio:3/1;object-fit:contain;border-radius:0}
 .payment-cod{padding:18px;border:1px solid var(--border);border-radius:8px;background:var(--surface,#fff)}
 .payment-cod strong{display:block;margin-bottom:6px}.payment-cod p{margin:0;color:var(--muted,#667085)}

@@ -15,3 +15,10 @@
 @media(max-width:430px){.ev-home .site-header .brand-logo-official{width:118px}.ev-hero{min-height:700px}.ev-hero__copy{padding-bottom:180px}.ev-feature-row{left:12px;right:12px}.ev-section-title p{font-size:.77rem}.ev-about__aside ul{grid-template-columns:1fr 1fr}.ev-about__aside li{font-size:.66rem}.ev-button{min-height:47px}.ev-home .mobile-bottom{background:rgba(255,255,255,.96)}}
 @media(max-width:360px){.ev-hero{min-height:680px}.ev-hero__copy{padding-bottom:174px}.ev-hero h1{font-size:2.55rem}.ev-feature-row article>span{display:none}.ev-feature-row b{font-size:.58rem}.ev-proof__grid{grid-template-columns:1fr}.ev-proof__grid article{border-bottom:1px solid rgba(255,255,255,.12)}}
 @media(prefers-reduced-motion:reduce){.ev-product-card,.ev-product-card img,.ev-button,.ev-button svg{transition:none!important}}
+
+/* Final spacing and footer-brand alignment. */
+.ev-hero__inner{width:var(--container);padding-inline:clamp(28px,5vw,78px)}
+.ev-site-footer__brand{display:flex;flex-direction:column;align-items:flex-start;align-self:start;min-width:0;width:max-content;max-width:100%;padding:14px 16px;background:#020705;border:1px solid rgba(255,255,255,.1);border-radius:14px}
+.ev-site-footer__brand img{display:block;width:min(260px,100%);height:auto;aspect-ratio:3/1;object-fit:contain}
+.ev-site-footer__brand p{margin-top:10px}
+@media(max-width:700px){.ev-hero__inner{padding-inline:clamp(24px,7vw,38px)}.ev-site-footer__brand{align-items:center;width:100%;text-align:center}}

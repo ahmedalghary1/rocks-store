@@ -1,13 +1,29 @@
 {% load static %}
 {% if request.resolver_match.url_name == 'home' %}
-<footer class="ev-site-footer" dir="ltr">
-  <div class="container ev-site-footer__grid">
-    <div class="ev-site-footer__brand"><img src="{% static 'images/rocks-logo-white.png' %}" alt="ROCKS EV Charging Solutions" width="2172" height="724"><p>Powering a cleaner tomorrow.</p></div>
-    <div><h3>Quick links</h3><a href="{% url 'core:home' %}">Home</a><a href="{% url 'catalog:list' %}">Products</a><a href="{% url 'core:about' %}">About us</a><a href="{% url 'core:contact' %}">Support</a></div>
-    <div><h3>Contact us</h3>{% if site_settings.email %}<a href="mailto:{{ site_settings.email }}"><i data-lucide="mail" aria-hidden="true"></i>{{ site_settings.email }}</a>{% endif %}{% if site_settings.phone %}<a href="tel:{{ site_settings.phone }}"><i data-lucide="phone" aria-hidden="true"></i>{{ site_settings.phone }}</a>{% endif %}{% if site_settings.address %}<p><i data-lucide="map-pin" aria-hidden="true"></i>{{ site_settings.address }}</p>{% endif %}</div>
-    <div class="ev-site-footer__subscribe"><h3>Subscribe to our newsletter</h3><form method="post" action="{% url 'core:newsletter_subscribe' %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.path }}"><label class="sr-only" for="ev-newsletter-email">Email address</label><input id="ev-newsletter-email" name="email" type="email" autocomplete="email" placeholder="Your email address" required><button type="submit" aria-label="Subscribe"><i data-lucide="send" aria-hidden="true"></i></button></form><small>Get the latest news and product updates.</small></div>
+<footer class="rocks-footer" dir="ltr">
+  <div class="container rocks-footer__grid">
+    <section class="rocks-footer__brand" aria-label="ROCKS EV Charging Solutions">
+      <a href="{% url 'core:home' %}"><img src="{% static 'images/rocks-logo-white.png' %}" alt="ROCKS EV Charging Solutions" width="2172" height="724"></a>
+      <p>Powering a Cleaner Tomorrow</p>
+    </section>
+    <nav class="rocks-footer__links" aria-label="Footer navigation">
+      <h2>Quick Links</h2>
+      <a href="{% url 'core:home' %}">Home</a><a href="{% url 'catalog:list' %}">Products</a><a href="{% url 'core:about' %}">About Us</a><a href="#products">Applications</a><a href="{% url 'core:contact' %}">Support</a><a href="{% url 'core:contact' %}">Contact</a>
+    </nav>
+    <section class="rocks-footer__contact">
+      <h2>Contact Us</h2>
+      <a href="mailto:{{ site_settings.email|default:'info@rocks-ev.com' }}"><i data-lucide="mail" aria-hidden="true"></i><span>{{ site_settings.email|default:"info@rocks-ev.com" }}</span></a>
+      <a href="tel:{{ site_settings.phone|default:'+201234567890' }}"><i data-lucide="phone" aria-hidden="true"></i><span>{{ site_settings.phone|default:"+20 123 456 7890" }}</span></a>
+      <p><i data-lucide="map-pin" aria-hidden="true"></i><span>{{ site_settings.address|default:"Cairo, Egypt" }}</span></p>
+      <div class="rocks-footer__socials" aria-label="Social media"><a href="{% url 'core:contact' %}" aria-label="Facebook"><i data-lucide="facebook" aria-hidden="true"></i></a><a href="{% url 'core:contact' %}" aria-label="LinkedIn"><i data-lucide="linkedin" aria-hidden="true"></i></a><a href="{% url 'core:contact' %}" aria-label="YouTube"><i data-lucide="youtube" aria-hidden="true"></i></a><a href="{% url 'core:contact' %}" aria-label="Instagram"><i data-lucide="instagram" aria-hidden="true"></i></a></div>
+    </section>
+    <section class="rocks-footer__newsletter">
+      <h2>Subscribe to Our Newsletter</h2>
+      <form method="post" action="{% url 'core:newsletter_subscribe' %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.path }}"><label class="sr-only" for="rocks-newsletter-email">Your email address</label><input id="rocks-newsletter-email" name="email" type="email" autocomplete="email" placeholder="Your Email Address" required><button type="submit" aria-label="Subscribe"><i data-lucide="send" aria-hidden="true"></i></button></form>
+      <p>Get the latest news and product updates.</p>
+    </section>
   </div>
-  <div class="container ev-site-footer__bottom"><span>© {% now "Y" %} ROCKS EV Charging Solutions. All rights reserved.</span><span>A greener tomorrow <i data-lucide="zap" aria-hidden="true"></i> with ROCKS</span></div>
+  <div class="container rocks-footer__bottom"><span>© {% now "Y" %} ROCKS EV Charging Solutions. All rights reserved.</span><span>A Greener Tomorrow <i data-lucide="zap" aria-hidden="true"></i> With ROCKS</span></div>
 </footer>
 {% if site_settings.whatsapp %}<a class="whatsapp" href="https://wa.me/{{ site_settings.whatsapp }}" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><i data-lucide="message-circle" aria-hidden="true"></i><span>WhatsApp</span></a>{% endif %}
 {% else %}
