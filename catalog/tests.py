@@ -71,6 +71,9 @@ class ProductImageProcessingTests(TestCase):
                     self.assertEqual(image.format, "WEBP")
                     self.assertEqual(image.size, (3200, 1800))
 
+            response = self.client.get(product.get_absolute_url())
+            self.assertContains(response, 'width="3200" height="1800"')
+
             product.main_image = self.uploaded_image("replacement.png", "PNG", (900, 900), "RGBA")
             product.save(update_fields=("main_image",))
             self.assertFalse(product.main_image.storage.exists(first_name))

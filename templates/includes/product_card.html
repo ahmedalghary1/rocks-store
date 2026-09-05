@@ -1,6 +1,6 @@
 <article class="product-card reveal">
   <div class="product-visual product-visual--{{ product.category.slug }}">
-    {% if product.main_image %}<img src="{{ product.main_image.url }}" width="420" height="360" loading="lazy" alt="{{ product.name }}">{% else %}<div class="product-art" aria-hidden="true"><span><i data-lucide="{{ product.category.icon|default:'zap' }}"></i></span><b>ROCKS</b></div>{% endif %}
+    {% if product.main_image %}<img src="{{ product.main_image.url }}" width="{{ product.main_image.width }}" height="{{ product.main_image.height }}" loading="lazy" alt="{{ product.name }}">{% else %}<div class="product-art" aria-hidden="true"><span><i data-lucide="{{ product.category.icon|default:'zap' }}"></i></span><b>ROCKS</b></div>{% endif %}
     {% if product.discount_percentage %}<span class="discount">-{{ product.discount_percentage }}%</span>{% elif product.is_new %}<span class="discount discount--new">NEW</span>{% endif %}
     <button class="wish-button" data-wishlist="{{ product.id }}" data-url="{% url 'core:wishlist_toggle' product.id %}" aria-label="Add {{ product.name }} to wishlist"><i data-lucide="heart" aria-hidden="true"></i></button>
     <button class="quick-button" data-quick="{% url 'catalog:quick_view' product.slug %}"><i data-lucide="eye" aria-hidden="true"></i>Quick view</button>
