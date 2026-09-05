@@ -3,6 +3,7 @@ import hashlib
 from django.conf import settings
 from django.core.cache import cache
 from django.http import HttpResponse
+from django.utils import translation
 
 
 class SecurityHeadersMiddleware:
@@ -48,7 +49,8 @@ class SensitivePostRateLimitMiddleware:
             key = f"sensitive-post:{digest}"
             attempts = cache.get(key, 0)
             if attempts >= self.limit:
-                response = HttpResponse("Too many attempts. Please wait one minute and try again.", status=429)
+                message = "محاولات كثيرة. يرجى الانتظار دقيقة ثم المحاولة مرة أخرى." if request.path.startswith("/admin/") else "Too many attempts. Please wait one minute and try again."
+                response = HttpResponse(message, status=429)
                 response["Retry-After"] = str(self.window)
                 return response
             if not cache.add(key, 1, self.window):
@@ -56,4 +58,17 @@ class SensitivePostRateLimitMiddleware:
                     cache.incr(key)
                 except ValueError:
                     cache.set(key, 1, self.window)
+        return self.get_response(request)
+
+
+class ArabicAdminLocaleMiddleware:
+    """Keep the management dashboard Arabic without changing the public storefront language."""
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if request.path.startswith("/admin/"):
+            with translation.override("ar"):
+                return self.get_response(request)
         return self.get_response(request)

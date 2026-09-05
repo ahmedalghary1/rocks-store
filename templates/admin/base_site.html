@@ -1,0 +1,6 @@
+{% extends "admin/base.html" %}{% load static i18n %}
+{% block title %}{{ title }} | إدارة ROCKS{% endblock %}
+{% block extrastyle %}{{ block.super }}<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="{% static 'css/admin-rocks.css' %}">{% endblock %}
+{% block branding %}<a class="rocks-admin-brand" href="{% url 'rocks_admin:index' %}"><img src="{% static 'images/rocks-logo-white.png' %}" alt="ROCKS"><span><b>لوحة التحكم</b><small>إدارة المتجر بالكامل</small></span></a>{% endblock %}
+{% block nav-global %}<a class="view-store" href="{% url 'core:home' %}" target="_blank" rel="noopener">عرض الموقع ↗</a>{% endblock %}
+{% block welcome-msg %}مرحبًا، <strong>{% firstof user.get_short_name user.get_username %}</strong>{% endblock %}

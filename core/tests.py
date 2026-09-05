@@ -1,5 +1,6 @@
 from django.core.management import call_command
 from django.core.management.base import CommandError
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
@@ -28,3 +29,45 @@ class PublicPagesTests(TestCase):
     def test_production_readiness_rejects_incomplete_business_data(self):
         with self.assertRaises(CommandError):
             call_command("check_production_readiness")
+
+
+class ArabicManagementDashboardTests(TestCase):
+    def setUp(self):
+        self.admin_user = get_user_model().objects.create_superuser(
+            username="dashboard-admin",
+            email="admin@example.com",
+            password="Strong-test-password-982!",
+        )
+
+    def test_dashboard_is_staff_only_and_renders_arabic_overview(self):
+        response = self.client.get(reverse("rocks_admin:index"))
+        self.assertEqual(response.status_code, 302)
+
+        self.client.force_login(self.admin_user)
+        response = self.client.get(reverse("rocks_admin:index"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "نظرة عامة على المتجر")
+        self.assertContains(response, "المنتجات والمخزون")
+        self.assertContains(response, "admin-rocks.css")
+
+    def test_catalog_management_is_arabic_while_storefront_stays_english(self):
+        self.client.force_login(self.admin_user)
+        dashboard_response = self.client.get(reverse("rocks_admin:catalog_product_changelist"))
+        self.assertEqual(dashboard_response.status_code, 200)
+        self.assertContains(dashboard_response, "المنتجات")
+
+        add_response = self.client.get(reverse("rocks_admin:catalog_product_add"))
+        self.assertEqual(add_response.status_code, 200)
+        self.assertContains(add_response, "السعر")
+        self.assertContains(add_response, 'lang="ar"', html=False)
+
+        storefront_response = self.client.get(reverse("core:home"))
+        self.assertContains(storefront_response, '<html lang="en" dir="ltr">', html=False)
+
+    def test_limited_staff_cannot_see_restricted_dashboard_data(self):
+        limited_staff = get_user_model().objects.create_user(username="limited", password="Strong-password-981!", is_staff=True)
+        self.client.force_login(limited_staff)
+        response = self.client.get(reverse("rocks_admin:index"))
+        self.assertEqual(response.status_code, 200)
+        self.assertNotContains(response, "أحدث الطلبات")
+        self.assertNotContains(response, "منتجات أوشكت على النفاد")

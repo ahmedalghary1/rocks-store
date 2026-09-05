@@ -1,0 +1,25 @@
+{% extends "admin/base_site.html" %}{% load i18n %}
+{% block bodyclass %}{{ block.super }} rocks-dashboard{% endblock %}
+{% block breadcrumbs %}{% endblock %}
+{% block content %}
+<div class="dashboard-head"><div><span>مركز إدارة ROCKS</span><h1>نظرة عامة على المتجر</h1><p>تابع الأداء ونفّذ المهام اليومية من مكان واحد.</p></div><div class="dashboard-actions">{% if dashboard_access.add_product %}<a href="{% url 'rocks_admin:catalog_product_add' %}">+ إضافة منتج</a>{% endif %}{% if dashboard_access.orders %}<a href="{% url 'rocks_admin:orders_order_changelist' %}">عرض الطلبات</a>{% endif %}</div></div>
+<section class="stat-grid" aria-label="مؤشرات المتجر">
+  <article><i>◫</i><div><small>طلبات اليوم</small><strong>{{ dashboard_stats.orders_today }}</strong><span>طلب جديد اليوم</span></div></article>
+  <article><i>◷</i><div><small>تحتاج متابعة</small><strong>{{ dashboard_stats.pending_orders }}</strong><span>طلبات قيد التنفيذ</span></div></article>
+  <article><i>£</i><div><small>مبيعات الشهر</small><strong>{{ dashboard_stats.monthly_revenue|floatformat:2 }}</strong><span>جنيه مصري</span></div></article>
+  <article><i>▦</i><div><small>المنتجات النشطة</small><strong>{{ dashboard_stats.active_products }}</strong><span>منتج متاح للعرض</span></div></article>
+  <article class="{% if dashboard_stats.low_stock %}stat-warning{% endif %}"><i>!</i><div><small>مخزون منخفض</small><strong>{{ dashboard_stats.low_stock }}</strong><span>يحتاج إعادة تزويد</span></div></article>
+  <article><i>✉</i><div><small>رسائل غير مقروءة</small><strong>{{ dashboard_stats.unread_messages }}</strong><span>{{ dashboard_stats.customers }} عميل مسجل</span></div></article>
+</section>
+{% if dashboard_access.orders or dashboard_access.products %}<div class="dashboard-layout">
+  {% if dashboard_access.orders %}
+  <section class="dashboard-panel recent-orders"><header><div><span>متابعة فورية</span><h2>أحدث الطلبات</h2></div><a href="{% url 'rocks_admin:orders_order_changelist' %}">كل الطلبات</a></header>
+    <div class="admin-table-wrap"><table><thead><tr><th>رقم الطلب</th><th>العميل</th><th>الإجمالي</th><th>الحالة</th><th>التاريخ</th></tr></thead><tbody>{% for order in recent_orders %}<tr><td><a href="{% url 'rocks_admin:orders_order_change' order.pk %}">{{ order.order_number }}</a></td><td>{{ order.customer_name }}<small>{{ order.phone }}</small></td><td><b>{{ order.total|floatformat:2 }} ج.م</b></td><td><span class="status status--{{ order.status }}">{{ order.dashboard_status }}</span></td><td>{{ order.created_at|date:"d/m/Y" }}<small>{{ order.created_at|time:"H:i" }}</small></td></tr>{% empty %}<tr><td colspan="5" class="empty-row">لا توجد طلبات حتى الآن.</td></tr>{% endfor %}</tbody></table></div>
+  </section>
+  {% endif %}
+  {% if dashboard_access.products %}
+  <aside class="dashboard-panel stock-panel"><header><div><span>تنبيه المخزون</span><h2>منتجات أوشكت على النفاد</h2></div></header>{% for product in low_stock_products %}<a href="{% url 'rocks_admin:catalog_product_change' product.pk %}"><span>{{ product.name }}<small>{{ product.sku }}</small></span><b>{{ product.stock_quantity }}</b></a>{% empty %}<div class="all-good">✓ المخزون بحالة جيدة</div>{% endfor %}</aside>
+  {% endif %}
+</div>{% endif %}
+<section class="management-panel"><header><span>التحكم الكامل</span><h2>أقسام الإدارة</h2></header><div class="management-grid">{% for app in app_list %}<article><h3>{{ app.name }}</h3><div>{% for model in app.models %}<a href="{{ model.admin_url }}"><span>{{ model.name }}</span><b>←</b></a>{% endfor %}</div></article>{% endfor %}</div></section>
+{% endblock %}
