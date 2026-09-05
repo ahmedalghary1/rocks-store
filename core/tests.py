@@ -49,6 +49,8 @@ class ArabicManagementDashboardTests(TestCase):
         self.assertContains(response, "نظرة عامة على المتجر")
         self.assertContains(response, "المنتجات والمخزون")
         self.assertContains(response, "admin-rocks.css")
+        self.assertContains(response, "admin-rocks.js")
+        self.assertContains(response, 'id="toggle-nav-sidebar"')
 
     def test_catalog_management_is_arabic_while_storefront_stays_english(self):
         self.client.force_login(self.admin_user)
