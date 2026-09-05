@@ -1,7 +1,9 @@
+import os
 from pathlib import Path
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
+from PIL import features
 
 from catalog.models import Product
 from core.models import SiteSettings
@@ -25,6 +27,20 @@ class Command(BaseCommand):
             issues.append("There are no active products.")
         if active_products.filter(main_image="").exists():
             issues.append("Every active product must have a main image.")
+        missing_product_images = [
+            product.sku
+            for product in active_products.exclude(main_image="").only("sku", "main_image")
+            if not product.main_image.storage.exists(product.main_image.name)
+        ]
+        if missing_product_images:
+            issues.append(f"Product image files are missing for: {', '.join(missing_product_images[:10])}.")
+        media_root = Path(settings.MEDIA_ROOT)
+        if not media_root.is_dir():
+            issues.append(f"MEDIA_ROOT does not exist: {media_root}.")
+        elif not os.access(media_root, os.W_OK):
+            issues.append(f"MEDIA_ROOT is not writable: {media_root}.")
+        if not features.check("webp"):
+            issues.append("The installed Pillow package does not support WebP.")
         if not ShippingZone.objects.filter(is_active=True).exists():
             issues.append("Configure at least one active shipping zone.")
         if not settings.ORDER_NOTIFICATION_EMAIL:

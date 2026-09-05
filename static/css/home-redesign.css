@@ -26,3 +26,6 @@
   .ev-hero__copy{display:flex;flex-direction:column;align-items:flex-start}
   .ev-hero__copy>.ev-button{position:relative;z-index:5;display:inline-flex;flex:0 0 auto;clear:both;margin-top:4px}
 }
+
+/* Show every product image in full without cropping its edges. */
+.ev-product-card__image img{object-fit:contain;object-position:center;padding:8px}

@@ -1,5 +1,34 @@
 # ROCKS ELECTRIC
 
+## PythonAnywhere uploaded images
+
+Uploaded product, category and banner images are stored in `MEDIA_ROOT`. New uploads keep their original pixel dimensions, are stripped of metadata, compressed as WebP, and saved without retaining the original file. Replaced and deleted database images are also removed from storage.
+
+For the `rocksev` PythonAnywhere account, set this in `.env`:
+
+```dotenv
+MEDIA_ROOT=/home/rocksev/rocks-store/media
+IMAGE_WEBP_QUALITY=82
+```
+
+Then create the directory and convert any existing JPG/PNG uploads:
+
+```bash
+cd /home/rocksev/rocks-store
+source /home/rocksev/venv/bin/activate
+mkdir -p /home/rocksev/rocks-store/media
+pip install -r requirements.txt
+python manage.py optimize_media_images
+```
+
+In the PythonAnywhere **Web** tab, add this exact Static files mapping and reload the web app:
+
+| URL | Directory |
+| --- | --- |
+| `/media/` | `/home/rocksev/rocks-store/media` |
+
+Do not point `/media/` at `staticfiles`; user uploads and collected static assets are separate directories.
+
 متجر عربي RTL مبني بـDjango ويستخدم SQLite مع حماية ذرّية للمخزون والكوبونات ومنع تكرار الطلب.
 
 ## التشغيل المحلي

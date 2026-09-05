@@ -4,9 +4,11 @@ from django.db import models
 from django.db.models import F, Q
 from django.urls import reverse
 from .validators import validate_image_size
+from core.image_processing import OptimizedImageFieldsMixin
 
 
-class Category(models.Model):
+class Category(OptimizedImageFieldsMixin, models.Model):
+    optimized_image_fields = ("image",)
     name = models.CharField(max_length=120)
     slug = models.SlugField(unique=True, db_index=True)
     description = models.TextField(blank=True)
@@ -30,7 +32,8 @@ class Category(models.Model):
         return f"{reverse('catalog:list')}?category={self.slug}"
 
 
-class Product(models.Model):
+class Product(OptimizedImageFieldsMixin, models.Model):
+    optimized_image_fields = ("main_image",)
     name = models.CharField(max_length=180)
     slug = models.SlugField(unique=True, db_index=True)
     sku = models.CharField(max_length=60, unique=True, db_index=True)
@@ -80,7 +83,8 @@ class Product(models.Model):
         return self.stock_quantity > 0
 
 
-class ProductImage(models.Model):
+class ProductImage(OptimizedImageFieldsMixin, models.Model):
+    optimized_image_fields = ("image",)
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name="images")
     image = models.ImageField(upload_to="products/gallery/", validators=[validate_image_size])
     alt_text = models.CharField(max_length=180)

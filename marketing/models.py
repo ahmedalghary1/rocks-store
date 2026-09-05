@@ -2,6 +2,7 @@ from django.db import models
 from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
 from catalog.validators import validate_image_size
+from core.image_processing import OptimizedImageFieldsMixin
 
 
 def validate_banner_link(value):
@@ -13,7 +14,8 @@ def validate_banner_link(value):
         raise ValidationError("Use an internal link or a valid HTTP/HTTPS URL.")
 
 
-class Banner(models.Model):
+class Banner(OptimizedImageFieldsMixin, models.Model):
+    optimized_image_fields = ("image", "mobile_image")
     LOCATIONS = [("hero", "Home hero"), ("offer", "Offer"), ("promo", "Promotional")]
     title = models.CharField(max_length=160)
     subtitle = models.CharField(max_length=255, blank=True)
