@@ -22,3 +22,7 @@
 .ev-site-footer__brand img{display:block;width:min(260px,100%);height:auto;aspect-ratio:3/1;object-fit:contain}
 .ev-site-footer__brand p{margin-top:10px}
 @media(max-width:700px){.ev-hero__inner{padding-inline:clamp(24px,7vw,38px)}.ev-site-footer__brand{align-items:center;width:100%;text-align:center}}
+@media(max-width:700px){
+  .ev-hero__copy{display:flex;flex-direction:column;align-items:flex-start}
+  .ev-hero__copy>.ev-button{position:relative;z-index:5;display:inline-flex;flex:0 0 auto;clear:both;margin-top:4px}
+}
