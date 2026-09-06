@@ -20,7 +20,7 @@
         <span class="ev-kicker">EV CHARGING SOLUTIONS</span>
         {% if marketing_banner.title %}<h1 id="hero-title">{{ marketing_banner.display_title|linebreaksbr }}</h1>{% else %}<h1 id="hero-title">POWER<br>TO A <em>GREENER</em><br>TOMORROW</h1>{% endif %}
         <p>{% if marketing_banner.subtitle %}{{ marketing_banner.display_subtitle }}{% else %}Reliable. Compatible. Built for the future.{% endif %}</p>
-        <a class="ev-button ev-button--solid" href="{{ marketing_banner.link|default:'/products/' }}">{% if marketing_banner.button_text %}{{ marketing_banner.display_button_text }}{% else %}Explore products{% endif %} <i data-lucide="arrow-right" aria-hidden="true"></i></a>
+        <a class="ev-button ev-button--solid" href="{{ marketing_banner.link|default:'/products/' }}" aria-label="{% if current_language == 'ar' %}استكشف حلول شحن السيارات الكهربائية من ROCKS{% else %}Explore ROCKS EV charging solutions{% endif %}">{% if marketing_banner.display_button_text %}{{ marketing_banner.display_button_text }}{% else %}Explore products{% endif %} <i data-lucide="arrow-right" aria-hidden="true"></i></a>
       </div>
     </div>
     <div class="container ev-feature-row" aria-label="Product benefits">
@@ -49,7 +49,7 @@
   </div></section>
 
   <section class="ev-about" aria-labelledby="about-title"><div class="container ev-about__grid">
-    <div class="ev-about__copy reveal"><span class="ev-kicker">ABOUT ROCKS</span><h2 id="about-title">MORE THAN<br>CABLES. A CLEANER<br>FUTURE.</h2><p>ROCKS provides high-quality EV charging solutions designed for safety, performance and global compatibility. We are committed to a smarter and greener world.</p><a class="ev-button ev-button--solid" href="{% url 'core:about' %}">Learn more <i data-lucide="arrow-right" aria-hidden="true"></i></a></div>
+    <div class="ev-about__copy reveal"><span class="ev-kicker">ABOUT ROCKS</span><h2 id="about-title">MORE THAN<br>CABLES. A CLEANER<br>FUTURE.</h2><p>ROCKS provides high-quality EV charging solutions designed for safety, performance and global compatibility. We are committed to a smarter and greener world.</p><a class="ev-button ev-button--solid" href="{% url 'core:about' %}" aria-label="{% if current_language == 'ar' %}تعرّف على شركة ROCKS{% else %}Learn more about ROCKS{% endif %}">Learn more <i data-lucide="arrow-right" aria-hidden="true"></i></a></div>
     <figure class="ev-about__visual reveal"><img src="{% static 'images/home/exhibition-booth.webp' %}" alt="ROCKS exhibition booth for EV charging products" width="1859" height="846" loading="lazy"></figure>
     <aside class="ev-about__aside reveal"><span>VISIT OUR</span><h3>EXHIBITION BOOTH</h3><ul><li><i data-lucide="layout-template" aria-hidden="true"></i> Modern design</li><li><i data-lucide="scan-eye" aria-hidden="true"></i> Live product display</li><li><i data-lucide="badge-help" aria-hidden="true"></i> Technical support</li><li><i data-lucide="handshake" aria-hidden="true"></i> Business opportunities</li></ul><a class="ev-button ev-button--solid" href="{% url 'core:contact' %}">Contact us <i data-lucide="arrow-right" aria-hidden="true"></i></a></aside>
   </div></section>

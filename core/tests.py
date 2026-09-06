@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
-from marketing.models import Subscriber
+from marketing.models import Banner, Subscriber
 from .models import ContactMessage
 
 
@@ -49,6 +49,18 @@ class PublicPagesTests(TestCase):
         response = self.client.post(reverse("core:newsletter_subscribe"), {"email": "USER@example.com"})
         self.assertRedirects(response, reverse("core:home"))
         self.assertTrue(Subscriber.objects.filter(email="user@example.com", is_active=True).exists())
+
+    def test_hero_link_keeps_a_descriptive_name_when_button_text_is_blank(self):
+        Banner.objects.create(
+            title="ROCKS",
+            link=reverse("core:about"),
+            button_text="   ",
+            location="hero",
+            is_active=True,
+        )
+        response = self.client.get(reverse("core:home"))
+        self.assertContains(response, 'href="/about/" aria-label="Explore ROCKS EV charging solutions"')
+        self.assertContains(response, "Explore products")
 
     def test_production_readiness_rejects_incomplete_business_data(self):
         with self.assertRaises(CommandError):

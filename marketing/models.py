@@ -54,7 +54,7 @@ class Banner(OptimizedImageFieldsMixin, models.Model):
 
     @property
     def display_button_text(self):
-        return self._localized("button_text")
+        return self._localized("button_text").strip()
 
 
 class Subscriber(models.Model):
