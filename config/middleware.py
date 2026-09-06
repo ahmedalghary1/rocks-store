@@ -3,9 +3,22 @@ import hashlib
 from django.conf import settings
 from django.core.cache import cache
 from django.http import HttpResponse
+from django.middleware.locale import LocaleMiddleware
 from django.utils import translation
 from django.utils.cache import patch_vary_headers
 from .translations import translate_markup
+
+
+class DefaultEnglishLocaleMiddleware(LocaleMiddleware):
+    """Use English on a visitor's first request; honor an explicit language cookie."""
+
+    def process_request(self, request):
+        language = request.COOKIES.get(settings.LANGUAGE_COOKIE_NAME, settings.LANGUAGE_CODE)
+        supported = {code for code, _name in settings.LANGUAGES}
+        if language not in supported:
+            language = settings.LANGUAGE_CODE
+        translation.activate(language)
+        request.LANGUAGE_CODE = translation.get_language()
 
 
 class SecurityHeadersMiddleware:

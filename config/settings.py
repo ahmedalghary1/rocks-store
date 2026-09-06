@@ -40,7 +40,7 @@ MIDDLEWARE = [
     "config.middleware.SecurityHeadersMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "config.middleware.SensitivePostRateLimitMiddleware",
-    "django.middleware.locale.LocaleMiddleware",
+    "config.middleware.DefaultEnglishLocaleMiddleware",
     "config.middleware.ArabicAdminLocaleMiddleware",
     "config.middleware.StorefrontTranslationMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -79,6 +79,7 @@ LANGUAGES = (
     ("en", "English"),
     ("ar", "العربية"),
 )
+LANGUAGE_COOKIE_NAME = "rocks_language"
 LANGUAGE_COOKIE_AGE = 365 * 24 * 60 * 60
 LANGUAGE_COOKIE_SAMESITE = "Lax"
 LANGUAGE_COOKIE_SECURE = not DEBUG

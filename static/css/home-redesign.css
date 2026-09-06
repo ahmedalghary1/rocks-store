@@ -53,9 +53,15 @@
 [dir=rtl] .ev-proof__grid article:first-child{padding-left:24px;padding-right:0}
 [dir=rtl] .ev-proof__statement{padding-left:0;padding-right:34px}
 [dir=rtl] .ev-about__copy{padding:34px 0 34px 45px}
+[dir=rtl] .ev-home .rocks-home{font-family:"IBM Plex Sans Arabic","Cairo",sans-serif}
+[dir=rtl] .ev-home .rocks-home h1,[dir=rtl] .ev-home .rocks-home h2,[dir=rtl] .ev-home .rocks-home h3,[dir=rtl] .ev-home .rocks-home b{font-family:"Cairo","IBM Plex Sans Arabic",sans-serif}
+[dir=rtl] .ev-hero h1{font-size:clamp(2.75rem,5vw,5rem);line-height:1.24;letter-spacing:0;text-wrap:balance}
+[dir=rtl] .ev-kicker,[dir=rtl] .ev-section-title span,[dir=rtl] .ev-product-card__body>span,[dir=rtl] .ev-about__aside>span{letter-spacing:0;line-height:1.65}
+[dir=rtl] .ev-hero__copy>p{letter-spacing:0;line-height:1.85}
 @media(max-width:900px){[dir=rtl] .ev-proof__grid article{border-left:0}}
 @media(max-width:700px){
   .ev-hero__media img{height:auto;aspect-ratio:3/2;object-fit:contain;object-position:center top}
   [dir=rtl] .ev-hero__shade{background:linear-gradient(180deg,rgba(3,12,10,.03) 0%,rgba(3,12,10,.12) 38%,rgba(3,12,10,.92) 66%,#06100e 100%)}
   [dir=rtl] .ev-about__copy{padding:0 0 32px}
+  [dir=rtl] .ev-hero h1{font-size:clamp(2.35rem,10vw,3.7rem);line-height:1.28}
 }

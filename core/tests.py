@@ -28,6 +28,11 @@ class PublicPagesTests(TestCase):
         self.assertContains(response, "EV CHARGING SOLUTIONS")
         self.assertContains(response, "hero-ev-original.webp")
 
+    def test_first_visit_defaults_to_english_and_mobile_drawer_is_closed(self):
+        response = self.client.get(reverse("core:home"), HTTP_ACCEPT_LANGUAGE="ar-EG,ar;q=0.9")
+        self.assertContains(response, '<html lang="en" dir="ltr">', html=False)
+        self.assertContains(response, '<div class="mobile-drawer" aria-hidden="true">', html=False)
+
     def test_health_and_legal_pages(self):
         self.assertEqual(self.client.get(reverse("core:health")).status_code, 200)
         for name in ("privacy", "terms", "shipping_policy", "returns_policy"):

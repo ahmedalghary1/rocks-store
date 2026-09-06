@@ -28,6 +28,7 @@ const toggleDrawer = open => {
   drawer?.classList.toggle('open', open); drawer?.setAttribute('aria-hidden', String(!open));
   $('.menu-toggle')?.setAttribute('aria-expanded', String(open)); document.body.style.overflow = open ? 'hidden' : '';
 };
+toggleDrawer(false);
 $('.menu-toggle')?.addEventListener('click', () => toggleDrawer(true));
 $('.drawer-close')?.addEventListener('click', () => toggleDrawer(false));
 
