@@ -41,6 +41,10 @@
   .ev-hero__copy{padding:0 0 184px}
   .ev-hero__copy>.ev-button{margin-top:5px;margin-bottom:22px}
 }
+
+/* Responsive section label: readable on phones and properly weighted on wide screens. */
+.ev-section-title>span{display:inline-block;font-size:clamp(.82rem,.72rem + .35vw,1.05rem);line-height:1.5}
+[dir=rtl] .ev-section-title>span{font-family:"Cairo","IBM Plex Sans Arabic",sans-serif;font-size:clamp(.95rem,.84rem + .42vw,1.2rem);font-weight:800;letter-spacing:0}
 @media(max-width:430px){
   .ev-hero__copy{padding-bottom:176px}
 }
