@@ -5,7 +5,7 @@ AR_TRANSLATIONS = {
     "Powering a cleaner tomorrow with reliable EV charging solutions.": "نقود غدًا أنظف بحلول موثوقة لشحن السيارات الكهربائية.",
     "Fast delivery across Egypt": "توصيل سريع إلى جميع أنحاء مصر",
     "Cairo, Egypt": "القاهرة، مصر",
-    "Powering a cleaner tomorrow.": "نقود الطريق نحو غدٍ أنظف.",
+    "Powering a cleaner tomorrow.": "نقود الطريق نحو المستقبل.",
     "Reliable. Compatible. Built for the future.": "موثوق. متوافق. مصمم للمستقبل.",
     "High-performance charging cables for a connected world.": "كابلات شحن عالية الأداء لعالم أكثر اتصالًا.",
     "For Chinese EVs to European chargers": "للسيارات الصينية مع الشواحن الأوروبية",
