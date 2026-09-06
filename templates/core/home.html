@@ -3,7 +3,8 @@
 {% block meta_description %}High-performance EV charging cables and dependable charging solutions from ROCKS.{% endblock %}
 {% block body_class %}home-page ev-home{% endblock %}
 {% block extra_head %}
-  <link rel="preload" as="image" type="image/webp" href="{% static 'images/home/hero-ev-original.webp' %}">
+  <link rel="preload" as="image" type="image/webp" media="(min-width: 701px)" href="{% static 'images/home/hero-ev-original.webp' %}">
+  <link rel="preload" as="image" type="image/webp" media="(max-width: 700px)" href="{% static 'images/home/hero-ev-original-mobile.webp' %}">
   <link rel="stylesheet" href="{% static 'css/home-redesign.css' %}">
 {% endblock %}
 
@@ -11,6 +12,7 @@
 <div class="rocks-home" dir="{% if current_language == 'ar' %}rtl{% else %}ltr{% endif %}">
   <section class="ev-hero" aria-labelledby="hero-title">
     <picture class="ev-hero__media" aria-hidden="true">
+      <source media="(max-width: 700px)" srcset="{% static 'images/home/hero-ev-original-mobile.webp' %}" type="image/webp">
       <img src="{% static 'images/home/hero-ev-original.webp' %}" alt="" width="1536" height="1024" fetchpriority="high" decoding="async">
     </picture>
     <div class="ev-hero__shade" aria-hidden="true"></div>
@@ -34,9 +36,9 @@
     <div class="container">
       <header class="ev-section-title"><span>OUR PRODUCTS</span><h2 id="products-title">EV CHARGING CABLES</h2><p>High-performance charging cables for a connected world.</p></header>
       <div class="ev-product-grid">
-        <article class="ev-product-card reveal"><a class="ev-product-card__image" href="{% url 'catalog:list' %}"><img src="{% static 'images/home/gbt-to-type2.jpeg' %}" alt="GB/T to Type 2 AC charging cable" width="1536" height="1024" loading="lazy"></a><div class="ev-product-card__body"><span>CHINA TO EUROPE</span><h3>GB/T to Type 2 AC Cable</h3><p>For Chinese EVs to European chargers</p><a class="ev-button ev-button--outline" href="{% url 'catalog:list' %}">View details <i data-lucide="arrow-right" aria-hidden="true"></i></a></div></article>
-        <article class="ev-product-card reveal"><a class="ev-product-card__image" href="{% url 'catalog:list' %}"><img src="{% static 'images/home/type2-to-type2.jpeg' %}" alt="Type 2 to Type 2 AC charging cable" width="1536" height="1024" loading="lazy"></a><div class="ev-product-card__body"><span>EUROPEAN STANDARD</span><h3>Type 2 to Type 2 AC Cable</h3><p>For standard European EV charging</p><a class="ev-button ev-button--outline" href="{% url 'catalog:list' %}">View details <i data-lucide="arrow-right" aria-hidden="true"></i></a></div></article>
-        <article class="ev-product-card reveal"><a class="ev-product-card__image" href="{% url 'catalog:list' %}"><img src="{% static 'images/home/type1-to-type2.jpeg' %}" alt="Type 1 to Type 2 AC charging cable" width="1536" height="1024" loading="lazy"></a><div class="ev-product-card__body"><span>NORTH AMERICA TO EUROPE</span><h3>Type 1 to Type 2 AC Cable</h3><p>For North American to European charging</p><a class="ev-button ev-button--outline" href="{% url 'catalog:list' %}">View details <i data-lucide="arrow-right" aria-hidden="true"></i></a></div></article>
+        <article class="ev-product-card reveal"><a class="ev-product-card__image" href="{% url 'catalog:list' %}"><img src="{% static 'images/home/gbt-to-type2.webp' %}" alt="GB/T to Type 2 AC charging cable" width="1536" height="1024" loading="lazy"></a><div class="ev-product-card__body"><span>CHINA TO EUROPE</span><h3>GB/T to Type 2 AC Cable</h3><p>For Chinese EVs to European chargers</p><a class="ev-button ev-button--outline" href="{% url 'catalog:list' %}">View details <i data-lucide="arrow-right" aria-hidden="true"></i></a></div></article>
+        <article class="ev-product-card reveal"><a class="ev-product-card__image" href="{% url 'catalog:list' %}"><img src="{% static 'images/home/type2-to-type2.webp' %}" alt="Type 2 to Type 2 AC charging cable" width="1536" height="1024" loading="lazy"></a><div class="ev-product-card__body"><span>EUROPEAN STANDARD</span><h3>Type 2 to Type 2 AC Cable</h3><p>For standard European EV charging</p><a class="ev-button ev-button--outline" href="{% url 'catalog:list' %}">View details <i data-lucide="arrow-right" aria-hidden="true"></i></a></div></article>
+        <article class="ev-product-card reveal"><a class="ev-product-card__image" href="{% url 'catalog:list' %}"><img src="{% static 'images/home/type1-to-type2.webp' %}" alt="Type 1 to Type 2 AC charging cable" width="1536" height="1024" loading="lazy"></a><div class="ev-product-card__body"><span>NORTH AMERICA TO EUROPE</span><h3>Type 1 to Type 2 AC Cable</h3><p>For North American to European charging</p><a class="ev-button ev-button--outline" href="{% url 'catalog:list' %}">View details <i data-lucide="arrow-right" aria-hidden="true"></i></a></div></article>
       </div>
     </div>
   </section>
@@ -51,7 +53,7 @@
 
   <section class="ev-about" aria-labelledby="about-title"><div class="container ev-about__grid">
     <div class="ev-about__copy reveal"><span class="ev-kicker">ABOUT ROCKS</span><h2 id="about-title">MORE THAN<br>CABLES. A CLEANER<br>FUTURE.</h2><p>ROCKS provides high-quality EV charging solutions designed for safety, performance and global compatibility. We are committed to a smarter and greener world.</p><a class="ev-button ev-button--solid" href="{% url 'core:about' %}">Learn more <i data-lucide="arrow-right" aria-hidden="true"></i></a></div>
-    <figure class="ev-about__visual reveal"><img src="{% static 'images/home/exhibition-booth.png' %}" alt="ROCKS exhibition booth for EV charging products" width="1536" height="1024" loading="lazy"></figure>
+    <figure class="ev-about__visual reveal"><img src="{% static 'images/home/exhibition-booth.webp' %}" alt="ROCKS exhibition booth for EV charging products" width="1859" height="846" loading="lazy"></figure>
     <aside class="ev-about__aside reveal"><span>VISIT OUR</span><h3>EXHIBITION BOOTH</h3><ul><li><i data-lucide="layout-template" aria-hidden="true"></i> Modern design</li><li><i data-lucide="scan-eye" aria-hidden="true"></i> Live product display</li><li><i data-lucide="badge-help" aria-hidden="true"></i> Technical support</li><li><i data-lucide="handshake" aria-hidden="true"></i> Business opportunities</li></ul><a class="ev-button ev-button--solid" href="{% url 'core:contact' %}">Contact us <i data-lucide="arrow-right" aria-hidden="true"></i></a></aside>
   </div></section>
 </div>

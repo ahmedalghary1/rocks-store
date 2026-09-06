@@ -17,6 +17,6 @@ def site_context(request):
         "site_settings": settings_obj,
         "cart_count": cart_count,
         "canonical_url": canonical_url,
-        "default_og_image": request.build_absolute_uri(static("images/rocks-logo-social-black.png")),
+        "default_og_image": request.build_absolute_uri(static("images/rocks-logo-social-black.webp")),
         "csp_nonce": getattr(request, "csp_nonce", ""),
     }
