@@ -146,12 +146,41 @@ $$('[data-wishlist]').forEach(button => button.addEventListener('click', async (
 }));
 
 const modal = $('#quickModal');
+const quickContent = $('#quickContent');
+const toggleQuickModal = open => {
+  if (!modal) return;
+  modal.classList.toggle('open', open);
+  modal.setAttribute('aria-hidden', String(!open));
+};
 $$('[data-quick]').forEach(button => button.addEventListener('click', async () => {
-  const content = $('#quickContent'); content.innerHTML = `<p>${t('Loading product details…', 'جارٍ تحميل تفاصيل المنتج…')}</p>`; modal.classList.add('open'); modal.setAttribute('aria-hidden', 'false');
-  const response = await fetch(button.dataset.quick); content.innerHTML = await response.text(); renderIcons(content);
-  const form = $('.ajax-cart', content); if (form) form.addEventListener('submit', async event => { event.preventDefault(); const response = await fetch(form.action, { method:'POST', body:new FormData(form), headers:{'X-Requested-With':'XMLHttpRequest','X-CSRFToken':csrf()} }); const data=await response.json(); $$('[data-cart-count]').forEach(el=>el.textContent=data.count); toast(data.message); });
+  if (!modal || !quickContent) return;
+  quickContent.innerHTML = `<p>${t('Loading product details…', 'جارٍ تحميل تفاصيل المنتج…')}</p>`;
+  toggleQuickModal(true);
+  try {
+    const response = await fetch(button.dataset.quick, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+    if (!response.ok) throw new Error(`Quick view request failed: ${response.status}`);
+    quickContent.innerHTML = await response.text();
+    renderIcons(quickContent);
+    const form = $('.ajax-cart', quickContent);
+    if (form) form.addEventListener('submit', async event => {
+      event.preventDefault();
+      try {
+        const response = await fetch(form.action, { method:'POST', body:new FormData(form), headers:{'X-Requested-With':'XMLHttpRequest','X-CSRFToken':csrf()} });
+        if (!response.ok) throw new Error(`Cart request failed: ${response.status}`);
+        const data = await response.json();
+        $$('[data-cart-count]').forEach(el => el.textContent = data.count);
+        toast(data.message);
+        toggleQuickModal(false);
+      } catch {
+        toast(t('Could not add this product to the cart.', 'تعذر إضافة هذا المنتج إلى السلة.'));
+      }
+    });
+  } catch {
+    quickContent.innerHTML = `<div class="empty-state"><h2>${t('Unable to load product', 'تعذر تحميل المنتج')}</h2><p>${t('Please try again in a moment.', 'يرجى المحاولة مرة أخرى بعد قليل.')}</p></div>`;
+  }
 }));
-$('.modal-close')?.addEventListener('click', () => { modal.classList.remove('open'); modal.setAttribute('aria-hidden', 'true'); });
+$('.modal-close')?.addEventListener('click', () => toggleQuickModal(false));
+modal?.addEventListener('click', event => { if (event.target === modal) toggleQuickModal(false); });
 
 $('.filter-toggle')?.addEventListener('click', () => $('.filters')?.classList.add('open'));
 $('.filter-close')?.addEventListener('click', () => $('.filters')?.classList.remove('open'));
@@ -209,4 +238,4 @@ const revealMotion = () => {
   uniqueMotionTargets.forEach(element => observer.observe(element));
 };
 window.setTimeout(() => requestAnimationFrame(revealMotion), reducedMotion ? 0 : 180);
-addEventListener('keydown', event => { if (event.key === 'Escape') { toggleSearch(false); toggleDrawer(false); modal?.classList.remove('open'); } });
+addEventListener('keydown', event => { if (event.key === 'Escape') { toggleSearch(false); toggleDrawer(false); toggleQuickModal(false); } });

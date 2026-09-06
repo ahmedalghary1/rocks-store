@@ -27,6 +27,7 @@
   <main id="main">{% block content %}{% endblock %}</main>
   {% include 'includes/footer.html' %}
   {% include 'includes/search_overlay.html' %}
+  {% include 'includes/quick_view_modal.html' %}
   <div class="toast-stack" id="toastStack" aria-live="polite">
     {% for message in messages %}<div class="toast toast--{{ message.tags }}">{{ message }}</div>{% endfor %}
   </div>

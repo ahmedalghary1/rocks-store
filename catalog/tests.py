@@ -24,6 +24,15 @@ class CatalogTests(TestCase):
         response = self.client.get(reverse("catalog:list"), {"category": "lights"})
         self.assertContains(response, "Test Lamp")
 
+    def test_product_list_includes_working_quick_view_dialog(self):
+        response = self.client.get(reverse("catalog:list"))
+        self.assertContains(response, 'id="quickModal"')
+        self.assertContains(response, f'data-quick="{reverse("catalog:quick_view", args=[self.product.slug])}"')
+
+        quick_view = self.client.get(reverse("catalog:quick_view", args=[self.product.slug]))
+        self.assertEqual(quick_view.status_code, 200)
+        self.assertContains(quick_view, "Test Lamp")
+
     def test_search_suggestions(self):
         response = self.client.get(reverse("catalog:suggestions"), {"q": "Lamp"})
         self.assertEqual(response.json()["results"][0]["name"], "Test Lamp")
