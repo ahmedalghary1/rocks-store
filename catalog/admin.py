@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Category, Product, ProductAttribute, ProductImage, ProductSpecification, ProductVariant
+from .models import Category, HomepageProduct, Product, ProductAttribute, ProductImage, ProductSpecification, ProductVariant
 
 
 class ProductImageInline(admin.TabularInline):
@@ -41,3 +41,4 @@ class ProductAdmin(admin.ModelAdmin):
 
 
 admin.site.register(ProductAttribute)
+admin.site.register(HomepageProduct)

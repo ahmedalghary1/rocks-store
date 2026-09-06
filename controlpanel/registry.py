@@ -3,7 +3,7 @@ from collections import OrderedDict
 from django.contrib.auth.models import Group, User
 
 from accounts.models import Address
-from catalog.models import Category, Product, ProductAttribute, ProductImage, ProductSpecification, ProductVariant
+from catalog.models import Category, HomepageProduct, Product, ProductAttribute, ProductImage, ProductSpecification, ProductVariant
 from core.models import ContactMessage, SiteSettings
 from marketing.models import Banner, Subscriber
 from orders.models import Coupon, Order, OrderItem, OrderNotification, ShippingZone
@@ -17,6 +17,7 @@ RESOURCES = OrderedDict({
     "notifications": {"model": OrderNotification, "label": "إشعارات الطلبات", "singular": "إشعار طلب", "icon": "bell-ring", "group": "sales", "list": ("order", "status", "attempts", "last_attempt_at", "sent_at"), "search": ("order__order_number", "last_error"), "filters": ("status",), "select": ("order",)},
 
     "products": {"model": Product, "label": "المنتجات", "singular": "منتج", "icon": "package-open", "group": "catalog", "list": ("main_image", "name", "sku", "category", "price", "stock_quantity", "is_active", "updated_at"), "search": ("name", "name_ar", "sku", "description", "description_ar"), "filters": ("category", "is_active", "is_featured", "is_best_seller", "is_new"), "select": ("category",)},
+    "homepage-products": {"model": HomepageProduct, "label": "منتجات الصفحة الرئيسية", "singular": "منتج في الرئيسية", "icon": "gallery-thumbnails", "group": "catalog", "list": ("product", "sort_order", "is_active"), "search": ("product__name", "product__name_ar", "product__sku"), "filters": ("is_active",), "select": ("product",)},
     "categories": {"model": Category, "label": "التصنيفات", "singular": "تصنيف", "icon": "layout-grid", "group": "catalog", "list": ("image", "name", "name_ar", "parent", "is_active", "sort_order"), "search": ("name", "name_ar", "description", "description_ar"), "filters": ("parent", "is_active"), "select": ("parent",)},
     "variants": {"model": ProductVariant, "label": "خيارات المنتجات", "singular": "خيار منتج", "icon": "boxes", "group": "catalog", "list": ("product", "label", "sku", "price", "stock_quantity", "is_active"), "search": ("product__name", "label", "label_ar", "sku"), "filters": ("product", "is_active"), "select": ("product",)},
     "product-images": {"model": ProductImage, "label": "صور المنتجات", "singular": "صورة منتج", "icon": "images", "group": "catalog", "list": ("image", "product", "alt_text", "sort_order"), "search": ("product__name", "alt_text", "alt_text_ar"), "filters": ("product",), "select": ("product",)},

@@ -2,7 +2,7 @@ from django.contrib.auth.models import Permission, User
 from django.test import TestCase
 from django.urls import reverse
 
-from catalog.models import Category
+from catalog.models import Category, HomepageProduct, Product
 from controlpanel.registry import RESOURCES
 from marketing.models import Banner
 
@@ -91,3 +91,23 @@ class ControlPanelTests(TestCase):
             with self.subTest(resource=resource):
                 self.assertEqual(self.client.get(reverse("controlpanel:list", args=(resource,))).status_code, 200)
                 self.assertEqual(self.client.get(reverse("controlpanel:create", args=(resource,))).status_code, 200)
+
+    def test_selected_homepage_products_control_storefront(self):
+        category = Category.objects.create(name="Home products", slug="home-products")
+        selected = Product.objects.create(
+            name="Selected homepage product", slug="selected-home-product", sku="HOME-1", category=category,
+            short_description="Selected from the dashboard", description="Details", price="100.00", stock_quantity=4,
+        )
+        Product.objects.create(
+            name="Unselected featured product", slug="unselected-featured", sku="HOME-2", category=category,
+            short_description="Should not be shown", description="Details", price="120.00", stock_quantity=4, is_featured=True,
+        )
+        self.client.force_login(self.admin)
+        response = self.client.post(reverse("controlpanel:create", args=("homepage-products",)), {
+            "product": selected.pk, "sort_order": 1, "is_active": "on",
+        })
+        self.assertRedirects(response, reverse("controlpanel:list", args=("homepage-products",)))
+        self.assertTrue(HomepageProduct.objects.filter(product=selected).exists())
+        response = self.client.get(reverse("core:home"))
+        self.assertContains(response, "Selected homepage product")
+        self.assertNotContains(response, "Unselected featured product")

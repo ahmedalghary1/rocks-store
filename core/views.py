@@ -14,7 +14,7 @@ from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
-from catalog.models import Category, Product
+from catalog.models import Category, HomepageProduct, Product
 from marketing.models import Banner, Subscriber
 from .forms import ContactForm, NewsletterForm
 
@@ -37,9 +37,13 @@ def home(request):
         Q(start_date__isnull=True) | Q(start_date__lte=now),
         Q(end_date__isnull=True) | Q(end_date__gte=now),
     ).first()
+    if HomepageProduct.objects.exists():
+        homepage_products = products.filter(homepage_placement__is_active=True).order_by("homepage_placement__sort_order", "homepage_placement__pk")[:8]
+    else:
+        homepage_products = products.filter(is_featured=True)[:8]
     return render(request, "core/home.html", {
         "categories": categories,
-        "featured_products": products.filter(is_featured=True)[:8],
+        "featured_products": homepage_products,
         "best_sellers": products.filter(is_best_seller=True)[:4],
         "new_products": products.filter(is_new=True)[:8],
         "marketing_banner": banner,

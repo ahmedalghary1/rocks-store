@@ -29,6 +29,7 @@
 
 /* Show every product image in full without cropping its edges. */
 .ev-product-card__image img{object-fit:contain;object-position:center;padding:8px}
+.ev-product-card__placeholder{display:grid;width:100%;height:100%;place-items:center;color:#31aa42;background:linear-gradient(145deg,#f5faf6,#e8f5e9)}.ev-product-card__placeholder svg{width:54px;height:54px}.ev-products__empty{grid-column:1/-1;padding:45px;border:1px dashed #bed1c2;border-radius:18px;background:#f8fbf8;text-align:center;color:var(--ev-muted)}.ev-products__empty svg{width:42px;height:42px;color:var(--ev-green-deep)}.ev-products__empty h3{margin:9px 0 4px;color:var(--ev-ink)}.ev-products__empty p{margin:0}
 
 /* Responsive product offers: balanced tablet grid and a clear mobile stack. */
 @media(min-width:701px) and (max-width:900px){
