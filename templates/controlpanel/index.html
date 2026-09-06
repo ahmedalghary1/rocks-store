@@ -1,0 +1,38 @@
+{% extends 'controlpanel/base.html' %}
+{% block content %}
+<section class="cp-welcome">
+  <div><span>مرحبًا {{ request.user.first_name|default:request.user.username }}</span><h2>كل ما تحتاجه لإدارة ROCKS في مكان واحد.</h2><p>تابع المبيعات والمخزون والرسائل، وانتقل مباشرة إلى أي جزء تريد تعديله.</p></div>
+  {% if dashboard_access.add_product %}<a class="cp-primary" href="{% url 'controlpanel:create' 'products' %}"><i data-lucide="plus"></i>إضافة منتج</a>{% elif dashboard_access.products %}<a class="cp-primary" href="{% url 'controlpanel:list' 'products' %}"><i data-lucide="package-open"></i>إدارة المنتجات</a>{% endif %}
+</section>
+
+<section class="cp-stats" aria-label="إحصائيات المتجر">
+  <article><span class="cp-stat-icon green"><i data-lucide="banknote"></i></span><div><small>إيراد الشهر</small><strong>{{ stats.monthly_revenue|floatformat:2 }}</strong><em>EGP</em></div></article>
+  <article><span class="cp-stat-icon amber"><i data-lucide="shopping-cart"></i></span><div><small>طلبات اليوم</small><strong>{{ stats.orders_today }}</strong><em>{{ stats.pending_orders }} قيد التنفيذ</em></div></article>
+  <article><span class="cp-stat-icon blue"><i data-lucide="package-check"></i></span><div><small>منتجات نشطة</small><strong>{{ stats.active_products }}</strong><em>{{ stats.low_stock }} مخزون منخفض</em></div></article>
+  <article><span class="cp-stat-icon violet"><i data-lucide="mail-open"></i></span><div><small>رسائل غير مقروءة</small><strong>{{ stats.unread_messages }}</strong><em>بحاجة للمتابعة</em></div></article>
+</section>
+
+<div class="cp-dashboard-grid">
+  {% if dashboard_access.orders %}<section class="cp-card cp-card--wide">
+    <header><div><span>آخر النشاطات</span><h2>الطلبات الحديثة</h2></div><a href="{% url 'controlpanel:list' 'orders' %}">عرض الكل <i data-lucide="arrow-left"></i></a></header>
+    <div class="cp-table-wrap"><table><thead><tr><th>رقم الطلب</th><th>العميل</th><th>الإجمالي</th><th>الحالة</th><th>التاريخ</th></tr></thead><tbody>
+      {% for order in recent_orders %}<tr><td><a href="{% url 'controlpanel:edit' 'orders' order.pk %}"><b>{{ order.order_number }}</b></a></td><td>{{ order.customer_name }}<small>{{ order.phone }}</small></td><td><b>{{ order.total|floatformat:2 }} EGP</b></td><td><span class="cp-status cp-status--{{ order.status }}">{{ order.panel_status }}</span></td><td>{{ order.created_at|date:"Y-m-d" }}</td></tr>{% empty %}<tr><td colspan="5" class="cp-empty">لا توجد طلبات حتى الآن.</td></tr>{% endfor %}
+    </tbody></table></div>
+  </section>{% endif %}
+
+  {% if dashboard_access.orders %}<section class="cp-card">
+    <header><div><span>توزيع العمل</span><h2>حالات الطلبات</h2></div></header>
+    <div class="cp-bars">{% for item in status_counts %}<div><p><span>{{ item.label }}</span><b>{{ item.count }}</b></p><i><u style="width:{{ item.width }}%"></u></i></div>{% empty %}<div class="cp-empty">لا توجد بيانات متاحة.</div>{% endfor %}</div>
+  </section>{% endif %}
+
+  {% if dashboard_access.products %}<section class="cp-card">
+    <header><div><span>تنبيه المخزون</span><h2>بحاجة لإعادة التزويد</h2></div><a href="{% url 'controlpanel:list' 'products' %}">المخزون</a></header>
+    <div class="cp-compact-list">{% for product in low_stock_products %}<a href="{% url 'controlpanel:edit' 'products' product.pk %}">{% if product.main_image %}<img src="{{ product.main_image.url }}" alt="">{% else %}<span><i data-lucide="package"></i></span>{% endif %}<div><b>{{ product.name }}</b><small>{{ product.sku }}</small></div><em>{{ product.stock_quantity }} متبقي</em></a>{% empty %}<div class="cp-empty">المخزون بحالة جيدة.</div>{% endfor %}</div>
+  </section>{% endif %}
+
+  {% if dashboard_access.messages %}<section class="cp-card">
+    <header><div><span>صندوق الوارد</span><h2>أحدث الرسائل</h2></div><a href="{% url 'controlpanel:list' 'messages' %}">عرض الكل</a></header>
+    <div class="cp-message-list">{% for item in recent_messages %}<a href="{% url 'controlpanel:edit' 'messages' item.pk %}" class="{% if not item.is_read %}unread{% endif %}"><span>{{ item.name|slice:":1" }}</span><div><b>{{ item.name }}</b><p>{{ item.subject }}</p></div><small>{{ item.created_at|timesince }}</small></a>{% empty %}<div class="cp-empty">لا توجد رسائل جديدة.</div>{% endfor %}</div>
+  </section>{% endif %}
+</div>
+{% endblock %}

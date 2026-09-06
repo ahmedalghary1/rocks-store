@@ -1,0 +1,24 @@
+{% extends 'controlpanel/base.html' %}
+{% block content %}
+<section class="cp-page-head">
+  <div><span>إدارة البيانات</span><h2>{{ config.label }}</h2><p>عرض وتصفية وتعديل كل بيانات هذا القسم.</p></div>
+  <div>{% if can_add %}<a class="cp-primary" href="{% url 'controlpanel:create' resource %}"><i data-lucide="plus"></i>إضافة {{ config.singular }}</a>{% endif %}<a class="cp-secondary" href="?{% if query_string %}{{ query_string }}&{% endif %}export=csv"><i data-lucide="download"></i>تصدير CSV</a></div>
+</section>
+
+<section class="cp-card cp-resource-card">
+  <form method="get" class="cp-filters">
+    <label class="cp-search"><i data-lucide="search"></i><input type="search" name="q" value="{{ query }}" placeholder="ابحث داخل {{ config.label }}..."></label>
+    {% for filter in filter_options %}<label><span>{{ filter.label }}</span><select name="{{ filter.name }}"><option value="">الكل</option>{% for value,label in filter.values %}<option value="{{ value }}" {% if filter.selected == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>{% endfor %}
+    <button class="cp-filter-button" type="submit"><i data-lucide="list-filter"></i>تطبيق</button>
+    {% if request.GET %}<a href="{% url 'controlpanel:list' resource %}" class="cp-clear">مسح</a>{% endif %}
+  </form>
+
+  <form method="post">{% csrf_token %}
+    <div class="cp-bulk"><label><input type="checkbox" data-select-all> تحديد الكل</label><select name="action"><option value="">إجراء جماعي</option>{% if can_change %}{% if supports_active %}<option value="activate">تفعيل</option><option value="deactivate">إيقاف</option>{% endif %}{% if resource == 'messages' %}<option value="mark_read">تعليم كمقروء</option>{% endif %}{% if resource == 'notifications' %}<option value="retry_notifications">إعادة إرسال الإشعارات</option>{% endif %}{% endif %}{% if can_delete %}<option value="delete">حذف المحدد</option>{% endif %}</select><button type="submit">تنفيذ</button><span>{{ page.paginator.count }} عنصر</span></div>
+    <div class="cp-table-wrap"><table class="cp-data-table"><thead><tr><th class="cp-check"></th>{% for column in columns %}<th>{{ column.label }}</th>{% endfor %}<th>الإجراءات</th></tr></thead><tbody>
+      {% for row in rows %}<tr><td class="cp-check"><input type="checkbox" name="selected" value="{{ row.object.pk }}"></td>{% for cell in row.cells %}<td>{% if cell.kind == 'image' %}<img class="cp-thumb" src="{{ cell.url }}" alt="">{% elif cell.kind == 'boolean' %}<span class="cp-bool {% if cell.value %}yes{% endif %}"><i data-lucide="{% if cell.value %}check{% else %}minus{% endif %}"></i>{{ cell.text }}</span>{% else %}{{ cell }}{% endif %}</td>{% endfor %}<td class="cp-row-actions">{% if can_change %}<a href="{% url 'controlpanel:edit' resource row.object.pk %}" aria-label="تعديل"><i data-lucide="pencil"></i></a>{% endif %}{% if can_delete %}<a class="danger" href="{% url 'controlpanel:delete' resource row.object.pk %}" aria-label="حذف"><i data-lucide="trash-2"></i></a>{% endif %}</td></tr>{% empty %}<tr><td colspan="{{ columns|length|add:2 }}" class="cp-empty"><i data-lucide="inbox"></i><b>لا توجد نتائج</b><span>غيّر كلمات البحث أو أضف عنصرًا جديدًا.</span></td></tr>{% endfor %}
+    </tbody></table></div>
+  </form>
+  {% if page.has_other_pages %}<nav class="cp-pagination">{% if page.has_previous %}<a href="?page={{ page.previous_page_number }}{% if query_string %}&{{ query_string }}{% endif %}"><i data-lucide="chevron-right"></i></a>{% endif %}<span>صفحة {{ page.number }} من {{ page.paginator.num_pages }}</span>{% if page.has_next %}<a href="?page={{ page.next_page_number }}{% if query_string %}&{{ query_string }}{% endif %}"><i data-lucide="chevron-left"></i></a>{% endif %}</nav>{% endif %}
+</section>
+{% endblock %}

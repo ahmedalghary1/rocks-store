@@ -33,7 +33,7 @@ def home(request):
         active_product_count=Count("products", filter=Q(products__is_active=True))
     )[:6]
     now = timezone.now()
-    banner = Banner.objects.filter(is_active=True).filter(
+    banner = Banner.objects.filter(is_active=True, location="hero").filter(
         Q(start_date__isnull=True) | Q(start_date__lte=now),
         Q(end_date__isnull=True) | Q(end_date__gte=now),
     ).first()

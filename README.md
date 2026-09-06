@@ -138,7 +138,8 @@ python manage.py retry_order_notifications --max-attempts 10
 ## التحقق والمراقبة
 
 - فحص الخدمة: `/health/`
-- لوحة الإدارة: `/admin/`
+- لوحة ROCKS المستقلة: `/dashboard/`
+- لوحة Django الاحتياطية: `/admin/`
 - sitemap: `/sitemap.xml`
 - robots: `/robots.txt`
 

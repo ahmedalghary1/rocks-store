@@ -3,8 +3,8 @@
 {% block meta_description %}High-performance EV charging cables and dependable charging solutions from ROCKS.{% endblock %}
 {% block body_class %}home-page ev-home{% endblock %}
 {% block extra_head %}
-  <link rel="preload" as="image" type="image/webp" media="(min-width: 701px)" href="{% static 'images/home/hero-ev-original.webp' %}">
-  <link rel="preload" as="image" type="image/webp" media="(max-width: 700px)" href="{% static 'images/home/hero-ev-original-mobile.webp' %}">
+  <link rel="preload" as="image" type="image/webp" media="(min-width: 701px)" href="{% if marketing_banner.image %}{{ marketing_banner.image.url }}{% else %}{% static 'images/home/hero-ev-original.webp' %}{% endif %}">
+  <link rel="preload" as="image" type="image/webp" media="(max-width: 700px)" href="{% if marketing_banner.mobile_image %}{{ marketing_banner.mobile_image.url }}{% elif marketing_banner.image %}{{ marketing_banner.image.url }}{% else %}{% static 'images/home/hero-ev-original-mobile.webp' %}{% endif %}">
   <link rel="stylesheet" href="{% static 'css/home-redesign.css' %}">
 {% endblock %}
 
@@ -12,16 +12,15 @@
 <div class="rocks-home" dir="{% if current_language == 'ar' %}rtl{% else %}ltr{% endif %}">
   <section class="ev-hero" aria-labelledby="hero-title">
     <picture class="ev-hero__media" aria-hidden="true">
-      <source media="(max-width: 700px)" srcset="{% static 'images/home/hero-ev-original-mobile.webp' %}" type="image/webp">
-      <img src="{% static 'images/home/hero-ev-original.webp' %}" alt="" width="1536" height="1024" fetchpriority="high" decoding="async">
+      {% if marketing_banner.image %}{% if marketing_banner.mobile_image %}<source media="(max-width: 700px)" srcset="{{ marketing_banner.mobile_image.url }}" type="image/webp">{% endif %}<img src="{{ marketing_banner.image.url }}" alt="" width="{{ marketing_banner.image.width }}" height="{{ marketing_banner.image.height }}" fetchpriority="high" decoding="async">{% else %}<source media="(max-width: 700px)" srcset="{% static 'images/home/hero-ev-original-mobile.webp' %}" type="image/webp"><img src="{% static 'images/home/hero-ev-original.webp' %}" alt="" width="1536" height="1024" fetchpriority="high" decoding="async">{% endif %}
     </picture>
     <div class="ev-hero__shade" aria-hidden="true"></div>
     <div class="container ev-hero__inner">
       <div class="ev-hero__copy">
         <span class="ev-kicker">EV CHARGING SOLUTIONS</span>
-        <h1 id="hero-title">POWER<br>TO A <em>GREENER</em><br>TOMORROW</h1>
-        <p>Reliable. Compatible. Built for the future.</p>
-        <a class="ev-button ev-button--solid" href="{% url 'catalog:list' %}">Explore products <i data-lucide="arrow-right" aria-hidden="true"></i></a>
+        {% if marketing_banner.title %}<h1 id="hero-title">{{ marketing_banner.display_title|linebreaksbr }}</h1>{% else %}<h1 id="hero-title">POWER<br>TO A <em>GREENER</em><br>TOMORROW</h1>{% endif %}
+        <p>{% if marketing_banner.subtitle %}{{ marketing_banner.display_subtitle }}{% else %}Reliable. Compatible. Built for the future.{% endif %}</p>
+        <a class="ev-button ev-button--solid" href="{{ marketing_banner.link|default:'/products/' }}">{% if marketing_banner.button_text %}{{ marketing_banner.display_button_text }}{% else %}Explore products{% endif %} <i data-lucide="arrow-right" aria-hidden="true"></i></a>
       </div>
     </div>
     <div class="container ev-feature-row" aria-label="Product benefits">

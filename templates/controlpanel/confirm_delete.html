@@ -1,0 +1,4 @@
+{% extends 'controlpanel/base.html' %}
+{% block content %}
+<section class="cp-confirm cp-card"><span><i data-lucide="triangle-alert"></i></span><h2>هل تريد حذف هذا العنصر؟</h2><p>سيتم حذف <b>{{ object }}</b>. قد لا يمكن التراجع عن هذا الإجراء إذا لم توجد نسخة احتياطية.</p><form method="post">{% csrf_token %}<a href="{% url 'controlpanel:edit' resource object.pk %}">العودة</a><button type="submit"><i data-lucide="trash-2"></i>تأكيد الحذف</button></form></section>
+{% endblock %}

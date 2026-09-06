@@ -4,5 +4,5 @@
 {% block responsive %}{{ block.super }}<link rel="stylesheet" href="{% static 'css/admin-rocks.css' %}">{% endblock %}
 {% block extrahead %}{{ block.super }}<script src="{% static 'js/admin-rocks.js' %}" defer></script>{% endblock %}
 {% block branding %}<a class="rocks-admin-brand" href="{% url 'rocks_admin:index' %}"><img src="{% static 'images/rocks-logo-white.webp' %}" alt="ROCKS"><span><b>لوحة التحكم</b><small>إدارة المتجر بالكامل</small></span></a>{% endblock %}
-{% block nav-global %}<a class="view-store" href="{% url 'core:home' %}" target="_blank" rel="noopener">عرض الموقع ↗</a>{% endblock %}
+{% block nav-global %}<a class="view-store" href="{% url 'controlpanel:index' %}">لوحة ROCKS الجديدة</a><a class="view-store" href="{% url 'core:home' %}" target="_blank" rel="noopener">عرض الموقع ↗</a>{% endblock %}
 {% block welcome-msg %}<span class="admin-welcome">مرحبًا، <strong>{% firstof user.get_short_name user.get_username %}</strong></span>{% endblock %}

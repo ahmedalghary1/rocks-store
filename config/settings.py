@@ -32,7 +32,7 @@ CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in os.getenv("CSRF_TRUSTED_ORI
 INSTALLED_APPS = [
     "django.contrib.admin", "django.contrib.auth", "django.contrib.contenttypes",
     "django.contrib.sessions", "django.contrib.messages", "django.contrib.staticfiles",
-    "core", "catalog", "cart", "orders", "accounts", "marketing",
+    "core", "catalog", "cart", "orders", "accounts", "marketing", "controlpanel",
 ]
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

@@ -1,0 +1,14 @@
+{% extends 'controlpanel/base.html' %}
+{% block content %}
+<section class="cp-page-head"><div><a class="cp-back-link" href="{% url 'controlpanel:list' resource %}"><i data-lucide="arrow-right"></i>العودة إلى {{ config.label }}</a><h2>{{ page_title }}</h2><p>راجع البيانات بعناية، ثم احفظ التغييرات.</p></div>{% if can_delete %}<a class="cp-danger-button" href="{% url 'controlpanel:delete' resource object.pk %}"><i data-lucide="trash-2"></i>حذف</a>{% endif %}</section>
+<form method="post" enctype="multipart/form-data" class="cp-editor">{% csrf_token %}
+  {% if form.non_field_errors %}<div class="cp-form-errors">{{ form.non_field_errors }}</div>{% endif %}
+  <section class="cp-card cp-form-card">
+    <header><div><span>تفاصيل العنصر</span><h2>البيانات الأساسية</h2></div><i data-lucide="file-pen-line"></i></header>
+    <div class="cp-form-grid">
+      {% for field in form %}<div class="cp-field {% if field.field.widget.input_type == 'checkbox' %}cp-field--check{% endif %} {% if field.name == 'description' or field.name == 'description_ar' or field.name == 'message' or field.name == 'notes' or field.name == 'last_error' or field.name == 'user_permissions' %}cp-field--wide{% endif %}"><label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %}<b>*</b>{% endif %}</label>{{ field }}{% if field.help_text %}<small>{{ field.help_text|safe }}</small>{% endif %}{% for error in field.errors %}<em>{{ error }}</em>{% endfor %}</div>{% endfor %}
+    </div>
+  </section>
+  <div class="cp-savebar"><div><i data-lucide="shield-check"></i><span>تُطبّق التغييرات مباشرة على الموقع.</span></div><a href="{% url 'controlpanel:list' resource %}">إلغاء</a><button type="submit" name="save_continue" value="1" class="cp-secondary">حفظ ومتابعة</button><button type="submit" class="cp-primary"><i data-lucide="save"></i>حفظ التغييرات</button></div>
+</form>
+{% endblock %}
