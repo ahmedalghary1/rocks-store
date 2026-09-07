@@ -38,7 +38,14 @@ addEventListener('load', () => {
 
 const header = $('#siteHeader');
 const updateHeader = () => header?.classList.toggle('scrolled', scrollY > 24);
-addEventListener('scroll', updateHeader, { passive: true }); updateHeader();
+let headerUpdateQueued = false;
+const queueHeaderUpdate = () => {
+  if (headerUpdateQueued) return;
+  headerUpdateQueued = true;
+  requestAnimationFrame(() => { updateHeader(); headerUpdateQueued = false; });
+};
+addEventListener('scroll', queueHeaderUpdate, { passive: true });
+queueHeaderUpdate();
 
 const drawer = $('.mobile-drawer');
 const toggleDrawer = open => {

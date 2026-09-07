@@ -38,7 +38,7 @@ class PublicPagesTests(TestCase):
         self.assertNotContains(response, "page-intro")
         self.assertNotContains(response, "fonts.googleapis.com")
         self.assertNotContains(response, '<script src="/static/js/vendor/lucide.min.js" defer>', html=False)
-        self.assertContains(response, 'data-icon-library="/static/js/vendor/lucide.min.js"', html=False)
+        self.assertContains(response, 'data-icon-library="/static/js/vendor/lucide-storefront.min.js"', html=False)
         self.assertContains(response, 'fetchpriority="high" media="(max-width: 700px)"', html=False)
 
     def test_health_and_legal_pages(self):
