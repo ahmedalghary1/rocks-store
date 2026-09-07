@@ -14,11 +14,33 @@ class PublicPagesTests(TestCase):
         cache.clear()
 
     def test_language_switch_renders_complete_arabic_shell(self):
+        from catalog.models import Category, Product
+
+        category = Category.objects.create(name="Power Strips", slug="arabic-home-products")
+        Product.objects.create(
+            name="6-Outlet USB Power Strip",
+            slug="arabic-home-product",
+            sku="AR-HOME-1",
+            category=category,
+            short_description="Six outlets and two USB ports in one dependable power hub.",
+            description="Test product",
+            price=720,
+            stock_quantity=5,
+            is_featured=True,
+        )
         response = self.client.post(reverse("set_language"), {"language": "ar", "next": reverse("core:home")})
         self.assertRedirects(response, reverse("core:home"))
         response = self.client.get(reverse("core:home"))
         self.assertContains(response, '<html lang="ar" dir="rtl">', html=False)
         self.assertContains(response, "حلول الكهرباء وشحن السيارات")
+        self.assertContains(response, "لكل")
+        self.assertContains(response, "توصيلة")
+        self.assertContains(response, "التصنيفات الشائعة")
+        self.assertContains(response, "مشترك كهربائي USB بـ 6 مخارج")
+        self.assertContains(response, "ستة مخارج ومنفذا USB في مشترك كهربائي واحد موثوق.")
+        self.assertNotContains(response, "FOR EVERY")
+        self.assertNotContains(response, "Popular categories")
+        self.assertNotContains(response, "6-Outlet USB Power Strip")
         self.assertContains(response, "English")
         self.assertContains(response, "hero-ev-original.webp")
 

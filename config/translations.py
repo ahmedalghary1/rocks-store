@@ -217,6 +217,57 @@ AR_TRANSLATIONS.update({
     "North Sinai": "شمال سيناء", "Sohag": "سوهاج",
 })
 
+# Copy introduced by the redesigned home page, including the bundled demo
+# products.  Keep the complete phrases here so shorter replacements (such as
+# "Cables") do not leave mixed Arabic/English labels behind.
+AR_TRANSLATIONS.update({
+    "Popular categories": "التصنيفات الشائعة",
+    "EV &amp; electrical cables": "كابلات السيارات والكهرباء",
+    "Plugs, switches &amp; sockets": "الفيش والمفاتيح والبرايز",
+    "More electrical products": "المزيد من المنتجات الكهربائية",
+    "Dependable electrical and EV products selected for safety, performance and everyday use.": "منتجات كهربائية ومنتجات للسيارات مختارة بعناية لتوفير الأمان والأداء الموثوق في الاستخدام اليومي.",
+    "Explore all products": "استكشف جميع المنتجات",
+    "All products": "جميع المنتجات",
+    "Lighting": "الإضاءة",
+    "Power Strips": "المشتركات الكهربائية",
+    "Plugs &amp; Sockets": "الفيش والبرايز",
+    "Decorative Lighting": "الإضاءة والديكور",
+    "LED Lamps": "لمبات ليد",
+    "LED lamps": "لمبات ليد",
+    "Electrical Tools": "أدوات الكهرباء",
+    "Electrical tools": "أدوات الكهرباء",
+    "About": "من نحن",
+    "FOR EVERY": "لكل",
+    "CONNECTION": "توصيلة",
+    "No featured products yet.": "لا توجد منتجات مميزة حتى الآن.",
+    "Select products from the control panel to show them here.": "اختر المنتجات من لوحة التحكم لعرضها هنا.",
+    "ROCKS exhibition booth for electrical and EV products": "جناح ROCKS لمنتجات الكهرباء والسيارات",
+    "6-Outlet USB Power Strip": "مشترك كهربائي USB بـ 6 مخارج",
+    "Six outlets and two USB ports in one dependable power hub.": "ستة مخارج ومنفذا USB في مشترك كهربائي واحد موثوق.",
+    "4-Outlet Power Strip": "مشترك كهربائي بـ 4 مخارج",
+    "Four outlets, a master switch, and a heavy-duty cable.": "أربعة مخارج ومفتاح رئيسي وكابل يتحمل الاستخدام الشاق.",
+    "IP65 Outdoor Wall Light": "مصباح حائط خارجي بمعيار IP65",
+    "A durable, weather-resistant light for entrances and facades.": "مصباح متين ومقاوم للعوامل الجوية للمداخل والواجهات.",
+    "24W Round Ceiling Light": "وحدة إضاءة سقف دائرية 24 وات",
+    "A slim fixture with even, neutral light distribution.": "وحدة نحيفة توزع إضاءة محايدة ومتساوية.",
+    "18W LED Lamp": "لمبة ليد 18 وات",
+    "Powerful illumination and long service life for larger spaces.": "إضاءة قوية وعمر تشغيلي طويل للمساحات الكبيرة.",
+    "12W LED Lamp": "لمبة ليد 12 وات",
+    "Comfortable white light with low energy consumption.": "إضاءة بيضاء مريحة باستهلاك منخفض للطاقة.",
+    "ROCKS Protected Schuko Socket": "بريزة شوكو محمية من ROCKS",
+    "A secure connection with integrated child protection.": "توصيلة آمنة مزودة بحماية مدمجة للأطفال.",
+    "ROCKS Modern Single Switch": "مفتاح مفرد عصري من ROCKS",
+    "A precise, safe switch with a clean modern profile.": "مفتاح دقيق وآمن بتصميم عصري أنيق.",
+    "20m Cable Reel": "بكرة كابل 20 مترًا",
+    "A flexible, heavy-duty cable on a practical everyday reel.": "كابل مرن يتحمل الاستخدام الشاق على بكرة عملية للاستخدام اليومي.",
+    "10×10 Sealed Junction Box": "علبة توصيل محكمة 10×10",
+    "A durable sealed box for clean, organized installations.": "علبة محكمة ومتينة لتركيبات نظيفة ومنظمة.",
+    "Professional Voltage Tester": "قلم اختبار جهد احترافي",
+    "Fast, safe voltage detection with an insulated grip.": "كشف سريع وآمن للجهد مع مقبض معزول.",
+    "6-Piece Insulated Screwdriver Set": "طقم مفكات معزولة من 6 قطع",
+    "Precision insulated screwdrivers in essential sizes.": "مفكات معزولة دقيقة بالمقاسات الأساسية.",
+})
+
 _REPLACEMENTS = sorted(AR_TRANSLATIONS.items(), key=lambda item: len(item[0]), reverse=True)
 
 
