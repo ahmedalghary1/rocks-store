@@ -65,8 +65,14 @@
 [dir=rtl] .ev-hero__copy>p{letter-spacing:0;line-height:1.85}
 @media(max-width:900px){[dir=rtl] .ev-proof__grid article{border-left:0}}
 @media(max-width:700px){
+  .ev-home .site-header{backdrop-filter:none}
   .ev-hero__media img{height:auto;aspect-ratio:3/2;object-fit:contain;object-position:center top}
   [dir=rtl] .ev-hero__shade{background:linear-gradient(180deg,rgba(3,12,10,.03) 0%,rgba(3,12,10,.12) 38%,rgba(3,12,10,.92) 66%,#06100e 100%)}
   [dir=rtl] .ev-about__copy{padding:0 0 32px}
   [dir=rtl] .ev-hero h1{font-size:clamp(2.35rem,10vw,3.7rem);line-height:1.28}
+}
+
+/* Skip layout and paint work for homepage sections that start below the fold. */
+@supports(content-visibility:auto){
+  .ev-products,.ev-proof,.ev-about,.ev-home .rocks-footer{content-visibility:auto;contain-intrinsic-size:auto 720px}
 }

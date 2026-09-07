@@ -33,6 +33,14 @@ class PublicPagesTests(TestCase):
         self.assertContains(response, '<html lang="en" dir="ltr">', html=False)
         self.assertContains(response, '<div class="mobile-drawer" aria-hidden="true">', html=False)
 
+    def test_homepage_has_no_artificial_render_delay_or_blocking_remote_fonts(self):
+        response = self.client.get(reverse("core:home"))
+        self.assertNotContains(response, "page-intro")
+        self.assertNotContains(response, "fonts.googleapis.com")
+        self.assertNotContains(response, '<script src="/static/js/vendor/lucide.min.js" defer>', html=False)
+        self.assertContains(response, 'data-icon-library="/static/js/vendor/lucide.min.js"', html=False)
+        self.assertContains(response, 'fetchpriority="high" media="(max-width: 700px)"', html=False)
+
     def test_health_and_legal_pages(self):
         self.assertEqual(self.client.get(reverse("core:health")).status_code, 200)
         for name in ("privacy", "terms", "shipping_policy", "returns_policy"):

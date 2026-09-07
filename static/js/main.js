@@ -17,7 +17,24 @@ const upgradeLegacyIcons = () => {
   $$('.purchase-trust span').forEach((el, index) => { el.textContent = el.textContent.replace(/^[◇↺▣]\s*/, ''); el.insertAdjacentHTML('afterbegin', iconMarkup(trustIcons[index] || 'check')); });
   $$('.empty-state>span').forEach(el => { el.innerHTML = iconMarkup(el.closest('.wishlist-page') ? 'heart' : 'package'); });
 };
-upgradeLegacyIcons(); renderIcons();
+upgradeLegacyIcons();
+
+// Lucide is a large, non-critical enhancement. Fetch it only after the page and
+// its LCP image have finished loading so it cannot compete for mobile bandwidth.
+const loadIconLibrary = () => {
+  if (window.lucide) { renderIcons(); return; }
+  const source = document.body.dataset.iconLibrary;
+  if (!source || document.querySelector('script[data-lucide-library]')) return;
+  const script = document.createElement('script');
+  script.src = source;
+  script.dataset.lucideLibrary = '';
+  script.onload = () => renderIcons();
+  document.head.append(script);
+};
+addEventListener('load', () => {
+  if ('requestIdleCallback' in window) requestIdleCallback(loadIconLibrary, { timeout: 1200 });
+  else setTimeout(loadIconLibrary, 1);
+}, { once: true });
 
 const header = $('#siteHeader');
 const updateHeader = () => header?.classList.toggle('scrolled', scrollY > 24);

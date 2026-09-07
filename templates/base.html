@@ -4,8 +4,6 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script nonce="{{ csp_nonce }}">document.documentElement.classList.add('motion-enabled');window.setTimeout(function(){document.documentElement.classList.add('page-ready')},650);</script>
-  <style nonce="{{ csp_nonce }}">html.motion-enabled:not(.page-ready),html.motion-enabled:not(.page-ready) body{background:#021108}.page-intro{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;background:#021108;color:#fff;opacity:1;visibility:visible;transition:opacity .38s ease,visibility 0s linear .38s}.page-intro__brand{font:800 clamp(1.4rem,4vw,2.3rem)/1 Arial,sans-serif;letter-spacing:.18em}.page-intro__energy{display:flex;justify-content:center;gap:5px;margin-top:18px}.page-intro__energy i{display:block;width:5px;height:24px;border-radius:8px;background:#59e13b;animation:intro-energy .6s ease-in-out infinite alternate}.page-intro__energy i:nth-child(2){animation-delay:.12s}.page-intro__energy i:nth-child(3){animation-delay:.24s}html.page-ready .page-intro{opacity:0;visibility:hidden}@keyframes intro-energy{from{transform:scaleY(.35);opacity:.45}to{transform:scaleY(1);opacity:1}}@media(prefers-reduced-motion:reduce){.page-intro{display:none!important}html.motion-enabled,html.motion-enabled body{background:initial!important}}</style>
   <title>{% block title %}ROCKS | EV Charging Solutions{% endblock %}</title>
   <meta name="description" content="{% block meta_description %}Reliable EV charging cables and solutions engineered for safety, compatibility and everyday performance.{% endblock %}">
   <meta name="robots" content="{% block robots %}index,follow,max-image-preview:large{% endblock %}">
@@ -15,13 +13,10 @@
   <meta property="og:type" content="{% block og_type %}website{% endblock %}"><meta property="og:locale" content="{% if current_language == 'ar' %}ar_EG{% else %}en_US{% endif %}"><meta property="og:url" content="{{ canonical_url }}">
   <meta property="og:title" content="{% block og_title %}ROCKS EV Charging Solutions{% endblock %}"><meta property="og:description" content="{% block og_description %}Powering a cleaner tomorrow with reliable EV charging solutions.{% endblock %}"><meta property="og:image" content="{% block og_image %}{{ default_og_image }}{% endblock %}">
   <meta name="twitter:card" content="summary_large_image">
-  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@500;600;700;800&family=Cairo:wght@500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/variables.css' %}"><link rel="stylesheet" href="{% static 'css/site.css' %}"><link rel="stylesheet" href="{% static 'css/polish.css' %}"><link rel="stylesheet" href="{% static 'css/home-footer.css' %}"><link rel="stylesheet" href="{% static 'css/brand-system.css' %}">
   {% block extra_head %}{% endblock %}
 </head>
-<body class="{% block body_class %}{% endblock %}">
-  <div class="page-intro" aria-hidden="true"><div><div class="page-intro__brand">ROCKS</div><div class="page-intro__energy"><i></i><i></i><i></i></div></div></div>
+<body class="{% block body_class %}{% endblock %}" data-icon-library="{% static 'js/vendor/lucide.min.js' %}">
   <a class="skip-link" href="#main">Skip to content</a>
   {% include 'includes/header.html' %}
   <main id="main">{% block content %}{% endblock %}</main>
@@ -36,7 +31,6 @@
     <button type="button" data-search-open><i data-lucide="search" aria-hidden="true"></i><span>Search</span></button><a href="{% url 'core:wishlist' %}"><i data-lucide="heart" aria-hidden="true"></i><span>Wishlist</span></a>
     <a href="{% url 'cart:detail' %}"><i data-lucide="shopping-bag" aria-hidden="true"></i><span>Cart</span><b data-cart-count>{{ cart_count }}</b></a>
   </nav>
-  <script src="{% static 'js/vendor/lucide.min.js' %}" defer></script>
   <script src="{% static 'js/main.js' %}" defer></script>
   {% block extra_js %}{% endblock %}
 </body>

@@ -7,14 +7,14 @@ from django.contrib import messages
 from django.core.cache import cache
 from django.core.mail import send_mail
 from django.db import connection, transaction
-from django.db.models import Count, Q
+from django.db.models import Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
-from catalog.models import Category, HomepageProduct, Product
+from catalog.models import HomepageProduct, Product
 from marketing.models import Banner, Subscriber
 from .forms import ContactForm, NewsletterForm
 
@@ -28,10 +28,7 @@ def _rate_key(request, action):
 
 
 def home(request):
-    products = Product.objects.filter(is_active=True, category__is_active=True).select_related("category").prefetch_related("variants")
-    categories = Category.objects.filter(is_active=True, parent__isnull=True).annotate(
-        active_product_count=Count("products", filter=Q(products__is_active=True))
-    )[:6]
+    products = Product.objects.filter(is_active=True, category__is_active=True).select_related("category")
     now = timezone.now()
     banner = Banner.objects.filter(is_active=True, location="hero").filter(
         Q(start_date__isnull=True) | Q(start_date__lte=now),
@@ -42,10 +39,7 @@ def home(request):
     else:
         homepage_products = products.filter(is_featured=True)[:8]
     return render(request, "core/home.html", {
-        "categories": categories,
         "featured_products": homepage_products,
-        "best_sellers": products.filter(is_best_seller=True)[:4],
-        "new_products": products.filter(is_new=True)[:8],
         "marketing_banner": banner,
     })
 
