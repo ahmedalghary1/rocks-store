@@ -22,7 +22,7 @@ class ProductVariantInline(admin.TabularInline):
 class CategoryAdmin(admin.ModelAdmin):
     list_display = ("name", "parent", "is_active", "sort_order")
     list_filter = ("is_active",)
-    search_fields = ("name", "description")
+    search_fields = ("name", "name_ar", "description", "description_ar", "meta_title", "meta_title_ar")
     prepopulated_fields = {"slug": ("name",)}
 
 

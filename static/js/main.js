@@ -228,6 +228,7 @@ $('.zoom-btn')?.addEventListener('click', event => {
 $$('[data-submit-once]').forEach(button => button.closest('form').addEventListener('submit', () => { button.disabled = true; button.textContent = t('Confirming order…', 'جارٍ تأكيد الطلب…'); }));
 
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const animateDetails = !reducedMotion && !matchMedia('(max-width: 700px)').matches;
 const motionDirections = ['right', 'left', 'bottom', 'top'];
 const detailTargets = $$([
   '.reveal', '.category-card', '.cart-item', '.checkout-fields > section',
@@ -235,14 +236,16 @@ const detailTargets = $$([
   '.why-cards > article', '.order-card', '.success-grid > div',
 ].join(','));
 const uniqueMotionTargets = [...new Set(detailTargets)];
-uniqueMotionTargets.forEach((element, index) => {
-  element.classList.add('motion-item', `motion-from-${motionDirections[index % motionDirections.length]}`);
-  element.style.setProperty('--motion-delay', `${Math.min((index % 6) * 65, 325)}ms`);
-});
+if (animateDetails) {
+  uniqueMotionTargets.forEach((element, index) => {
+    element.classList.add('motion-item', `motion-from-${motionDirections[index % motionDirections.length]}`);
+    element.style.setProperty('--motion-delay', `${Math.min((index % 6) * 65, 325)}ms`);
+  });
+}
 
 const revealMotion = () => {
   document.documentElement.classList.add('page-ready');
-  if (reducedMotion || !('IntersectionObserver' in window)) {
+  if (!animateDetails || !('IntersectionObserver' in window)) {
     uniqueMotionTargets.forEach(element => element.classList.add('visible'));
     return;
   }
@@ -254,5 +257,5 @@ const revealMotion = () => {
   }), { threshold: .08, rootMargin: '0px 0px -4% 0px' });
   uniqueMotionTargets.forEach(element => observer.observe(element));
 };
-window.setTimeout(() => requestAnimationFrame(revealMotion), reducedMotion ? 0 : 180);
+window.setTimeout(() => requestAnimationFrame(revealMotion), animateDetails ? 180 : 0);
 addEventListener('keydown', event => { if (event.key === 'Escape') { toggleSearch(false); toggleDrawer(false); toggleQuickModal(false); } });

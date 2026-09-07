@@ -4,15 +4,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}ROCKS | EV Charging Solutions{% endblock %}</title>
-  <meta name="description" content="{% block meta_description %}Reliable EV charging cables and solutions engineered for safety, compatibility and everyday performance.{% endblock %}">
+  <title>{% block title %}ROCKS Egypt | Electrical Products &amp; EV Charging Cables{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}Shop ROCKS electrical products in Egypt, including EV charging cables, power strips, plugs, switches, lighting and electrical tools.{% endblock %}">
   <meta name="robots" content="{% block robots %}index,follow,max-image-preview:large{% endblock %}">
   <link rel="canonical" href="{{ canonical_url }}">
   <meta name="theme-color" content="#021108">
   <link rel="icon" type="image/webp" href="{% static 'images/rocks-favicon-black.webp' %}">
   <meta property="og:type" content="{% block og_type %}website{% endblock %}"><meta property="og:locale" content="{% if current_language == 'ar' %}ar_EG{% else %}en_US{% endif %}"><meta property="og:url" content="{{ canonical_url }}">
-  <meta property="og:title" content="{% block og_title %}ROCKS EV Charging Solutions{% endblock %}"><meta property="og:description" content="{% block og_description %}Powering a cleaner tomorrow with reliable EV charging solutions.{% endblock %}"><meta property="og:image" content="{% block og_image %}{{ default_og_image }}{% endblock %}">
-  <meta name="twitter:card" content="summary_large_image">
+  <meta property="og:site_name" content="ROCKS"><meta property="og:title" content="{% block og_title %}ROCKS Electrical &amp; EV Solutions{% endblock %}"><meta property="og:description" content="{% block og_description %}Reliable electrical products and EV charging solutions for homes and businesses in Egypt.{% endblock %}"><meta property="og:image" content="{% block og_image %}{{ default_og_image }}{% endblock %}">
+  <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{% block twitter_title %}ROCKS Electrical &amp; EV Solutions{% endblock %}"><meta name="twitter:description" content="{% block twitter_description %}Electrical products and EV charging solutions from ROCKS Egypt.{% endblock %}"><meta name="twitter:image" content="{% block twitter_image %}{{ default_og_image }}{% endblock %}">
   <link rel="stylesheet" href="{% static 'css/variables.css' %}"><link rel="stylesheet" href="{% static 'css/site.css' %}"><link rel="stylesheet" href="{% static 'css/polish.css' %}"><link rel="stylesheet" href="{% static 'css/home-footer.css' %}"><link rel="stylesheet" href="{% static 'css/brand-system.css' %}">
   {% block extra_head %}{% endblock %}
 </head>

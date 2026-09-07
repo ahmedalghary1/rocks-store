@@ -19,10 +19,30 @@ class CatalogTests(TestCase):
         response = self.client.get(self.product.get_absolute_url())
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Test Lamp")
+        self.assertContains(response, '"itemCondition":"https://schema.org/NewCondition"', html=False)
+        self.assertContains(response, '"@type":"BreadcrumbList"', html=False)
 
     def test_filter_by_category(self):
         response = self.client.get(reverse("catalog:list"), {"category": "lights"})
+        self.assertRedirects(response, self.category.get_absolute_url(), status_code=301)
+        response = self.client.get(self.category.get_absolute_url())
         self.assertContains(response, "Test Lamp")
+
+    def test_category_page_is_an_indexable_landing_page(self):
+        self.category.description = "Modern lighting for homes and businesses."
+        self.category.meta_title = "Modern Lighting | ROCKS Egypt"
+        self.category.meta_description = "Shop reliable modern lighting from ROCKS in Egypt."
+        self.category.save()
+        response = self.client.get(self.category.get_absolute_url())
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Modern Lighting | ROCKS Egypt")
+        self.assertContains(response, '<meta name="robots" content="index,follow,max-image-preview:large">', html=False)
+        self.assertContains(response, f'<link rel="canonical" href="http://testserver{self.category.get_absolute_url()}">', html=False)
+        self.assertContains(response, '"@type":"BreadcrumbList"', html=False)
+
+    def test_filtered_list_is_noindex(self):
+        response = self.client.get(reverse("catalog:list"), {"q": "Lamp"})
+        self.assertContains(response, '<meta name="robots" content="noindex,follow">', html=False)
 
     def test_product_list_includes_working_quick_view_dialog(self):
         response = self.client.get(reverse("catalog:list"))

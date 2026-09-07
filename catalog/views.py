@@ -1,13 +1,18 @@
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from .models import Category, Product
 
 
-def product_list(request):
+def product_list(request, slug=None):
     products = Product.objects.filter(is_active=True, category__is_active=True).select_related("category").prefetch_related("variants")
-    category_slug = request.GET.get("category")
+    category_slug = slug or request.GET.get("category")
+    default_category_filter = set(request.GET).issubset({"category", "sort"}) and request.GET.get("sort", "newest") == "newest"
+    if not slug and category_slug and default_category_filter:
+        category = get_object_or_404(Category, slug=category_slug, is_active=True)
+        return redirect(category.get_absolute_url(), permanent=True)
+    category = get_object_or_404(Category, slug=slug, is_active=True) if slug else None
     query = request.GET.get("q", "").strip()
     sort = request.GET.get("sort", "newest")
     if category_slug:
@@ -22,8 +27,14 @@ def product_list(request):
     sort_map = {"newest": "-created_at", "price-low": "price", "price-high": "-price", "name": "name"}
     products = products.order_by(sort_map.get(sort, "-created_at"))
     page_obj = Paginator(products, 24).get_page(request.GET.get("page"))
+    requested_page = request.GET.get("page", "")
+    valid_page = not requested_page or (requested_page.isdigit() and int(requested_page) == page_obj.number)
     return render(request, "catalog/product_list.html", {
-        "page_obj": page_obj, "categories": Category.objects.filter(is_active=True), "selected_category": category_slug,
+        "page_obj": page_obj,
+        "categories": Category.objects.filter(is_active=True),
+        "selected_category": category_slug,
+        "category": category,
+        "listing_indexable": valid_page and not any(key != "page" for key in request.GET),
     })
 
 

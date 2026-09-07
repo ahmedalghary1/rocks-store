@@ -24,6 +24,8 @@ class DefaultEnglishLocaleMiddleware(LocaleMiddleware):
 class SecurityHeadersMiddleware:
     """Small, dependency-free baseline for browser security headers."""
 
+    private_prefixes = ("/admin/", "/dashboard/", "/cart/", "/checkout/", "/account/", "/auth/", "/wishlist/", "/health/")
+
     def __init__(self, get_response):
         self.get_response = get_response
 
@@ -42,6 +44,8 @@ class SecurityHeadersMiddleware:
         )
         response.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()")
         response.setdefault("Cross-Origin-Opener-Policy", "same-origin")
+        if request.path.startswith(self.private_prefixes):
+            response.setdefault("X-Robots-Tag", "noindex, nofollow, noarchive")
         return response
 
 

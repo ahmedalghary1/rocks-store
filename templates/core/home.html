@@ -1,11 +1,12 @@
 {% extends 'base.html' %}{% load static i18n %}{% get_current_language as current_language %}
-{% block title %}ROCKS | EV Charging Solutions{% endblock %}
-{% block meta_description %}High-performance EV charging cables and dependable charging solutions from ROCKS.{% endblock %}
+{% block title %}ROCKS Egypt | EV Cables, Power Strips &amp; Electrical Products{% endblock %}
+{% block meta_description %}Shop EV charging cables, power strips, plugs, switches, decorative lighting, LED lamps and electrical tools from ROCKS in Egypt.{% endblock %}
 {% block body_class %}home-page ev-home{% endblock %}
 {% block extra_head %}
   <link rel="preload" as="image" type="image/webp" fetchpriority="high" media="(min-width: 701px)" href="{% if marketing_banner.image %}{{ marketing_banner.image.url }}{% else %}{% static 'images/home/hero-ev-original.webp' %}{% endif %}">
   <link rel="preload" as="image" type="image/webp" fetchpriority="high" media="(max-width: 700px)" href="{% if marketing_banner.mobile_image %}{{ marketing_banner.mobile_image.url }}{% elif marketing_banner.image %}{{ marketing_banner.image.url }}{% else %}{% static 'images/home/hero-ev-original-mobile.webp' %}{% endif %}">
   <link rel="stylesheet" href="{% static 'css/home-redesign.css' %}">
+  <script type="application/ld+json" nonce="{{ csp_nonce }}">{"@context":"https://schema.org","@type":"OnlineStore","@id":"{{ canonical_url|escapejs }}#store","name":"{{ site_settings.company_name|default:'ROCKS'|escapejs }}","url":"{{ canonical_url|escapejs }}","logo":"{{ default_og_image|escapejs }}","image":"{{ default_og_image|escapejs }}","priceRange":"EGP","areaServed":{"@type":"Country","name":"Egypt"}{% if site_settings.phone %},"telephone":"{{ site_settings.phone|escapejs }}"{% endif %}{% if site_settings.email %},"email":"{{ site_settings.email|escapejs }}"{% endif %}}</script>
 {% endblock %}
 
 {% block content %}
@@ -17,10 +18,10 @@
     <div class="ev-hero__shade" aria-hidden="true"></div>
     <div class="container ev-hero__inner">
       <div class="ev-hero__copy">
-        <span class="ev-kicker">EV CHARGING SOLUTIONS</span>
-        {% if marketing_banner.title %}<h1 id="hero-title">{{ marketing_banner.display_title|linebreaksbr }}</h1>{% else %}<h1 id="hero-title">POWER<br>TO A <em>GREENER</em><br>TOMORROW</h1>{% endif %}
-        <p>{% if marketing_banner.subtitle %}{{ marketing_banner.display_subtitle }}{% else %}Reliable. Compatible. Built for the future.{% endif %}</p>
-        <a class="ev-button ev-button--solid" href="{{ marketing_banner.link|default:'/products/' }}" aria-label="{% if current_language == 'ar' %}استكشف حلول شحن السيارات الكهربائية من ROCKS{% else %}Explore ROCKS EV charging solutions{% endif %}">{% if marketing_banner.display_button_text %}{{ marketing_banner.display_button_text }}{% else %}Explore products{% endif %} <i data-lucide="arrow-right" aria-hidden="true"></i></a>
+        <span class="ev-kicker">ELECTRICAL &amp; EV SOLUTIONS</span>
+        {% if marketing_banner.title %}<h1 id="hero-title">{{ marketing_banner.display_title|linebreaksbr }}</h1>{% else %}<h1 id="hero-title">POWER<br>FOR EVERY<br><em>CONNECTION</em></h1>{% endif %}
+        <p>{% if marketing_banner.subtitle %}{{ marketing_banner.display_subtitle }}{% else %}Reliable electrical products for your car, home and business.{% endif %}</p>
+        <a class="ev-button ev-button--solid" href="{{ marketing_banner.link|default:'/products/' }}">{% if marketing_banner.display_button_text %}{{ marketing_banner.display_button_text }}{% else %}Explore electrical products{% endif %} <i data-lucide="arrow-right" aria-hidden="true"></i></a>
       </div>
     </div>
     <div class="container ev-feature-row" aria-label="Product benefits">
@@ -31,26 +32,33 @@
     </div>
   </section>
 
+  <nav class="ev-category-nav" aria-label="Popular product categories"><div class="container">
+    <a href="{% url 'catalog:category' 'cables' %}"><span>EV &amp; electrical</span><b>Cables</b></a>
+    <a href="{% url 'catalog:category' 'power-strips' %}"><span>Home &amp; office</span><b>Power strips</b></a>
+    <a href="{% url 'catalog:category' 'switches-sockets' %}"><span>Safe connections</span><b>Plugs &amp; sockets</b></a>
+    <a href="{% url 'catalog:category' 'lighting' %}"><span>Modern interiors</span><b>Decorative lighting</b></a>
+  </div></nav>
+
   <section class="ev-products" id="products" aria-labelledby="products-title">
     <div class="container">
-      <header class="ev-section-title"><span>OUR PRODUCTS</span><h2 id="products-title">EV CHARGING CABLES</h2><p>High-performance charging cables for a connected world.</p></header>
+      <header class="ev-section-title"><span>OUR PRODUCTS</span><h2 id="products-title">ELECTRICAL &amp; EV ESSENTIALS</h2><p>Cables, power strips, plugs, lighting and tools selected for dependable everyday use.</p></header>
       <div class="ev-product-grid">
-        {% for product in featured_products %}<article class="ev-product-card reveal"><a class="ev-product-card__image" href="{{ product.get_absolute_url }}">{% if product.main_image %}<img src="{{ product.main_image.url }}" alt="{{ product.display_name }}" width="900" height="600" loading="lazy" decoding="async">{% else %}<span class="ev-product-card__placeholder"><i data-lucide="package-open" aria-hidden="true"></i></span>{% endif %}</a><div class="ev-product-card__body"><span>{{ product.category.display_name }}</span><h3>{{ product.display_name }}</h3><p>{{ product.display_short_description }}</p><a class="ev-button ev-button--outline" href="{{ product.get_absolute_url }}">View details <i data-lucide="arrow-right" aria-hidden="true"></i></a></div></article>{% empty %}<div class="ev-products__empty"><i data-lucide="package-search" aria-hidden="true"></i><h3>No featured products yet.</h3><p>Select products from the control panel to show them here.</p></div>{% endfor %}
+        {% for product in featured_products %}<article class="ev-product-card reveal"><a class="ev-product-card__image" href="{{ product.get_absolute_url }}" aria-label="View {{ product.display_name }}">{% if product.main_image %}<img src="{{ product.main_image.url }}" alt="{{ product.display_name }}" width="900" height="600" loading="lazy" decoding="async">{% else %}<span class="ev-product-card__placeholder"><i data-lucide="package-open" aria-hidden="true"></i></span>{% endif %}</a><div class="ev-product-card__body"><span>{{ product.category.display_name }}</span><h3>{{ product.display_name }}</h3><p>{{ product.display_short_description }}</p><a class="ev-button ev-button--outline" href="{{ product.get_absolute_url }}">View details <i data-lucide="arrow-right" aria-hidden="true"></i></a></div></article>{% empty %}<div class="ev-products__empty"><i data-lucide="package-search" aria-hidden="true"></i><h3>No featured products yet.</h3><p>Select products from the control panel to show them here.</p></div>{% endfor %}
       </div>
     </div>
   </section>
 
   <section class="ev-proof" aria-label="ROCKS product standards"><div class="container ev-proof__grid">
     <article><i data-lucide="badge-check" aria-hidden="true"></i><div><b>Premium materials</b><small>Long lifespan</small></div></article>
-    <article><i data-lucide="shield" aria-hidden="true"></i><div><b>Certified standards</b><small>IEC 62196 / GB/T 20234</small></div></article>
-    <article><i data-lucide="globe-2" aria-hidden="true"></i><div><b>Global compatibility</b><small>For all major EV brands</small></div></article>
-    <article><i data-lucide="gauge" aria-hidden="true"></i><div><b>Fast &amp; efficient</b><small>Up to 32A / 7.4 kW</small></div></article>
-    <div class="ev-proof__statement"><b>CHARGE TODAY<br>FOR A CLEANER<br>TOMORROW</b><span></span></div>
+    <article><i data-lucide="shield" aria-hidden="true"></i><div><b>Clear specifications</b><small>Buy with confidence</small></div></article>
+    <article><i data-lucide="globe-2" aria-hidden="true"></i><div><b>Wide selection</b><small>Home, business &amp; EV</small></div></article>
+    <article><i data-lucide="gauge" aria-hidden="true"></i><div><b>Reliable performance</b><small>Made for everyday use</small></div></article>
+    <div class="ev-proof__statement"><b>SAFE POWER.<br>SMART CHOICES.<br>ROCKS QUALITY.</b><span></span></div>
   </div></section>
 
   <section class="ev-about" aria-labelledby="about-title"><div class="container ev-about__grid">
-    <div class="ev-about__copy reveal"><span class="ev-kicker">ABOUT ROCKS</span><h2 id="about-title">MORE THAN<br>CABLES. A CLEANER<br>FUTURE.</h2><p>ROCKS provides high-quality EV charging solutions designed for safety, performance and global compatibility. We are committed to a smarter and greener world.</p><a class="ev-button ev-button--solid" href="{% url 'core:about' %}" aria-label="{% if current_language == 'ar' %}تعرّف على شركة ROCKS{% else %}Learn more about ROCKS{% endif %}">Learn more <i data-lucide="arrow-right" aria-hidden="true"></i></a></div>
-    <figure class="ev-about__visual reveal"><img src="{% static 'images/home/exhibition-booth.webp' %}" alt="ROCKS exhibition booth for EV charging products" width="1859" height="846" loading="lazy"></figure>
+    <div class="ev-about__copy reveal"><span class="ev-kicker">ABOUT ROCKS</span><h2 id="about-title">POWERING<br>EVERYDAY LIFE<br>SAFELY.</h2><p>ROCKS provides dependable electrical products and EV charging solutions with clear specifications, practical design and support before and after your purchase.</p><a class="ev-button ev-button--solid" href="{% url 'core:about' %}" aria-label="{% if current_language == 'ar' %}تعرّف على شركة ROCKS{% else %}Learn more about ROCKS{% endif %}">Learn more <i data-lucide="arrow-right" aria-hidden="true"></i></a></div>
+    <figure class="ev-about__visual reveal"><img src="{% static 'images/home/exhibition-booth.webp' %}" alt="ROCKS exhibition booth for electrical and EV products" width="1859" height="846" loading="lazy"></figure>
     <aside class="ev-about__aside reveal"><span>VISIT OUR</span><h3>EXHIBITION BOOTH</h3><ul><li><i data-lucide="layout-template" aria-hidden="true"></i> Modern design</li><li><i data-lucide="scan-eye" aria-hidden="true"></i> Live product display</li><li><i data-lucide="badge-help" aria-hidden="true"></i> Technical support</li><li><i data-lucide="handshake" aria-hidden="true"></i> Business opportunities</li></ul><a class="ev-button ev-button--solid" href="{% url 'core:contact' %}">Contact us <i data-lucide="arrow-right" aria-hidden="true"></i></a></aside>
   </div></section>
 </div>

@@ -14,7 +14,7 @@ from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
-from catalog.models import HomepageProduct, Product
+from catalog.models import Category, HomepageProduct, Product
 from marketing.models import Banner, Subscriber
 from .forms import ContactForm, NewsletterForm
 
@@ -119,19 +119,30 @@ def wishlist_toggle(request, product_id):
 
 def sitemap(request):
     namespace = "http://www.sitemaps.org/schemas/sitemap/0.9"
+    image_namespace = "http://www.google.com/schemas/sitemap-image/1.1"
     ET.register_namespace("", namespace)
+    ET.register_namespace("image", image_namespace)
     root = ET.Element(f"{{{namespace}}}urlset")
 
-    def add_url(path, lastmod=None):
+    def add_url(path, lastmod=None, image_url=None, image_title=None):
         node = ET.SubElement(root, f"{{{namespace}}}url")
         ET.SubElement(node, f"{{{namespace}}}loc").text = request.build_absolute_uri(path)
         if lastmod:
             ET.SubElement(node, f"{{{namespace}}}lastmod").text = lastmod.date().isoformat()
+        if image_url:
+            image = ET.SubElement(node, f"{{{image_namespace}}}image")
+            ET.SubElement(image, f"{{{image_namespace}}}loc").text = request.build_absolute_uri(image_url)
+            if image_title:
+                ET.SubElement(image, f"{{{image_namespace}}}title").text = image_title
 
     for path in ("/", "/products/", "/about/", "/contact/", "/privacy/", "/terms/", "/shipping-policy/", "/returns-policy/"):
         add_url(path)
-    for product in Product.objects.filter(is_active=True, category__is_active=True):
-        add_url(product.get_absolute_url(), product.updated_at)
+    categories = Category.objects.filter(is_active=True, products__is_active=True).distinct()
+    for category in categories:
+        add_url(category.get_absolute_url(), category.updated_at, category.image.url if category.image else None, category.display_name)
+    products = Product.objects.filter(is_active=True, category__is_active=True).select_related("category")
+    for product in products:
+        add_url(product.get_absolute_url(), product.updated_at, product.main_image.url if product.main_image else None, product.display_name)
     return HttpResponse(ET.tostring(root, encoding="unicode"), content_type="application/xml")
 
 

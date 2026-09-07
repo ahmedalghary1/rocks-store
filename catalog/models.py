@@ -21,6 +21,10 @@ class Category(OptimizedImageFieldsMixin, models.Model):
     slug = models.SlugField(unique=True, db_index=True)
     description = models.TextField(blank=True)
     description_ar = models.TextField("الوصف بالعربية", blank=True)
+    meta_title = models.CharField(max_length=160, blank=True)
+    meta_title_ar = models.CharField("عنوان محركات البحث بالعربية", max_length=160, blank=True)
+    meta_description = models.CharField(max_length=260, blank=True)
+    meta_description_ar = models.CharField("وصف محركات البحث بالعربية", max_length=260, blank=True)
     image = models.ImageField(upload_to="categories/", blank=True, validators=[validate_image_size])
     icon = models.CharField(max_length=40, blank=True)
     parent = models.ForeignKey("self", null=True, blank=True, on_delete=models.PROTECT, related_name="children")
@@ -38,7 +42,7 @@ class Category(OptimizedImageFieldsMixin, models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return f"{reverse('catalog:list')}?category={self.slug}"
+        return reverse("catalog:category", kwargs={"slug": self.slug})
 
     @property
     def display_name(self):
@@ -47,6 +51,14 @@ class Category(OptimizedImageFieldsMixin, models.Model):
     @property
     def display_description(self):
         return localized_value(self, "description")
+
+    @property
+    def display_meta_title(self):
+        return localized_value(self, "meta_title") or f"{self.display_name} | ROCKS Egypt"
+
+    @property
+    def display_meta_description(self):
+        return localized_value(self, "meta_description") or self.display_description or f"Shop {self.display_name} from ROCKS with clear specifications and delivery across Egypt."
 
 
 class Product(OptimizedImageFieldsMixin, models.Model):

@@ -18,14 +18,14 @@ class PublicPagesTests(TestCase):
         self.assertRedirects(response, reverse("core:home"))
         response = self.client.get(reverse("core:home"))
         self.assertContains(response, '<html lang="ar" dir="rtl">', html=False)
-        self.assertContains(response, "حلول شحن السيارات الكهربائية")
+        self.assertContains(response, "حلول الكهرباء وشحن السيارات")
         self.assertContains(response, "English")
         self.assertContains(response, "hero-ev-original.webp")
 
         self.client.post(reverse("set_language"), {"language": "en", "next": reverse("core:home")})
         response = self.client.get(reverse("core:home"))
         self.assertContains(response, '<html lang="en" dir="ltr">', html=False)
-        self.assertContains(response, "EV CHARGING SOLUTIONS")
+        self.assertContains(response, "ELECTRICAL &amp; EV SOLUTIONS")
         self.assertContains(response, "hero-ev-original.webp")
 
     def test_first_visit_defaults_to_english_and_mobile_drawer_is_closed(self):
@@ -43,8 +43,20 @@ class PublicPagesTests(TestCase):
 
     def test_health_and_legal_pages(self):
         self.assertEqual(self.client.get(reverse("core:health")).status_code, 200)
+        self.assertEqual(self.client.get(reverse("core:health"))["X-Robots-Tag"], "noindex, nofollow, noarchive")
         for name in ("privacy", "terms", "shipping_policy", "returns_policy"):
             self.assertEqual(self.client.get(reverse(f"core:{name}")).status_code, 200)
+
+    def test_sitemap_contains_indexable_category_pages(self):
+        from catalog.models import Category, Product
+        category = Category.objects.create(name="Power Strips", slug="test-power-strips")
+        Product.objects.create(
+            name="Test Strip", slug="test-strip", sku="STRIP-SEO", category=category,
+            short_description="A safe power strip", description="Product description", price=250,
+        )
+        response = self.client.get(reverse("core:sitemap"))
+        self.assertContains(response, f"http://testserver{category.get_absolute_url()}")
+        self.assertContains(response, "http://testserver/products/test-strip/")
 
     def test_contact_validates_on_server(self):
         response = self.client.post(reverse("core:contact"), {
@@ -67,8 +79,8 @@ class PublicPagesTests(TestCase):
             is_active=True,
         )
         response = self.client.get(reverse("core:home"))
-        self.assertContains(response, 'href="/about/" aria-label="Explore ROCKS EV charging solutions"')
-        self.assertContains(response, "Explore products")
+        self.assertContains(response, 'href="/about/"')
+        self.assertContains(response, "Explore electrical products")
 
     def test_production_readiness_rejects_incomplete_business_data(self):
         with self.assertRaises(CommandError):
