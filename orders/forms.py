@@ -1,5 +1,25 @@
 from django import forms
+from config.translations import translate_text
 from .models import Order, ShippingZone
+
+
+def resolve_shipping_zone(value):
+    """Resolve stable IDs plus legacy English/Arabic option values."""
+    submitted = str(value or "").strip()
+    zones = ShippingZone.objects.filter(is_active=True)
+    if submitted.isdigit():
+        zone = zones.filter(pk=int(submitted)).first()
+        if zone:
+            return zone
+    submitted_folded = submitted.casefold()
+    return next((
+        zone for zone in zones
+        if submitted_folded in {
+            zone.name.casefold(),
+            (zone.name_ar or "").casefold(),
+            translate_text(zone.name).casefold(),
+        }
+    ), None)
 
 
 class CheckoutForm(forms.ModelForm):
@@ -11,7 +31,7 @@ class CheckoutForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        zones = [(zone.name, zone.display_name) for zone in ShippingZone.objects.filter(is_active=True)]
+        zones = [(str(zone.pk), zone.display_name) for zone in ShippingZone.objects.filter(is_active=True)]
         self.fields["governorate"].widget = forms.Select(choices=[("", "Select a governorate")] + zones)
 
     def clean_phone(self):
@@ -27,10 +47,12 @@ class CheckoutForm(forms.ModelForm):
         return phone
 
     def clean_governorate(self):
-        governorate = self.cleaned_data["governorate"]
-        if not ShippingZone.objects.filter(name=governorate, is_active=True).exists():
+        submitted = self.cleaned_data["governorate"].strip()
+        zone = resolve_shipping_zone(submitted)
+        if not zone:
             raise forms.ValidationError("Select a governorate available for delivery.")
-        return governorate
+        self.shipping_zone = zone
+        return zone.name
 
 
 class TrackOrderForm(forms.Form):

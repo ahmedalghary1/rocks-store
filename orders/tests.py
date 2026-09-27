@@ -52,6 +52,38 @@ class CheckoutTests(TestCase):
         self.assertEqual(order.payment_method, "cod")
         self.assertEqual(order.notification.status, "pending")
 
+    def test_arabic_checkout_preserves_technical_values_and_accepts_arabic_details(self):
+        self.client.cookies["rocks_language"] = "ar"
+        self.client.post(reverse("cart:add", args=[self.product.id]), {"quantity": 1})
+        checkout_page = self.client.get(reverse("orders:checkout"))
+        zone = ShippingZone.objects.get(name="Cairo")
+        token = self.client.session["checkout_token"]
+
+        self.assertContains(checkout_page, f'value="{zone.pk}"')
+        self.assertContains(checkout_page, f'name="checkout_token" value="{token}"')
+        self.assertNotContains(checkout_page, 'value="القاهرة"')
+
+        response = self.client.post(reverse("orders:checkout"), self.checkout_payload(
+            governorate=str(zone.pk), customer_name="أحمد محمد", city="مدينة نصر",
+            address="١٠ شارع الطاقة", notes="يرجى الاتصال قبل الوصول",
+        ))
+        self.assertEqual(response.status_code, 302)
+        order = Order.objects.get()
+        self.assertEqual(order.customer_name, "أحمد محمد")
+        self.assertEqual(order.governorate, "Cairo")
+        self.assertEqual(order.city, "مدينة نصر")
+        self.assertRedirects(response, reverse("orders:success", args=[order.public_token]))
+
+    def test_checkout_accepts_legacy_translated_governorate_value(self):
+        self.client.post(reverse("cart:add", args=[self.product.id]), {"quantity": 1})
+        self.client.get(reverse("orders:checkout"))
+        response = self.client.post(
+            reverse("orders:checkout"),
+            self.checkout_payload(governorate="القاهرة", customer_name="عميل عربي"),
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Order.objects.get().governorate, "Cairo")
+
     def test_empty_cart_redirects(self):
         response = self.client.get(reverse("orders:checkout"))
         self.assertRedirects(response, reverse("catalog:list"))
@@ -61,13 +93,11 @@ class CheckoutTests(TestCase):
         self.client.get(reverse("orders:checkout"))
         token = self.client.session["checkout_token"]
         payload = {"checkout_token":token, "customer_name":"John", "phone":"01012345678", "email":"", "second_phone":"", "governorate":"Cairo", "city":"Cairo", "address":"Test Street", "notes":"", "payment_method":"cod"}
-        self.client.post(reverse("orders:checkout"), payload)
-        session = self.client.session
-        session["cart"] = {str(self.product.id): 1}
-        session["checkout_token"] = token
-        session.save()
-        self.client.post(reverse("orders:checkout"), payload)
+        first_response = self.client.post(reverse("orders:checkout"), payload)
+        second_response = self.client.post(reverse("orders:checkout"), payload)
         self.assertEqual(Order.objects.count(), 1)
+        self.assertEqual(second_response.status_code, 302)
+        self.assertEqual(second_response.url, first_response.url)
         self.product.refresh_from_db()
         self.assertEqual(self.product.stock_quantity, 4)
 

@@ -232,7 +232,23 @@ $('.zoom-btn')?.addEventListener('click', event => {
   const target = $('[data-main-image]'); const zoomed = target?.classList.toggle('zoomed');
   event.currentTarget.setAttribute('aria-pressed', String(Boolean(zoomed)));
 });
-$$('[data-submit-once]').forEach(button => button.closest('form').addEventListener('submit', () => { button.disabled = true; button.textContent = t('Confirming order…', 'جارٍ تأكيد الطلب…'); }));
+const submitOnceButtons = $$('[data-submit-once]');
+submitOnceButtons.forEach(button => {
+  button.dataset.originalMarkup = button.innerHTML;
+  button.closest('form')?.addEventListener('submit', () => {
+    button.disabled = true;
+    button.setAttribute('aria-busy', 'true');
+    button.textContent = t('Confirming order…', 'جارٍ تأكيد الطلب…');
+  });
+});
+// Back/forward cache can restore the checkout DOM exactly as it was while the
+// request was leaving, including a disabled submit button.
+addEventListener('pageshow', () => submitOnceButtons.forEach(button => {
+  button.disabled = false;
+  button.removeAttribute('aria-busy');
+  if (button.dataset.originalMarkup) button.innerHTML = button.dataset.originalMarkup;
+  renderIcons(button);
+}));
 
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const animateDetails = !reducedMotion && !matchMedia('(max-width: 700px)').matches;

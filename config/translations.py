@@ -1,5 +1,7 @@
 """Arabic storefront copy kept in one reviewable, dependency-free catalog."""
 
+import re
+
 AR_TRANSLATIONS = {
     "ROCKS Egypt | Electrical Products &amp; EV Charging Cables": "روكس مصر | منتجات كهربائية وكابلات شحن سيارات",
     "ROCKS Egypt | EV Cables, Power Strips &amp; Electrical Products": "روكس مصر | كابلات سيارات ومشتركات ومنتجات كهربائية",
@@ -270,11 +272,57 @@ AR_TRANSLATIONS.update({
 
 _REPLACEMENTS = sorted(AR_TRANSLATIONS.items(), key=lambda item: len(item[0]), reverse=True)
 
+_HTML_PARTS = re.compile(r"(<[^>]+>)")
+_TRANSLATABLE_ATTRIBUTE = re.compile(
+    r'(?P<prefix>\b(?:alt|title|placeholder|aria-label|content)\s*=\s*)'
+    r'(?P<quote>[\"\'])(?P<value>.*?)(?P=quote)',
+    re.IGNORECASE,
+)
 
-def translate_markup(value):
+
+def _translate_value(value):
     for english, arabic in _REPLACEMENTS:
         value = value.replace(english, arabic)
     return value
+
+
+def _translate_safe_attributes(tag):
+    return _TRANSLATABLE_ATTRIBUTE.sub(
+        lambda match: (
+            f"{match.group('prefix')}{match.group('quote')}"
+            f"{_translate_value(match.group('value'))}{match.group('quote')}"
+        ),
+        tag,
+    )
+
+
+def translate_markup(value):
+    """Translate visible HTML without changing form values, URLs, or identifiers.
+
+    The storefront previously translated the complete response as an opaque
+    string. That changed values such as ``<option value="Cairo">`` into Arabic,
+    while the checkout backend still expected the stable database value.
+    """
+    translated = []
+    raw_text_element = None
+    for part in _HTML_PARTS.split(value):
+        if not part:
+            continue
+        if part.startswith("<"):
+            tag_name_match = re.match(r"<\s*(/?)\s*([a-zA-Z0-9]+)", part)
+            if tag_name_match:
+                closing, tag_name = tag_name_match.groups()
+                tag_name = tag_name.lower()
+                if closing and tag_name == raw_text_element:
+                    raw_text_element = None
+                elif not closing and tag_name in {"script", "style", "textarea"}:
+                    raw_text_element = tag_name
+            translated.append(_translate_safe_attributes(part))
+        elif raw_text_element:
+            translated.append(part)
+        else:
+            translated.append(_translate_value(part))
+    return "".join(translated)
 
 
 def translate_text(value):

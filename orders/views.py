@@ -12,7 +12,7 @@ from django.utils import timezone
 
 from cart.service import Cart
 from catalog.models import Product, ProductVariant
-from .forms import CheckoutForm, TrackOrderForm
+from .forms import CheckoutForm, TrackOrderForm, resolve_shipping_zone
 from .models import Coupon, Order, OrderItem, OrderNotification, ShippingZone
 
 
@@ -29,6 +29,20 @@ def _checkout_token(request):
 
 
 def checkout(request):
+    # Browsers, proxies, and impatient taps can repeat a successful POST after
+    # the cart has already been cleared. Resolve the idempotency token before
+    # the empty-cart check so a retry always reaches the original receipt.
+    if request.method == "POST":
+        try:
+            replay_token = uuid.UUID(request.POST.get("checkout_token", ""))
+        except (ValueError, TypeError, AttributeError):
+            replay_token = None
+        if replay_token:
+            existing = Order.objects.filter(checkout_token=replay_token).first()
+            if existing:
+                request.session["last_order_token"] = str(existing.public_token)
+                return redirect("orders:success", public_token=existing.public_token)
+
     cart = Cart(request)
     items = cart.items()
     if not items:
@@ -53,7 +67,7 @@ def checkout(request):
                 try:
                     with transaction.atomic():
                         subtotal = sum((item["total"] for item in items), Decimal("0"))
-                        zone = ShippingZone.objects.get(name=form.cleaned_data["governorate"], is_active=True)
+                        zone = form.shipping_zone
                         shipping = zone.cost_for(subtotal)
                         discount = Decimal("0")
                         claimed_coupon = None
@@ -112,9 +126,9 @@ def checkout(request):
                 cart.clear()
                 return redirect("orders:success", public_token=order.public_token)
     shipping = cart.shipping
-    selected_governorate = request.POST.get("governorate", "")
+    selected_governorate = request.POST.get("governorate", "").strip()
     if selected_governorate:
-        zone = ShippingZone.objects.filter(name=selected_governorate, is_active=True).first()
+        zone = resolve_shipping_zone(selected_governorate)
         if zone:
             shipping = zone.cost_for(cart.subtotal)
     return render(request, "orders/checkout.html", {
