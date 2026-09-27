@@ -1,0 +1,79 @@
+{% extends 'controlpanel/base.html' %}
+{% block content %}
+<section class="cp-order-detail-head">
+  <div>
+    <a class="cp-back-link" href="{% url 'controlpanel:list' 'orders' %}"><i data-lucide="arrow-right"></i>العودة إلى الطلبات</a>
+    <div class="cp-order-title"><h2>طلب {{ object.order_number }}</h2><span class="cp-status cp-status--{{ object.status }}">{{ status_label }}</span></div>
+    <p>تم استلامه {{ object.created_at|date:"d/m/Y" }} الساعة {{ object.created_at|date:"H:i" }} · آخر تحديث {{ object.updated_at|timesince }}</p>
+  </div>
+  <div class="cp-order-head-total"><small>إجمالي الطلب</small><strong>{{ object.total|floatformat:2 }} <em>EGP</em></strong></div>
+</section>
+
+<form method="post" class="cp-editor cp-order-editor">{% csrf_token %}
+  {% if form.non_field_errors %}<div class="cp-form-errors">{{ form.non_field_errors }}</div>{% endif %}
+  <div class="cp-order-layout">
+    <div class="cp-order-content">
+      <section class="cp-card cp-order-products">
+        <header><div><span>محتويات الطلب</span><h2>المنتجات المطلوبة</h2></div><b>{{ order_items|length }} منتج</b></header>
+        <div class="cp-order-product-list">
+          {% for item in order_items %}
+          <article class="cp-order-product">
+            <div class="cp-product-image">{% if item.product and item.product.main_image %}<img src="{{ item.product.main_image.url }}" alt="{{ item.product_name_ar|default:item.product_name }}">{% else %}<i data-lucide="package"></i>{% endif %}</div>
+            <div class="cp-product-copy"><strong>{{ item.product_name_ar|default:item.product_name }}</strong><small>SKU: <span dir="ltr">{{ item.sku }}</span>{% if item.variant %} · {{ item.variant }}{% endif %}</small></div>
+            <div class="cp-product-qty"><small>الكمية</small><b>{{ item.quantity }}</b></div>
+            <div class="cp-product-price"><small>{{ item.price|floatformat:2 }} EGP للوحدة</small><strong>{{ item.total|floatformat:2 }} EGP</strong></div>
+          </article>
+          {% empty %}<div class="cp-empty"><i data-lucide="package-x"></i><b>لا توجد منتجات مسجلة لهذا الطلب</b></div>{% endfor %}
+        </div>
+        <div class="cp-order-totals">
+          <div><span>قيمة المنتجات</span><b>{{ object.subtotal|floatformat:2 }} EGP</b></div>
+          {% if object.discount %}<div class="discount"><span>الخصم{% if object.coupon %} ({{ object.coupon.code }}){% endif %}</span><b>- {{ object.discount|floatformat:2 }} EGP</b></div>{% endif %}
+          <div><span>الشحن</span><b>{% if object.shipping_cost %}{{ object.shipping_cost|floatformat:2 }} EGP{% else %}مجاني{% endif %}</b></div>
+          <div class="grand"><span>الإجمالي</span><b>{{ object.total|floatformat:2 }} EGP</b></div>
+        </div>
+      </section>
+
+      <section class="cp-card cp-customer-card">
+        <header><div><span>بيانات الشحن</span><h2>العميل وعنوان الاستلام</h2></div><i data-lucide="map-pin"></i></header>
+        <div class="cp-customer-grid">
+          <div><span>اسم العميل</span><strong>{{ object.customer_name }}</strong></div>
+          <div><span>رقم الهاتف</span><strong dir="ltr">{{ object.phone }}</strong>{% if object.second_phone %}<small dir="ltr">{{ object.second_phone }}</small>{% endif %}</div>
+          <div><span>البريد الإلكتروني</span><strong dir="ltr">{{ object.email|default:"غير مسجل" }}</strong></div>
+          <div><span>المحافظة والمدينة</span><strong>{{ object.governorate }}، {{ object.city }}</strong></div>
+          <div class="wide"><span>العنوان بالتفصيل</span><strong>{{ object.address }}</strong></div>
+          {% if object.notes %}<div class="wide note"><span>ملاحظات العميل</span><p>{{ object.notes|linebreaksbr }}</p></div>{% endif %}
+        </div>
+      </section>
+    </div>
+
+    <aside class="cp-order-aside">
+      <section class="cp-card cp-order-control">
+        <header><div><span>تنفيذ الطلب</span><h2>الحالة والدفع</h2></div><i data-lucide="sliders-horizontal"></i></header>
+        <div class="cp-order-control-fields">
+          {% if can_change %}
+          <div class="cp-field"><label for="{{ form.status.id_for_label }}">{{ form.status.label }}</label>{{ form.status }}{% for error in form.status.errors %}<em>{{ error }}</em>{% endfor %}</div>
+          <div class="cp-field"><label for="{{ form.payment_status.id_for_label }}">{{ form.payment_status.label }}</label>{{ form.payment_status }}{% for error in form.payment_status.errors %}<em>{{ error }}</em>{% endfor %}</div>
+          {% else %}
+          <div class="cp-readonly-status"><span>حالة الطلب</span><b class="cp-status cp-status--{{ object.status }}">{{ status_label }}</b></div>
+          <div class="cp-readonly-status"><span>حالة الدفع</span><b>{{ payment_status_label }}</b></div>
+          {% endif %}
+          <div class="cp-payment-method"><span><i data-lucide="banknote"></i></span><div><small>طريقة الدفع</small><strong>{{ object.get_payment_method_display }}</strong></div><b class="cp-payment-chip">{{ payment_status_label }}</b></div>
+        </div>
+      </section>
+
+      <section class="cp-card cp-order-meta">
+        <header><div><span>مرجع الطلب</span><h2>معلومات إضافية</h2></div></header>
+        <div><span>رقم الطلب</span><b dir="ltr">{{ object.order_number }}</b></div>
+        <div><span>حساب العميل</span><b>{{ object.user|default:"زائر" }}</b></div>
+        <div><span>آخر تحديث</span><b>{{ object.updated_at|date:"d/m/Y، H:i" }}</b></div>
+      </section>
+    </aside>
+  </div>
+
+  {% if can_change %}{% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+  {% for field in form %}{% if field.name != 'status' and field.name != 'payment_status' %}<input type="hidden" name="{{ field.name }}" value="{{ field.value|default_if_none:'' }}">{% endif %}{% endfor %}{% endif %}
+  {% if can_change or can_delete %}
+  <div class="cp-savebar"><div><i data-lucide="shield-check"></i><span>{% if can_change %}يتم تحديث حالة الطلب مباشرة.{% else %}تفاصيل الطلب للعرض فقط.{% endif %}</span></div><a href="{% url 'controlpanel:list' 'orders' %}">إلغاء</a>{% if can_delete %}<a class="cp-delete-link" href="{% url 'controlpanel:delete' 'orders' object.pk %}">حذف الطلب</a>{% endif %}{% if can_change %}<button type="submit" name="save_continue" value="1" class="cp-primary"><i data-lucide="save"></i>حفظ حالة الطلب</button>{% endif %}</div>
+  {% endif %}
+</form>
+{% endblock %}

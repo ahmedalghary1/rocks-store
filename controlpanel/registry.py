@@ -11,7 +11,10 @@ from orders.models import Coupon, Order, OrderItem, OrderNotification, ShippingZ
 
 RESOURCES = OrderedDict({
     "orders": {"model": Order, "label": "الطلبات", "singular": "طلب", "icon": "shopping-bag", "group": "sales", "list": ("order_number", "customer_name", "phone", "total", "status", "payment_status", "created_at"), "search": ("order_number", "customer_name", "phone", "email"), "filters": ("status", "payment_status"), "select": ("user", "coupon")},
-    "order-items": {"model": OrderItem, "label": "عناصر الطلبات", "singular": "عنصر طلب", "icon": "package", "group": "sales", "list": ("order", "product_name", "sku", "price", "quantity", "total"), "search": ("order__order_number", "product_name", "sku"), "filters": ("order",), "select": ("order", "product", "variant")},
+    # Order items are managed from their parent order. Keep the resource registered
+    # for backwards-compatible URLs and permissions, but do not expose a separate
+    # navigation destination.
+    "order-items": {"model": OrderItem, "label": "عناصر الطلبات", "singular": "عنصر طلب", "icon": "package", "group": "sales", "nav": False, "list": ("order", "product_name", "sku", "price", "quantity", "total"), "search": ("order__order_number", "product_name", "sku"), "filters": ("order",), "select": ("order", "product", "variant")},
     "coupons": {"model": Coupon, "label": "كوبونات الخصم", "singular": "كوبون", "icon": "ticket-percent", "group": "sales", "list": ("code", "discount_type", "value", "minimum_order", "usage_count", "usage_limit", "is_active"), "search": ("code",), "filters": ("discount_type", "is_active")},
     "shipping-zones": {"model": ShippingZone, "label": "مناطق الشحن", "singular": "منطقة شحن", "icon": "truck", "group": "sales", "list": ("name", "name_ar", "shipping_cost", "free_shipping_threshold", "is_active", "sort_order"), "search": ("name", "name_ar"), "filters": ("is_active",)},
     "notifications": {"model": OrderNotification, "label": "إشعارات الطلبات", "singular": "إشعار طلب", "icon": "bell-ring", "group": "sales", "list": ("order", "status", "attempts", "last_attempt_at", "sent_at"), "search": ("order__order_number", "last_error"), "filters": ("status",), "select": ("order",)},

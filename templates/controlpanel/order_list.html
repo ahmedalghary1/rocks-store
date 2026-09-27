@@ -1,0 +1,41 @@
+{% extends 'controlpanel/base.html' %}
+{% block content %}
+<section class="cp-page-head cp-orders-head">
+  <div>
+    <span>إدارة المبيعات</span>
+    <h2>الطلبات</h2>
+    <p>كل طلب أمامك بملخص العميل والمنتجات والقيمة، وافتحه لمراجعة التفاصيل كاملة.</p>
+  </div>
+  <a class="cp-secondary" href="?{% if query_string %}{{ query_string }}&{% endif %}export=csv"><i data-lucide="download"></i>تصدير الطلبات</a>
+</section>
+
+<section class="cp-order-toolbar cp-card">
+  <form method="get" class="cp-filters">
+    <label class="cp-search"><i data-lucide="search"></i><input type="search" name="q" value="{{ query }}" placeholder="ابحث برقم الطلب أو اسم العميل أو الهاتف..."></label>
+    {% for filter in filter_options %}<label><span>{{ filter.label }}</span><select name="{{ filter.name }}"><option value="">الكل</option>{% for value,label in filter.values %}<option value="{{ value }}" {% if filter.selected == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></label>{% endfor %}
+    <button class="cp-filter-button" type="submit"><i data-lucide="list-filter"></i>تطبيق</button>
+    {% if request.GET %}<a href="{% url 'controlpanel:list' 'orders' %}" class="cp-clear">مسح</a>{% endif %}
+  </form>
+</section>
+
+<div class="cp-orders-summary"><span><b>{{ page.paginator.count }}</b> طلب</span><small>اضغط على أي طلب لعرض بيانات العميل والمنتجات كاملة</small></div>
+
+<section class="cp-order-list" aria-label="قائمة الطلبات">
+  {% for order in page %}
+  <a class="cp-order-row" href="{% url 'controlpanel:edit' 'orders' order.pk %}" aria-label="عرض تفاصيل الطلب {{ order.order_number }}">
+    <div class="cp-order-main">
+      <span class="cp-order-icon"><i data-lucide="shopping-bag"></i></span>
+      <div><strong>{{ order.order_number }}</strong><small>{{ order.created_at|date:"d/m/Y، H:i" }}</small></div>
+    </div>
+    <div class="cp-order-customer"><strong>{{ order.customer_name }}</strong><small><i data-lucide="phone"></i><span dir="ltr">{{ order.phone }}</span></small></div>
+    <div class="cp-order-items"><strong>{{ order.items.all|length }} منتج</strong><small>{% for item in order.items.all|slice:":2" %}{{ item.product_name_ar|default:item.product_name }}{% if not forloop.last %}، {% endif %}{% endfor %}{% if order.items.all|length > 2 %} +{{ order.items.all|length|add:"-2" }}{% endif %}</small></div>
+    <div class="cp-order-total"><strong>{{ order.total|floatformat:2 }} <em>EGP</em></strong><span class="cp-status cp-status--{{ order.status }}">{{ order.panel_status }}</span></div>
+    <span class="cp-order-arrow"><i data-lucide="chevron-left"></i></span>
+  </a>
+  {% empty %}
+  <div class="cp-card cp-empty cp-orders-empty"><i data-lucide="inbox"></i><b>لا توجد طلبات مطابقة</b><span>جرّب تغيير البحث أو عوامل التصفية.</span></div>
+  {% endfor %}
+</section>
+
+{% if page.has_other_pages %}<nav class="cp-pagination">{% if page.has_previous %}<a href="?page={{ page.previous_page_number }}{% if query_string %}&{{ query_string }}{% endif %}" aria-label="الصفحة السابقة"><i data-lucide="chevron-right"></i></a>{% endif %}<span>صفحة {{ page.number }} من {{ page.paginator.num_pages }}</span>{% if page.has_next %}<a href="?page={{ page.next_page_number }}{% if query_string %}&{{ query_string }}{% endif %}" aria-label="الصفحة التالية"><i data-lucide="chevron-left"></i></a>{% endif %}</nav>{% endif %}
+{% endblock %}

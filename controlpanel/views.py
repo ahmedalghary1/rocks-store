@@ -59,7 +59,7 @@ def _panel_context(request, active=None, **extra):
     for group_key, group_label in GROUPS:
         entries = []
         for key, config in RESOURCES.items():
-            if config["group"] == group_key and _allowed(request, config):
+            if config["group"] == group_key and config.get("nav", True) and _allowed(request, config):
                 entries.append({"key": key, **config})
         if entries:
             groups.append({"key": group_key, "label": group_label, "entries": entries})
@@ -253,6 +253,30 @@ def resource_list(request, resource):
     preserved_query.pop("export", None)
     columns = [{"name": name, "label": _field_label(config["model"], name)} for name in config["list"]]
     rows = [{"object": obj, "cells": [_raw_display(obj, name) for name in config["list"]]} for obj in page]
+    if resource == "orders":
+        order_ids = [order.pk for order in page.object_list]
+        order_map = {
+            order.pk: order
+            for order in Order.objects.filter(pk__in=order_ids).prefetch_related("items")
+        }
+        page.object_list = [order_map[order.pk] for order in page.object_list]
+        for order in page.object_list:
+            order.panel_status = CHOICE_LABELS.get(order.status, order.get_status_display())
+            order.panel_payment_status = CHOICE_LABELS.get(order.payment_status, order.get_payment_status_display())
+        order_context = _panel_context(
+            request,
+            active=resource,
+            page_title="الطلبات",
+            config=config,
+            resource=resource,
+            page=page,
+            query=q,
+            filter_options=_filter_options(request, config),
+            can_change=_allowed(request, config, "change"),
+            query_string=preserved_query.urlencode(),
+        )
+        return render(request, "controlpanel/order_list.html", order_context)
+
     context = _panel_context(
         request,
         active=resource,
@@ -277,7 +301,10 @@ def resource_list(request, resource):
 def resource_form(request, resource, pk=None):
     config = _config_or_404(resource)
     action = "change" if pk else "add"
-    _require(request, config, action)
+    if config["model"] is Order and pk and request.method == "GET":
+        _require(request, config, "view")
+    else:
+        _require(request, config, action)
     if not pk and config.get("singleton") and config["model"].objects.exists():
         existing = config["model"].objects.first()
         return redirect("controlpanel:edit", resource=resource, pk=existing.pk)
@@ -305,8 +332,14 @@ def resource_form(request, resource, pk=None):
         resource=resource,
         form=form,
         object=instance,
+        can_change=bool(instance and _allowed(request, config, "change")),
         can_delete=bool(instance and _allowed(request, config, "delete") and instance != request.user),
     )
+    if isinstance(instance, Order):
+        context["order_items"] = instance.items.select_related("product", "variant").all()
+        context["status_label"] = CHOICE_LABELS.get(instance.status, instance.get_status_display())
+        context["payment_status_label"] = CHOICE_LABELS.get(instance.payment_status, instance.get_payment_status_display())
+        return render(request, "controlpanel/order_detail.html", context)
     return render(request, "controlpanel/resource_form.html", context)
 
 

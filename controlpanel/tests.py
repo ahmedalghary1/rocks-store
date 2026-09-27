@@ -5,6 +5,7 @@ from django.urls import reverse
 from catalog.models import Category, HomepageProduct, Product
 from controlpanel.registry import RESOURCES
 from marketing.models import Banner
+from orders.models import Order, OrderItem
 
 
 class ControlPanelTests(TestCase):
@@ -111,3 +112,46 @@ class ControlPanelTests(TestCase):
         response = self.client.get(reverse("core:home"))
         self.assertContains(response, "Selected homepage product")
         self.assertNotContains(response, "Unselected featured product")
+
+    def test_orders_list_and_detail_keep_customer_and_products_together(self):
+        category = Category.objects.create(name="Chargers", slug="chargers-order-test")
+        product = Product.objects.create(
+            name="Wall Charger", name_ar="شاحن جداري", slug="wall-charger-order-test",
+            sku="WC-22", category=category, short_description="Fast charger",
+            description="Order test product", price="12500.00", stock_quantity=3,
+        )
+        order = Order.objects.create(
+            order_number="ROCKS-1001", customer_name="أحمد محمد", phone="01000000000",
+            email="ahmed@example.com", governorate="القاهرة", city="مدينة نصر",
+            address="شارع الاختبار، مبنى 10", notes="الاتصال قبل الوصول",
+            subtotal="25000.00", shipping_cost="100.00", discount="0.00", total="25100.00",
+        )
+        OrderItem.objects.create(
+            order=order, product=product, product_name=product.name, product_name_ar=product.name_ar,
+            sku=product.sku, price="12500.00", quantity=2, total="25000.00",
+        )
+        self.client.force_login(self.admin)
+
+        response = self.client.get(reverse("controlpanel:list", args=("orders",)))
+        self.assertContains(response, "ROCKS-1001")
+        self.assertContains(response, "أحمد محمد")
+        self.assertContains(response, "شاحن جداري")
+        self.assertNotContains(response, ">عناصر الطلبات<")
+
+        response = self.client.get(reverse("controlpanel:edit", args=("orders", order.pk)))
+        self.assertContains(response, "العميل وعنوان الاستلام")
+        self.assertContains(response, "المنتجات المطلوبة")
+        self.assertContains(response, "شاحن جداري")
+        self.assertContains(response, "الاتصال قبل الوصول")
+
+        response = self.client.post(reverse("controlpanel:edit", args=("orders", order.pk)), {
+            "user": "", "coupon": "", "order_number": order.order_number, "customer_name": order.customer_name,
+            "phone": order.phone, "email": order.email, "second_phone": "",
+            "governorate": order.governorate, "city": order.city, "address": order.address,
+            "notes": order.notes, "subtotal": order.subtotal, "shipping_cost": order.shipping_cost,
+            "discount": order.discount, "total": order.total, "status": "confirmed",
+            "payment_method": "cod", "payment_status": "unpaid", "save_continue": "1",
+        })
+        self.assertRedirects(response, reverse("controlpanel:edit", args=("orders", order.pk)))
+        order.refresh_from_db()
+        self.assertEqual(order.status, "confirmed")
