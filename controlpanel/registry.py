@@ -70,7 +70,7 @@ FIELD_LABELS = {
     "free_shipping_threshold": "حد الشحن المجاني", "attempts": "عدد المحاولات", "last_error": "آخر خطأ",
     "last_attempt_at": "آخر محاولة", "sent_at": "تاريخ الإرسال", "subject": "الموضوع", "message": "الرسالة",
     "is_read": "تمت القراءة", "company_name": "اسم الشركة", "whatsapp": "واتساب", "facebook": "فيسبوك",
-    "instagram": "إنستجرام", "tiktok": "تيك توك", "footer_text": "نص التذييل",
+    "instagram": "إنستجرام", "tiktok": "تيك توك", "footer_text": "نص التذييل بالإنجليزية",
     "footer_text_ar": "نص التذييل بالعربية", "shipping_message": "رسالة الشحن",
     "shipping_message_ar": "رسالة الشحن بالعربية", "currency": "العملة", "link": "الرابط",
     "button_text": "نص الزر", "button_text_ar": "نص الزر بالعربية", "location": "مكان الظهور", "recipient_name": "اسم المستلم",

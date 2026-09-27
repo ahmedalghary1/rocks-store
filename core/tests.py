@@ -6,7 +6,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from marketing.models import Banner, Subscriber
-from .models import ContactMessage
+from .models import ContactMessage, SiteSettings
 
 
 class PublicPagesTests(TestCase):
@@ -54,6 +54,20 @@ class PublicPagesTests(TestCase):
         response = self.client.get(reverse("core:home"), HTTP_ACCEPT_LANGUAGE="ar-EG,ar;q=0.9")
         self.assertContains(response, '<html lang="en" dir="ltr">', html=False)
         self.assertContains(response, '<div class="mobile-drawer" aria-hidden="true">', html=False)
+
+    def test_footer_switches_between_english_and_arabic(self):
+        SiteSettings.objects.create(
+            footer_text="Powering a cleaner tomorrow.",
+            footer_text_ar="نقود الطريق نحو المستقبل.",
+        )
+
+        response = self.client.get(reverse("core:home"))
+        self.assertContains(response, "Powering a cleaner tomorrow.")
+        self.assertNotContains(response, "نقود الطريق نحو المستقبل.")
+
+        self.client.post(reverse("set_language"), {"language": "ar", "next": reverse("core:home")})
+        response = self.client.get(reverse("core:home"))
+        self.assertContains(response, "نقود الطريق نحو المستقبل.")
 
     def test_navigation_uses_real_active_catalog_categories(self):
         from catalog.models import Category
