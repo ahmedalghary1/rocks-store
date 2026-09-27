@@ -35,7 +35,7 @@ class PublicPagesTests(TestCase):
         self.assertContains(response, "حلول الكهرباء وشحن السيارات")
         self.assertContains(response, "لكل")
         self.assertContains(response, "توصيلة")
-        self.assertContains(response, "التصنيفات الشائعة")
+        self.assertContains(response, "تصنيفات المنتجات")
         self.assertContains(response, "مشترك كهربائي USB بـ 6 مخارج")
         self.assertContains(response, "ستة مخارج ومنفذا USB في مشترك كهربائي واحد موثوق.")
         self.assertNotContains(response, "FOR EVERY")
@@ -54,6 +54,22 @@ class PublicPagesTests(TestCase):
         response = self.client.get(reverse("core:home"), HTTP_ACCEPT_LANGUAGE="ar-EG,ar;q=0.9")
         self.assertContains(response, '<html lang="en" dir="ltr">', html=False)
         self.assertContains(response, '<div class="mobile-drawer" aria-hidden="true">', html=False)
+
+    def test_navigation_uses_real_active_catalog_categories(self):
+        from catalog.models import Category
+
+        active = Category.objects.create(
+            name="Real Store Category", name_ar="قسم حقيقي", slug="real-store-category",
+            icon="plug-zap", is_active=True, sort_order=1,
+        )
+        Category.objects.create(name="Hidden Category", slug="hidden-category", is_active=False)
+
+        response = self.client.get(reverse("core:home"))
+
+        self.assertContains(response, active.get_absolute_url())
+        self.assertContains(response, "Real Store Category")
+        self.assertNotContains(response, "Hidden Category")
+        self.assertNotContains(response, "/products/category/cables/")
 
     def test_homepage_has_no_artificial_render_delay_or_blocking_remote_fonts(self):
         response = self.client.get(reverse("core:home"))

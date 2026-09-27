@@ -2,5 +2,5 @@
   <button class="search-close" data-search-close aria-label="Close search"><i data-lucide="x" aria-hidden="true"></i></button>
   <span class="eyebrow">Find what you need</span><h2 id="searchTitle">Search ROCKS products</h2>
   <div class="search-field"><span><i data-lucide="search" aria-hidden="true"></i></span><input id="liveSearch" type="search" autocomplete="off" placeholder="Search by product name or SKU…" data-url="{% url 'catalog:suggestions' %}"></div>
-  <div id="searchResults" class="search-results"><p>Try: EV cable, power strip, plug or lamp</p><div class="popular-searches"><a href="{% url 'catalog:category' 'cables' %}">Cables</a><a href="{% url 'catalog:category' 'power-strips' %}">Power strips</a><a href="{% url 'catalog:category' 'lighting' %}">Lighting</a></div></div>
+  <div id="searchResults" class="search-results"><p>Browse a category or search by product name or SKU.</p><div class="popular-searches">{% for category in navigation_categories|slice:":4" %}<a href="{{ category.get_absolute_url }}">{{ category.display_name }}</a>{% empty %}<a href="{% url 'catalog:list' %}">All products</a>{% endfor %}</div></div>
 </div></div>

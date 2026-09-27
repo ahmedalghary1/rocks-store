@@ -1,4 +1,5 @@
 from .models import SiteSettings
+from catalog.models import Category
 from django.templatetags.static import static
 
 
@@ -19,6 +20,7 @@ def site_context(request):
                 continue
     return {
         "site_settings": settings_obj,
+        "navigation_categories": Category.objects.filter(is_active=True),
         "cart_count": cart_count,
         "canonical_url": canonical_url,
         "default_og_image": request.build_absolute_uri(static("images/rocks-logo-social-black.webp")),
