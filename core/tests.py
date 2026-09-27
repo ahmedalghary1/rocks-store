@@ -117,6 +117,29 @@ class PublicPagesTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(ContactMessage.objects.count(), 0)
 
+    def test_contact_page_switches_all_copy_and_form_labels(self):
+        response = self.client.get(reverse("core:contact"))
+        self.assertContains(response, "Let’s find the right connection.")
+        self.assertContains(response, "Ask about compatibility, specifications, availability or delivery")
+        self.assertContains(response, "Full name")
+        self.assertNotContains(response, "لنجد التوصيلة المناسبة.")
+
+        self.client.post(reverse("set_language"), {"language": "ar", "next": reverse("core:contact")})
+        response = self.client.get(reverse("core:contact"))
+        self.assertContains(response, "لنجد التوصيلة المناسبة.")
+        self.assertContains(response, "اسأل عن التوافق أو المواصفات أو التوفر أو التوصيل")
+        self.assertContains(response, "الاسم بالكامل")
+        self.assertNotContains(response, "Let’s find the right connection.")
+        self.assertNotContains(response, "Ask about compatibility, specifications, availability or delivery")
+
+    def test_about_page_has_no_untranslated_current_copy_in_arabic(self):
+        self.client.post(reverse("set_language"), {"language": "ar", "next": reverse("core:about")})
+        response = self.client.get(reverse("core:about"))
+        self.assertContains(response, "الطاقة الآمنة ليست تفصيلًا.")
+        self.assertContains(response, "من طاقة الحياة اليومية إلى كل رحلة")
+        self.assertNotContains(response, "Safe power is not a detail.")
+        self.assertNotContains(response, "FROM EVERYDAY POWER TO EVERY JOURNEY")
+
     def test_newsletter_subscription(self):
         response = self.client.post(reverse("core:newsletter_subscribe"), {"email": "USER@example.com"})
         self.assertRedirects(response, reverse("core:home"))

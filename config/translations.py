@@ -270,6 +270,59 @@ AR_TRANSLATIONS.update({
     "Precision insulated screwdrivers in essential sizes.": "مفكات معزولة دقيقة بالمقاسات الأساسية.",
 })
 
+# Complete copy used by the current storefront. Keep whole sentences here so
+# generic words such as "products", "power", and "cables" cannot produce
+# partially translated Arabic sentences.
+AR_TRANSLATIONS.update({
+    "About ROCKS Electrical &amp; EV Solutions Egypt": "عن روكس للحلول الكهربائية وشحن السيارات في مصر",
+    "Learn how ROCKS selects dependable EV charging cables, power strips, plugs, lighting and electrical tools for customers in Egypt.": "تعرّف على كيفية اختيار روكس لكابلات شحن السيارات والمشتركات والفيش والإضاءة وأدوات الكهرباء الموثوقة لعملائها في مصر.",
+    "Safe power is not a detail.": "الطاقة الآمنة ليست تفصيلًا.",
+    "It supports everyday life.": "بل تدعم تفاصيل الحياة اليومية.",
+    "We offer carefully selected electrical products and EV charging solutions that combine safety, practical design and clear specifications.": "نقدم منتجات كهربائية وحلول شحن سيارات مختارة بعناية تجمع بين الأمان والتصميم العملي والمواصفات الواضحة.",
+    "FROM EVERYDAY POWER TO EVERY JOURNEY": "من طاقة الحياة اليومية إلى كل رحلة",
+    "A dependable electrical product must perform safely and consistently, day after day. That is why we select ROCKS products against clear standards and put simple purchasing and responsible after-sales support at the heart of the experience.": "يجب أن يعمل المنتج الكهربائي الموثوق بأمان وثبات يومًا بعد يوم. لذلك نختار منتجات ROCKS وفق معايير واضحة، ونجعل سهولة الشراء ودعم ما بعد البيع المسؤول في صميم التجربة.",
+    "From EV charging cables and power strips to plugs, switches, lighting, decorative lamp holders and electrical tools, our goal is simple: help you find the right product quickly and understand exactly what you are buying.": "من كابلات شحن السيارات والمشتركات إلى الفيش والمفاتيح والإضاءة والدوايات الديكور وأدوات الكهرباء، هدفنا بسيط: مساعدتك على إيجاد المنتج المناسب سريعًا وفهم ما تشتريه بدقة.",
+    "Dependable materials selected for everyday use.": "خامات موثوقة مختارة للاستخدام اليومي.",
+    "Contact ROCKS Electrical Products Egypt": "تواصل مع روكس للمنتجات الكهربائية في مصر",
+    "Contact ROCKS for help choosing EV charging cables, power strips, plugs, lighting and other electrical products in Egypt.": "تواصل مع روكس للمساعدة في اختيار كابلات شحن السيارات والمشتركات والفيش والإضاءة وغيرها من المنتجات الكهربائية في مصر.",
+    "Let’s find the right connection.": "لنجد التوصيلة المناسبة.",
+    "Ask about compatibility, specifications, availability or delivery and our product team will provide a clear, practical answer.": "اسأل عن التوافق أو المواصفات أو التوفر أو التوصيل، وسيقدم لك فريق المنتجات إجابة واضحة وعملية.",
+    "Electrical Products &amp; EV Charging Cables | ROCKS Egypt": "منتجات كهربائية وكابلات شحن سيارات | روكس مصر",
+    "ROCKS Electrical Products &amp; EV Charging Cables": "منتجات روكس الكهربائية وكابلات شحن السيارات",
+    "Shop ROCKS electrical products in Egypt: EV charging cables, power strips, plugs, switches, lighting, decorative lamp holders and electrical tools.": "تسوق منتجات روكس الكهربائية في مصر: كابلات شحن السيارات والمشتركات والفيش والمفاتيح والإضاءة والدوايات الديكور وأدوات الكهرباء.",
+    "Shop cables, power strips, plugs, lighting and electrical tools from ROCKS Egypt.": "تسوق الكابلات والمشتركات والفيش والإضاءة وأدوات الكهرباء من روكس مصر.",
+    "Browse a category or search by product name or SKU.": "تصفح أحد التصنيفات أو ابحث باسم المنتج أو رمزه.",
+    "ROCKS electrical and EV products": "منتجات روكس الكهربائية ومنتجات السيارات",
+    "Product categories": "تصنيفات المنتجات",
+    "Quick product view": "عرض سريع للمنتج",
+    "Close quick view": "إغلاق العرض السريع",
+    "ROCKS warranty": "ضمان روكس",
+    "ROCKS standards": "معايير روكس",
+    "Voltage": "الجهد",
+    "Material": "الخامة",
+    "Warranty": "الضمان",
+    "Heat-resistant materials": "خامات مقاومة للحرارة",
+    "One year from ROCKS": "عام من روكس",
+    "is engineered to ROCKS quality and safety standards, using carefully selected materials for dependable everyday performance.": "مصمم وفق معايير روكس للجودة والأمان، باستخدام خامات مختارة بعناية لأداء يومي موثوق.",
+    "Breadcrumb": "مسار التنقل",
+    "Shopping Cart | ROCKS": "سلة التسوق | روكس",
+    "Returns &amp; Exchanges | ROCKS": "الاسترجاع والاستبدال | روكس",
+    "Terms &amp; Conditions | ROCKS": "الشروط والأحكام | روكس",
+    "Returns & Exchanges | ROCKS": "الاسترجاع والاستبدال | روكس",
+    "Terms & Conditions | ROCKS": "الشروط والأحكام | روكس",
+    "Subject": "الموضوع",
+    "Message": "الرسالة",
+    "Cart, ": "السلة، ",
+    " items": " عناصر",
+    " item": " عنصر",
+    " products": " منتجات",
+    " product": " منتج",
+    "Add ": "إضافة ",
+    " to cart": " إلى السلة",
+    " to wishlist": " إلى المفضلة",
+    "View ": "عرض ",
+})
+
 _REPLACEMENTS = sorted(AR_TRANSLATIONS.items(), key=lambda item: len(item[0]), reverse=True)
 
 _HTML_PARTS = re.compile(r"(<[^>]+>)")

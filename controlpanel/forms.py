@@ -35,6 +35,18 @@ class DashboardModelForm(forms.ModelForm):
             if field.required:
                 widget.attrs["aria-required"] = "true"
 
+    def clean(self):
+        cleaned = super().clean()
+        for arabic_name in (name for name in self.fields if name.endswith("_ar")):
+            english_name = arabic_name[:-3]
+            if english_name not in self.fields:
+                continue
+            english_value = cleaned.get(english_name)
+            arabic_value = cleaned.get(arabic_name)
+            if isinstance(english_value, str) and english_value.strip() and not str(arabic_value or "").strip():
+                self.add_error(arabic_name, "أدخل النسخة العربية حتى لا يظهر النص الإنجليزي في الواجهة العربية.")
+        return cleaned
+
 
 class UserControlForm(DashboardModelForm):
     new_password = forms.CharField(

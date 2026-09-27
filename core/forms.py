@@ -3,6 +3,11 @@ from .models import ContactMessage
 
 
 class ContactForm(forms.ModelForm):
+    name = forms.CharField(label="Full name", max_length=120)
+    phone = forms.CharField(label="Phone number", max_length=30)
+    email = forms.EmailField(label="Email address", required=False)
+    subject = forms.CharField(label="Subject", max_length=160)
+    message = forms.CharField(label="Message", widget=forms.Textarea)
     website = forms.CharField(required=False, widget=forms.HiddenInput, label="")
 
     class Meta:
