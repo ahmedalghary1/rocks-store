@@ -250,35 +250,8 @@ addEventListener('pageshow', () => submitOnceButtons.forEach(button => {
   renderIcons(button);
 }));
 
-const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const animateDetails = !reducedMotion && !matchMedia('(max-width: 700px)').matches;
-const motionDirections = ['right', 'left', 'bottom', 'top'];
-const detailTargets = $$([
-  '.reveal', '.category-card', '.cart-item', '.checkout-fields > section',
-  '.order-summary', '.spec-grid > div', '.values-grid > article',
-  '.why-cards > article', '.order-card', '.success-grid > div',
-].join(','));
-const uniqueMotionTargets = [...new Set(detailTargets)];
-if (animateDetails) {
-  uniqueMotionTargets.forEach((element, index) => {
-    element.classList.add('motion-item', `motion-from-${motionDirections[index % motionDirections.length]}`);
-    element.style.setProperty('--motion-delay', `${Math.min((index % 6) * 65, 325)}ms`);
-  });
-}
-
-const revealMotion = () => {
-  document.documentElement.classList.add('page-ready');
-  if (!animateDetails || !('IntersectionObserver' in window)) {
-    uniqueMotionTargets.forEach(element => element.classList.add('visible'));
-    return;
-  }
-  const observer = new IntersectionObserver(entries => entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('visible');
-      observer.unobserve(entry.target);
-    }
-  }), { threshold: .08, rootMargin: '0px 0px -4% 0px' });
-  uniqueMotionTargets.forEach(element => observer.observe(element));
-};
-window.setTimeout(() => requestAnimationFrame(revealMotion), animateDetails ? 180 : 0);
+// Section and interaction motion is coordinated in motion.js using GSAP.
+// Keep legacy reveal-marked content visible if that enhancement cannot load.
+$$('.reveal').forEach(element => element.classList.add('visible'));
+document.documentElement.classList.add('page-ready');
 addEventListener('keydown', event => { if (event.key === 'Escape') { toggleSearch(false); toggleDrawer(false); toggleQuickModal(false); } });

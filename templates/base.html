@@ -15,6 +15,7 @@
   <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="{% block twitter_title %}ROCKS Electrical &amp; EV Solutions{% endblock %}"><meta name="twitter:description" content="{% block twitter_description %}Electrical products and EV charging solutions from ROCKS Egypt.{% endblock %}"><meta name="twitter:image" content="{% block twitter_image %}{{ default_og_image }}{% endblock %}">
   <link rel="stylesheet" href="{% static 'css/variables.css' %}"><link rel="stylesheet" href="{% static 'css/site.css' %}"><link rel="stylesheet" href="{% static 'css/polish.css' %}"><link rel="stylesheet" href="{% static 'css/home-footer.css' %}"><link rel="stylesheet" href="{% static 'css/brand-system.css' %}">
   {% block extra_head %}{% endblock %}
+  <link rel="stylesheet" href="{% static 'css/motion.css' %}">
 </head>
 <body class="{% block body_class %}{% endblock %}" data-icon-library="{% static 'js/vendor/lucide-storefront.min.js' %}">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -31,7 +32,10 @@
     <button type="button" data-search-open><i data-lucide="search" aria-hidden="true"></i><span>Search</span></button><a href="{% url 'core:wishlist' %}"><i data-lucide="heart" aria-hidden="true"></i><span>Wishlist</span></a>
     <a href="{% url 'cart:detail' %}"><i data-lucide="shopping-bag" aria-hidden="true"></i><span>Cart</span><b data-cart-count>{{ cart_count }}</b></a>
   </nav>
+  <script src="{% static 'js/vendor/gsap.min.js' %}" defer></script>
+  <script src="{% static 'js/vendor/ScrollTrigger.min.js' %}" defer></script>
   <script src="{% static 'js/main.js' %}" defer></script>
+  <script src="{% static 'js/motion.js' %}" defer></script>
   {% block extra_js %}{% endblock %}
 </body>
 </html>
