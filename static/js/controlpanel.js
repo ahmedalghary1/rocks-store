@@ -20,4 +20,30 @@ document.addEventListener('DOMContentLoaded', () => {
   selectAll?.addEventListener('change', () => {
     document.querySelectorAll('input[name="selected"]').forEach(input => { input.checked = selectAll.checked; });
   });
+
+  const lengthFormset = document.querySelector('[data-length-formset]');
+  if (lengthFormset) {
+    const rows = lengthFormset.querySelector('[data-formset-rows]');
+    const template = lengthFormset.querySelector('[data-empty-length-form]');
+    const total = lengthFormset.querySelector('[name$="-TOTAL_FORMS"]');
+
+    lengthFormset.addEventListener('click', event => {
+      const removeButton = event.target.closest('[data-remove-length]');
+      if (removeButton) {
+        const row = removeButton.closest('[data-formset-row]');
+        const deleteInput = row?.querySelector('input[name$="-DELETE"]');
+        if (deleteInput) deleteInput.checked = true;
+        if (row) row.hidden = true;
+        return;
+      }
+
+      if (!event.target.closest('[data-add-length]') || !template || !total || !rows) return;
+      const index = Number(total.value);
+      rows.insertAdjacentHTML('beforeend', template.innerHTML.replaceAll('__prefix__', index));
+      total.value = index + 1;
+      const newRow = rows.lastElementChild;
+      window.lucide?.createIcons({root: newRow});
+      newRow?.querySelector('input:not([type="hidden"])')?.focus();
+    });
+  }
 });

@@ -13,7 +13,7 @@
 <div class="rocks-home" dir="{% if current_language == 'ar' %}rtl{% else %}ltr{% endif %}">
   <section class="ev-hero" aria-labelledby="hero-title">
     <picture class="ev-hero__media" aria-hidden="true">
-      {% if marketing_banner.image %}{% if marketing_banner.mobile_image %}<source media="(max-width: 700px)" srcset="{{ marketing_banner.mobile_image.url }}" type="image/webp">{% endif %}<img src="{{ marketing_banner.image.url }}" alt="" width="{{ marketing_banner.image.width }}" height="{{ marketing_banner.image.height }}" fetchpriority="high">{% else %}<source media="(max-width: 700px)" srcset="{% static 'images/home/hero-ev-original-mobile.webp' %}" type="image/webp"><img src="{% static 'images/home/hero-ev-original.webp' %}" alt="" width="1536" height="1024" fetchpriority="high">{% endif %}
+      {% if marketing_banner.image %}{% if marketing_banner.mobile_image %}<source media="(max-width: 700px)" srcset="{{ marketing_banner.mobile_image.url }}" type="image/webp">{% endif %}<img src="{{ marketing_banner.image.url }}" alt="" width="{{ marketing_banner.image.width }}" height="{{ marketing_banner.image.height }}" fetchpriority="high" decoding="async">{% else %}<source media="(max-width: 700px)" srcset="{% static 'images/home/hero-ev-original-mobile.webp' %}" type="image/webp"><img src="{% static 'images/home/hero-ev-original.webp' %}" alt="" width="1536" height="1024" fetchpriority="high" decoding="async">{% endif %}
     </picture>
     <div class="ev-hero__shade" aria-hidden="true"></div>
     <div class="container ev-hero__inner">

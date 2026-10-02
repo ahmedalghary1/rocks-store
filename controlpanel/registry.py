@@ -56,7 +56,7 @@ FIELD_LABELS = {
     "is_best_seller": "الأكثر مبيعًا", "is_new": "جديد", "sort_order": "ترتيب العرض",
     "meta_title": "عنوان محركات البحث", "meta_title_ar": "عنوان محركات البحث بالعربية",
     "meta_description": "وصف محركات البحث", "meta_description_ar": "وصف محركات البحث بالعربية",
-    "product": "المنتج", "variant": "الخيار", "label": "التسمية", "label_ar": "التسمية بالعربية",
+    "product": "المنتج", "variant": "الخيار", "label": "الطول / اسم الخيار", "label_ar": "الطول / اسم الخيار بالعربية",
     "value": "القيمة", "value_ar": "القيمة بالعربية", "attributes": "الخصائص JSON",
     "order": "الطلب", "order_number": "رقم الطلب", "customer_name": "اسم العميل", "phone": "الهاتف",
     "second_phone": "هاتف بديل", "email": "البريد الإلكتروني", "governorate": "المحافظة", "city": "المدينة",

@@ -9,6 +9,22 @@
       {% for field in form %}<div class="cp-field {% if field.field.widget.input_type == 'checkbox' %}cp-field--check{% endif %} {% if field.name == 'description' or field.name == 'description_ar' or field.name == 'message' or field.name == 'notes' or field.name == 'last_error' or field.name == 'user_permissions' %}cp-field--wide{% endif %}"><label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %}<b>*</b>{% endif %}</label>{{ field }}{% if field.help_text %}<small>{{ field.help_text|safe }}</small>{% endif %}{% for error in field.errors %}<em>{{ error }}</em>{% endfor %}</div>{% endfor %}
     </div>
   </section>
+  {% if length_formset %}
+  <section class="cp-card cp-form-card cp-length-editor" data-length-formset>
+    <header><div><span>خيارات المنتج</span><h2>الأطوال والأسعار</h2><p>أضف كل طول بسعره ورمز المخزون والكمية المتاحة.</p></div><i data-lucide="ruler"></i></header>
+    {{ length_formset.management_form }}
+    {% if length_formset.non_form_errors %}<div class="cp-form-errors">{{ length_formset.non_form_errors }}</div>{% endif %}
+    <div class="cp-length-list" data-formset-rows>
+      {% for length_form in length_formset %}
+        {% include 'controlpanel/includes/product_length_row.html' with length_form=length_form %}
+      {% endfor %}
+    </div>
+    <template data-empty-length-form>
+      {% include 'controlpanel/includes/product_length_row.html' with length_form=length_formset.empty_form %}
+    </template>
+    <button type="button" class="cp-secondary cp-add-length" data-add-length><i data-lucide="plus"></i>إضافة طول آخر</button>
+  </section>
+  {% endif %}
   <div class="cp-savebar"><div><i data-lucide="shield-check"></i><span>تُطبّق التغييرات مباشرة على الموقع.</span></div><a href="{% url 'controlpanel:list' resource %}">إلغاء</a><button type="submit" name="save_continue" value="1" class="cp-secondary">حفظ ومتابعة</button><button type="submit" class="cp-primary"><i data-lucide="save"></i>حفظ التغييرات</button></div>
 </form>
 {% endblock %}

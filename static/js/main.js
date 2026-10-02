@@ -211,9 +211,9 @@ $('.filter-close')?.addEventListener('click', () => $('.filters')?.classList.rem
 $$('[data-qty-minus]').forEach(button => button.addEventListener('click', () => { const input = button.nextElementSibling; input.value = Math.max(Number(input.min), Number(input.value) - 1); }));
 $$('[data-qty-plus]').forEach(button => button.addEventListener('click', () => { const input = button.previousElementSibling; input.value = Math.min(Number(input.max), Number(input.value) + 1); }));
 $$('[data-tab]').forEach(button => button.addEventListener('click', () => { $$('.tab-buttons button,.tab-panel').forEach(el => el.classList.remove('active')); button.classList.add('active'); $(`#${button.dataset.tab}`).classList.add('active'); }));
-const variantSelect = $('[data-variant-select]');
-variantSelect?.addEventListener('change', event => {
-  const option = event.currentTarget.selectedOptions[0];
+const variantControls = $$('[data-variant-select], [data-variant-option]');
+variantControls.forEach(control => control.addEventListener('change', event => {
+  const option = event.currentTarget.matches('select') ? event.currentTarget.selectedOptions[0] : event.currentTarget;
   const form = $('#detail-cart-form'); const quantity = $('input[name=quantity]', form); const submit = $('button[type=submit]', form);
   const selected = Boolean(option?.value); const stock = Number(option?.dataset.stock || 0);
   if (quantity && selected) { quantity.max = stock; quantity.value = Math.min(Number(quantity.value), stock); }
@@ -223,7 +223,8 @@ variantSelect?.addEventListener('change', event => {
   if ($('[data-mobile-variant]')) $('[data-mobile-variant]').value = option?.value || '';
   if (submit) submit.disabled = !selected || stock < 1;
   const mobileSubmit = $('.mobile-add button[type=submit]'); if (mobileSubmit) mobileSubmit.disabled = !selected || stock < 1;
-});
+  $$('.price--hero del, .price--hero em').forEach(element => { element.hidden = selected; });
+}));
 $$('[data-gallery-image]').forEach(button => button.addEventListener('click', () => {
   const image = $('[data-main-image] img'); if (!image) return;
   image.src = button.dataset.galleryImage; image.alt = button.dataset.galleryAlt || image.alt;

@@ -46,6 +46,8 @@ class Cart:
         variant = None
         if variant_id:
             variant = ProductVariant.objects.get(pk=variant_id, product=product, is_active=True)
+        elif product.variants.filter(is_active=True).exists():
+            raise ValueError("Choose a length before adding this product to the cart.")
         available = variant.stock_quantity if variant else product.stock_quantity
         if available <= 0:
             raise ValueError("This product is currently unavailable.")

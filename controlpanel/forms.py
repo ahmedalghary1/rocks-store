@@ -3,7 +3,9 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.forms import modelform_factory
+from django.forms import inlineformset_factory, modelform_factory
+
+from catalog.models import Product, ProductVariant
 
 from .registry import FIELD_LABELS
 
@@ -46,6 +48,34 @@ class DashboardModelForm(forms.ModelForm):
             if isinstance(english_value, str) and english_value.strip() and not str(arabic_value or "").strip():
                 self.add_error(arabic_name, "أدخل النسخة العربية حتى لا يظهر النص الإنجليزي في الواجهة العربية.")
         return cleaned
+
+
+class ProductLengthForm(DashboardModelForm):
+    class Meta:
+        model = ProductVariant
+        fields = ("label", "label_ar", "sku", "price", "stock_quantity", "is_active")
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["label"].label = "الطول"
+        self.fields["label"].help_text = "مثال: 2 متر أو 5 متر."
+        self.fields["label_ar"].label = "الطول بالعربية"
+        self.fields["label_ar"].help_text = "مثال: ٢ متر."
+        self.fields["sku"].label = "رمز هذا الطول"
+        self.fields["price"].label = "سعر هذا الطول"
+        self.fields["price"].required = True
+        self.fields["stock_quantity"].label = "مخزون هذا الطول"
+
+
+def product_length_formset(*, can_delete=True):
+    return inlineformset_factory(
+        Product,
+        ProductVariant,
+        form=ProductLengthForm,
+        fields=("label", "label_ar", "sku", "price", "stock_quantity", "is_active"),
+        extra=1,
+        can_delete=can_delete,
+    )
 
 
 class UserControlForm(DashboardModelForm):

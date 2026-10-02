@@ -20,7 +20,7 @@ from core.models import ContactMessage
 from orders.models import Order
 from orders.services import restore_order_stock, send_order_notifications
 
-from .forms import StaffAuthenticationForm, form_for
+from .forms import StaffAuthenticationForm, form_for, product_length_formset
 from .registry import CHOICE_LABELS, FIELD_LABELS, GROUPS, RESOURCES, permission_name, resource_for
 
 
@@ -312,12 +312,33 @@ def resource_form(request, resource, pk=None):
     previous_order_status = instance.status if isinstance(instance, Order) else None
     FormClass = form_for(config)
     form = FormClass(request.POST or None, request.FILES or None, instance=instance)
-    if request.method == "POST" and form.is_valid():
+    length_formset = None
+    if config["model"] is Product:
+        can_manage_lengths = (
+            request.user.has_perm("catalog.add_productvariant")
+            and request.user.has_perm("catalog.change_productvariant")
+        )
+        if can_manage_lengths:
+            FormSet = product_length_formset(
+                can_delete=request.user.has_perm("catalog.delete_productvariant")
+            )
+            length_formset = FormSet(
+                request.POST or None,
+                instance=form.instance,
+                prefix="lengths",
+            )
+    forms_are_valid = form.is_valid()
+    if length_formset is not None:
+        forms_are_valid = length_formset.is_valid() and forms_are_valid
+    if request.method == "POST" and forms_are_valid:
         if isinstance(instance, User) and instance == request.user and (not form.cleaned_data.get("is_active") or not form.cleaned_data.get("is_staff")):
             form.add_error("is_staff", "لا يمكنك تعطيل حسابك الإداري الحالي أو إزالة صفة الموظف منه.")
         else:
             with transaction.atomic():
                 obj = form.save()
+                if length_formset is not None:
+                    length_formset.instance = obj
+                    length_formset.save()
                 if isinstance(obj, Order) and obj.status == "cancelled" and previous_order_status != "cancelled":
                     restore_order_stock(obj.pk)
             messages.success(request, f"تم حفظ {config['singular']} بنجاح.")
@@ -331,6 +352,7 @@ def resource_form(request, resource, pk=None):
         config=config,
         resource=resource,
         form=form,
+        length_formset=length_formset,
         object=instance,
         can_change=bool(instance and _allowed(request, config, "change")),
         can_delete=bool(instance and _allowed(request, config, "delete") and instance != request.user),

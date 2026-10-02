@@ -37,6 +37,28 @@ class CartTests(TestCase):
         variant = ProductVariant.objects.create(product=self.product, sku="T-1-B", label="Large", price=175, stock_quantity=2)
         self.client.post(reverse("cart:add", args=[self.product.id]), {"quantity": 5, "variant_id": variant.id})
         self.assertEqual(self.client.session["cart"][f"{self.product.id}:{variant.id}"], 2)
+        item = next(iter(self.client.get(reverse("cart:detail")).context["cart_items"]))
+        self.assertEqual(item["price"], 175)
+        self.assertEqual(item["total"], 350)
+
+    def test_product_with_lengths_requires_a_length_selection(self):
+        ProductVariant.objects.create(
+            product=self.product,
+            sku="T-1-2M",
+            label="2 meters",
+            price=175,
+            stock_quantity=2,
+        )
+
+        response = self.client.post(
+            reverse("cart:add", args=[self.product.id]),
+            {"quantity": 1},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("Choose a length", response.json()["message"])
+        self.assertEqual(self.client.session.get("cart", {}), {})
 
     def test_external_next_url_is_rejected(self):
         response = self.client.post(reverse("cart:add", args=[self.product.id]), {"quantity": 1, "next": "https://evil.example/"})

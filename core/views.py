@@ -7,7 +7,7 @@ from django.contrib import messages
 from django.core.cache import cache
 from django.core.mail import send_mail
 from django.db import connection, transaction
-from django.db.models import Q
+from django.db.models import Case, Exists, F, IntegerField, Q, Value, When
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -34,10 +34,29 @@ def home(request):
         Q(start_date__isnull=True) | Q(start_date__lte=now),
         Q(end_date__isnull=True) | Q(end_date__gte=now),
     ).first()
-    if HomepageProduct.objects.exists():
-        homepage_products = products.filter(homepage_placement__is_active=True).order_by("homepage_placement__sort_order", "homepage_placement__pk")[:8]
-    else:
-        homepage_products = products.filter(is_featured=True)[:8]
+    active_homepage_products = HomepageProduct.objects.filter(
+        is_active=True,
+        product__is_active=True,
+        product__category__is_active=True,
+    )
+    homepage_products = (
+        products.annotate(_has_active_homepage=Exists(active_homepage_products))
+        .filter(
+            Q(homepage_placement__is_active=True)
+            | Q(_has_active_homepage=False, is_featured=True)
+        )
+        .annotate(
+            _homepage_order=Case(
+                When(
+                    homepage_placement__is_active=True,
+                    then=F("homepage_placement__sort_order"),
+                ),
+                default=Value(0),
+                output_field=IntegerField(),
+            )
+        )
+        .order_by("_homepage_order", "homepage_placement__pk", "-created_at")[:8]
+    )
     return render(request, "core/home.html", {
         "featured_products": homepage_products,
         "marketing_banner": banner,

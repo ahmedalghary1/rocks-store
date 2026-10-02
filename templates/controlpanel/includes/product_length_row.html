@@ -1,0 +1,14 @@
+<div class="cp-length-row" data-formset-row>
+  {% for hidden in length_form.hidden_fields %}{{ hidden }}{% endfor %}
+  {% for field in length_form.visible_fields %}
+    {% if field.name != 'DELETE' %}
+    <div class="cp-field {% if field.field.widget.input_type == 'checkbox' %}cp-field--check{% endif %}">
+      <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %}<b>*</b>{% endif %}</label>
+      {{ field }}
+      {% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}
+      {% for error in field.errors %}<em>{{ error }}</em>{% endfor %}
+    </div>
+    {% endif %}
+  {% endfor %}
+  {% if length_form.DELETE %}<span hidden>{{ length_form.DELETE }}</span><button type="button" class="cp-remove-length" data-remove-length aria-label="حذف هذا الطول"><i data-lucide="trash-2"></i></button>{% endif %}
+</div>

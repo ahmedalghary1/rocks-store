@@ -1,8 +1,10 @@
+from decimal import Decimal
+
 from django.contrib.auth.models import Permission, User
 from django.test import TestCase
 from django.urls import reverse
 
-from catalog.models import Category, HomepageProduct, Product
+from catalog.models import Category, HomepageProduct, Product, ProductVariant
 from controlpanel.registry import RESOURCES
 from marketing.models import Banner
 from orders.models import Order, OrderItem
@@ -56,6 +58,62 @@ class ControlPanelTests(TestCase):
         self.assertRedirects(response, reverse("controlpanel:list", args=("categories",)))
         category.refresh_from_db()
         self.assertEqual(category.name, "EV Chargers")
+
+    def test_product_editor_saves_lengths_with_independent_prices(self):
+        category = Category.objects.create(name="Cables", slug="dashboard-length-cables")
+        product = Product.objects.create(
+            name="Charging Cable",
+            name_ar="كابل شحن",
+            slug="dashboard-length-cable",
+            sku="CABLE-BASE",
+            category=category,
+            short_description="Charging cable with selectable lengths",
+            short_description_ar="كابل شحن بأطوال متعددة",
+            description="Cable details",
+            description_ar="تفاصيل الكابل",
+            price="100.00",
+            stock_quantity=0,
+        )
+        self.client.force_login(self.admin)
+
+        response = self.client.post(
+            reverse("controlpanel:edit", args=("products", product.pk)),
+            {
+                "name": product.name,
+                "name_ar": product.name_ar,
+                "slug": product.slug,
+                "sku": product.sku,
+                "category": category.pk,
+                "short_description": product.short_description,
+                "short_description_ar": product.short_description_ar,
+                "description": product.description,
+                "description_ar": product.description_ar,
+                "price": "100.00",
+                "old_price": "",
+                "stock_quantity": "0",
+                "is_active": "on",
+                "meta_title": "",
+                "meta_title_ar": "",
+                "meta_description": "",
+                "meta_description_ar": "",
+                "lengths-TOTAL_FORMS": "1",
+                "lengths-INITIAL_FORMS": "0",
+                "lengths-MIN_NUM_FORMS": "0",
+                "lengths-MAX_NUM_FORMS": "1000",
+                "lengths-0-label": "3 meters",
+                "lengths-0-label_ar": "٣ متر",
+                "lengths-0-sku": "CABLE-3M",
+                "lengths-0-price": "275.00",
+                "lengths-0-stock_quantity": "6",
+                "lengths-0-is_active": "on",
+            },
+        )
+
+        self.assertRedirects(response, reverse("controlpanel:list", args=("products",)))
+        length = ProductVariant.objects.get(product=product)
+        self.assertEqual(length.label, "3 meters")
+        self.assertEqual(length.price, Decimal("275.00"))
+        self.assertEqual(length.stock_quantity, 6)
 
     def test_staff_permissions_are_enforced(self):
         staff = User.objects.create_user("catalog-staff", password="Strong-password-981!", is_staff=True)

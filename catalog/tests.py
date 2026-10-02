@@ -53,6 +53,38 @@ class CatalogTests(TestCase):
         self.assertEqual(quick_view.status_code, 200)
         self.assertContains(quick_view, "Test Lamp")
 
+    def test_product_detail_displays_length_prices(self):
+        two_meter = ProductVariant.objects.create(
+            product=self.product,
+            sku="TEST-1-2M",
+            label="2 meters",
+            label_ar="٢ متر",
+            price="180.00",
+            stock_quantity=3,
+        )
+        ProductVariant.objects.create(
+            product=self.product,
+            sku="TEST-1-5M",
+            label="5 meters",
+            label_ar="٥ متر",
+            price="320.00",
+            stock_quantity=2,
+        )
+
+        response = self.client.get(self.product.get_absolute_url())
+
+        self.assertContains(response, "Choose a length")
+        self.assertContains(response, 'data-variant-option', count=2)
+        self.assertContains(response, f'value="{two_meter.pk}"', html=False)
+        self.assertContains(response, 'data-price="180.00"', html=False)
+        self.assertContains(response, "320.00 EGP")
+        self.assertContains(response, 'type="submit" disabled', html=False)
+
+        self.client.post(reverse("set_language"), {"language": "ar", "next": self.product.get_absolute_url()})
+        response = self.client.get(self.product.get_absolute_url())
+        self.assertContains(response, "اختر الطول")
+        self.assertContains(response, "٢ متر")
+
     def test_search_suggestions(self):
         response = self.client.get(reverse("catalog:suggestions"), {"q": "Lamp"})
         self.assertEqual(response.json()["results"][0]["name"], "Test Lamp")

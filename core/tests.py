@@ -89,6 +89,8 @@ class PublicPagesTests(TestCase):
         response = self.client.get(reverse("core:home"))
         self.assertNotContains(response, "page-intro")
         self.assertNotContains(response, "fonts.googleapis.com")
+        self.assertNotContains(response, "gsap.min.js")
+        self.assertNotContains(response, "ScrollTrigger.min.js")
         self.assertNotContains(response, '<script src="/static/js/vendor/lucide.min.js" defer>', html=False)
         self.assertContains(response, 'data-icon-library="/static/js/vendor/lucide-storefront.min.js"', html=False)
         self.assertContains(response, 'fetchpriority="high" media="(max-width: 700px)"', html=False)
