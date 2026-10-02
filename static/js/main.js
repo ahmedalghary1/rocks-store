@@ -6,6 +6,14 @@ const csrf = () => document.cookie.split('; ').find(row => row.startsWith('csrft
 const escapeHtml = value => String(value).replace(/[&<>'"]/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' })[char]);
 const renderIcons = (root = document) => window.lucide?.createIcons({ root, attrs: { 'stroke-width': 1.8, 'aria-hidden': 'true' } });
 const iconMarkup = (name) => `<i data-lucide="${name}" aria-hidden="true"></i>`;
+const parseLocalizedNumber = value => {
+  let normalized = String(value ?? '').trim()
+    .replace(/[٠-٩]/g, digit => String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit)))
+    .replace(/٬/g, '')
+    .replace(/٫/g, '.');
+  normalized = normalized.includes('.') ? normalized.replace(/,/g, '') : normalized.replace(',', '.');
+  return Number(normalized);
+};
 const upgradeLegacyIcons = () => {
   $$('.product-art span').forEach(el => { const name = el.textContent.trim(); if (!el.querySelector('[data-lucide]') && /^[a-z-]+$/.test(name)) el.innerHTML = iconMarkup(name); });
   $$('.zoom-btn').forEach(el => { el.innerHTML = iconMarkup('zoom-in'); });
@@ -215,11 +223,12 @@ const variantControls = $$('[data-variant-select], [data-variant-option]');
 variantControls.forEach(control => control.addEventListener('change', event => {
   const option = event.currentTarget.matches('select') ? event.currentTarget.selectedOptions[0] : event.currentTarget;
   const form = $('#detail-cart-form'); const quantity = $('input[name=quantity]', form); const submit = $('button[type=submit]', form);
-  const selected = Boolean(option?.value); const stock = Number(option?.dataset.stock || 0);
+  const selected = Boolean(option?.value); const stock = parseLocalizedNumber(option?.dataset.stock || 0);
   if (quantity && selected) { quantity.max = stock; quantity.value = Math.min(Number(quantity.value), stock); }
-  if ($('[data-product-price]') && selected) $('[data-product-price]').textContent = Number(option.dataset.price).toLocaleString('en-EG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const price = parseLocalizedNumber(option?.dataset.price);
+  if ($('[data-product-price]') && selected) $('[data-product-price]').textContent = price.toLocaleString(isArabic ? 'ar-EG' : 'en-EG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   if ($('[data-product-sku]') && selected) $('[data-product-sku]').textContent = option.dataset.sku;
-  if ($('[data-mobile-price]') && selected) $('[data-mobile-price]').textContent = Number(option.dataset.price).toLocaleString('en-EG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  if ($('[data-mobile-price]') && selected) $('[data-mobile-price]').textContent = price.toLocaleString(isArabic ? 'ar-EG' : 'en-EG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   if ($('[data-mobile-variant]')) $('[data-mobile-variant]').value = option?.value || '';
   if (submit) submit.disabled = !selected || stock < 1;
   const mobileSubmit = $('.mobile-add button[type=submit]'); if (mobileSubmit) mobileSubmit.disabled = !selected || stock < 1;

@@ -84,6 +84,8 @@ class CatalogTests(TestCase):
         response = self.client.get(self.product.get_absolute_url())
         self.assertContains(response, "اختر الطول")
         self.assertContains(response, "٢ متر")
+        self.assertContains(response, 'data-price="180.00"', html=False)
+        self.assertNotContains(response, 'data-price="180,00"', html=False)
 
     def test_search_suggestions(self):
         response = self.client.get(reverse("catalog:suggestions"), {"q": "Lamp"})
