@@ -94,6 +94,10 @@ class PublicPagesTests(TestCase):
         self.assertNotContains(response, '<script src="/static/js/vendor/lucide.min.js" defer>', html=False)
         self.assertContains(response, 'data-icon-library="/static/js/vendor/lucide-storefront.min.js"', html=False)
         self.assertContains(response, 'fetchpriority="high" media="(max-width: 700px)"', html=False)
+        self.assertContains(response, 'src="/static/videos/rocks-product-showcase.mp4"', html=False)
+        self.assertContains(response, 'poster="/static/images/home/rocks-product-video-poster.webp"', html=False)
+        self.assertContains(response, 'preload="none"', html=False)
+        self.assertContains(response, 'src="/static/js/home-video.js"', html=False)
 
     def test_health_and_legal_pages(self):
         self.assertEqual(self.client.get(reverse("core:health")).status_code, 200)

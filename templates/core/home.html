@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="{% static 'css/home-redesign.css' %}">
   <script type="application/ld+json" nonce="{{ csp_nonce }}">{"@context":"https://schema.org","@type":"OnlineStore","@id":"{{ canonical_url|escapejs }}#store","name":"{{ site_settings.company_name|default:'ROCKS'|escapejs }}","url":"{{ canonical_url|escapejs }}","logo":"{{ default_og_image|escapejs }}","image":"{{ default_og_image|escapejs }}","priceRange":"EGP","areaServed":{"@type":"Country","name":"Egypt"}{% if site_settings.phone %},"telephone":"{{ site_settings.phone|escapejs }}"{% endif %}{% if site_settings.email %},"email":"{{ site_settings.email|escapejs }}"{% endif %}}</script>
 {% endblock %}
+{% block extra_js %}<script src="{% static 'js/home-video.js' %}" defer></script>{% endblock %}
 
 {% block content %}
 <div class="rocks-home" dir="{% if current_language == 'ar' %}rtl{% else %}ltr{% endif %}">
@@ -37,6 +38,27 @@
       <header class="ev-section-title"><span>OUR PRODUCTS</span><h2 id="products-title">ELECTRICAL &amp; EV ESSENTIALS</h2><p>Cables, power strips, plugs, lighting and tools selected for dependable everyday use.</p></header>
       <div class="ev-product-grid">
         {% for product in featured_products %}<article class="ev-product-card reveal"><a class="ev-product-card__image" href="{{ product.get_absolute_url }}" aria-label="View {{ product.display_name }}">{% if product.main_image %}<img src="{{ product.main_image.url }}" alt="{{ product.display_name }}" width="{{ product.main_image.width }}" height="{{ product.main_image.height }}" loading="lazy" decoding="async">{% else %}<span class="ev-product-card__placeholder"><i data-lucide="package-open" aria-hidden="true"></i></span>{% endif %}</a><div class="ev-product-card__body"><span>{{ product.category.display_name }}</span><h3>{{ product.display_name }}</h3><p>{{ product.display_short_description }}</p><a class="ev-button ev-button--outline" href="{{ product.get_absolute_url }}">View details <i data-lucide="arrow-right" aria-hidden="true"></i></a></div></article>{% empty %}<div class="ev-products__empty"><i data-lucide="package-search" aria-hidden="true"></i><h3>No featured products yet.</h3><p>Select products from the control panel to show them here.</p></div>{% endfor %}
+      </div>
+    </div>
+  </section>
+
+  <section class="ev-video-showcase" aria-labelledby="product-video-title" data-product-video-section>
+    <div class="container ev-video-showcase__grid">
+      <div class="ev-video-showcase__copy reveal">
+        <span class="ev-kicker">{% if current_language == 'ar' %}روكس أثناء الاستخدام{% else %}ROCKS IN ACTION{% endif %}</span>
+        <h2 id="product-video-title">{% if current_language == 'ar' %}طاقة عملية، مصممة للاستخدام اليومي.{% else %}PRACTICAL POWER.<br>MADE FOR EVERY DAY.{% endif %}</h2>
+        <p id="product-video-description">{% if current_language == 'ar' %}شاهد تصميم ROCKS العملي وسهولة توصيل أجهزتك في عرض سريع وواضح للمنتج.{% else %}See the practical ROCKS design and how easily it powers your everyday devices in one clear product demonstration.{% endif %}</p>
+        <a class="ev-button ev-button--solid" href="{% url 'catalog:list' %}">{% if current_language == 'ar' %}استكشف المنتجات{% else %}Explore our products{% endif %} <i data-lucide="arrow-right" aria-hidden="true"></i></a>
+      </div>
+      <div class="ev-video-showcase__media reveal" data-product-video-shell>
+        <video controls muted loop playsinline preload="none" poster="{% static 'images/home/rocks-product-video-poster.webp' %}" aria-describedby="product-video-description" data-product-video>
+          <source src="{% static 'videos/rocks-product-showcase.mp4' %}" type="video/mp4">
+          {% if current_language == 'ar' %}متصفحك لا يدعم تشغيل الفيديو.{% else %}Your browser does not support video playback.{% endif %}
+        </video>
+        <button type="button" class="ev-video-toggle" aria-pressed="false" aria-label="{% if current_language == 'ar' %}تشغيل الفيديو{% else %}Play video{% endif %}" data-play-label="{% if current_language == 'ar' %}تشغيل الفيديو{% else %}Play video{% endif %}" data-pause-label="{% if current_language == 'ar' %}إيقاف الفيديو مؤقتًا{% else %}Pause video{% endif %}" data-product-video-toggle hidden>
+          <span class="ev-video-toggle__icon" aria-hidden="true"></span>
+          <span data-product-video-label>{% if current_language == 'ar' %}شاهد الفيديو{% else %}Watch video{% endif %}</span>
+        </button>
       </div>
     </div>
   </section>
