@@ -101,7 +101,7 @@ class StorefrontTranslationMiddleware:
 
     def __call__(self, request):
         response = self.get_response(request)
-        if request.path.startswith("/admin/"):
+        if request.path.startswith(("/admin/", "/dashboard/")):
             return response
         content_type = response.get("Content-Type", "")
         if not (content_type.startswith("text/html") or content_type.startswith("application/json")):

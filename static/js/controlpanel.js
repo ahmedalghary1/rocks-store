@@ -46,4 +46,31 @@ document.addEventListener('DOMContentLoaded', () => {
       newRow?.querySelector('input:not([type="hidden"])')?.focus();
     });
   }
+
+  document.querySelectorAll('.cp-editor').forEach(form => {
+    form.addEventListener('submit', event => {
+      const submitter = event.submitter;
+      if (submitter?.name) {
+        const intent = document.createElement('input');
+        intent.type = 'hidden';
+        intent.name = submitter.name;
+        intent.value = submitter.value;
+        form.append(intent);
+      }
+      form.querySelectorAll('button[type="submit"]').forEach(button => {
+        button.dataset.originalMarkup ||= button.innerHTML;
+        button.disabled = true;
+        button.setAttribute('aria-busy', 'true');
+      });
+      if (submitter) submitter.textContent = 'جاري حفظ المنتج والصورة…';
+    });
+  });
+
+  addEventListener('pageshow', () => {
+    document.querySelectorAll('.cp-editor button[type="submit"]').forEach(button => {
+      button.disabled = false;
+      button.removeAttribute('aria-busy');
+      if (button.dataset.originalMarkup) button.innerHTML = button.dataset.originalMarkup;
+    });
+  });
 });

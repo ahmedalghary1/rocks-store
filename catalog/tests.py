@@ -147,10 +147,10 @@ class ProductImageProcessingTests(TestCase):
             with product.main_image.open("rb") as saved_image:
                 with Image.open(saved_image) as image:
                     self.assertEqual(image.format, "WEBP")
-                    self.assertEqual(image.size, (3200, 1800))
+            self.assertEqual(image.size, (2000, 1125))
 
             response = self.client.get(product.get_absolute_url())
-            self.assertContains(response, 'width="3200" height="1800"')
+            self.assertContains(response, 'width="2000" height="1125"')
 
             product.main_image = self.uploaded_image("replacement.png", "PNG", (900, 900), "RGBA")
             product.save(update_fields=("main_image",))

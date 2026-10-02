@@ -2,15 +2,21 @@ const fs = require('fs');
 const vm = require('vm');
 
 const iconNames = [
-  'arrow-right', 'badge-check', 'badge-help', 'box', 'building-2', 'cable',
-  'circle-user-round', 'eye', 'facebook', 'gauge', 'globe-2', 'handshake',
-  'headphones', 'heart', 'house', 'instagram', 'lamp', 'languages',
-  'layout-grid', 'layout-template', 'leaf', 'lightbulb', 'linkedin',
-  'list-filter', 'mail', 'map-pin', 'menu', 'message-circle', 'package',
-  'package-open', 'package-search', 'phone', 'plug', 'plug-zap', 'scan-eye',
-  'search', 'send', 'settings', 'shield', 'shield-check', 'shopping-bag',
-  'sliders-horizontal', 'toggle-left', 'trash-2', 'wrench', 'x', 'youtube',
-  'zap', 'zoom-in',
+  'arrow-left', 'arrow-right', 'badge-check', 'badge-help', 'banknote',
+  'bell-ring', 'box', 'boxes', 'building-2', 'cable', 'chevron-left',
+  'chevron-right', 'circle-user-round', 'download', 'external-link', 'eye',
+  'facebook', 'file-pen-line', 'gallery-horizontal', 'gallery-thumbnails',
+  'gauge', 'globe-2', 'handshake', 'headphones', 'heart', 'house', 'images',
+  'inbox', 'info', 'instagram', 'lamp', 'languages', 'layout-grid',
+  'layout-template', 'leaf', 'lightbulb', 'linkedin', 'list-checks',
+  'list-filter', 'log-out', 'mail', 'mail-open', 'map-pin', 'menu',
+  'message-circle', 'messages-square', 'package', 'package-check',
+  'package-open', 'package-search', 'package-x', 'pencil', 'phone', 'plug',
+  'plug-zap', 'plus', 'ruler', 'save', 'scan-eye', 'search', 'send',
+  'settings', 'shield', 'shield-check', 'shopping-bag', 'shopping-cart',
+  'sliders-horizontal', 'ticket-percent', 'toggle-left', 'trash-2',
+  'triangle-alert', 'truck', 'users', 'wrench', 'x', 'youtube', 'zap',
+  'zoom-in',
 ];
 
 const context = {};

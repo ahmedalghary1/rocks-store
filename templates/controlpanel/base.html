@@ -6,9 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
   <title>{{ page_title|default:"لوحة التحكم" }} | ROCKS</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="icon" type="image/webp" href="{% static 'images/rocks-favicon-black.webp' %}">
   <link rel="stylesheet" href="{% static 'css/controlpanel.css' %}">
 </head>
@@ -16,7 +13,7 @@
   <button class="cp-backdrop" type="button" data-sidebar-close aria-label="إغلاق القائمة"></button>
   <aside class="cp-sidebar" id="cpSidebar" aria-label="أقسام لوحة التحكم">
     <div class="cp-brand">
-      <a href="{% url 'controlpanel:index' %}"><img src="{% static 'images/rocks-logo-white.webp' %}" alt="ROCKS" width="720" height="240"></a>
+      <a href="{% url 'controlpanel:index' %}"><img src="{% static 'images/rocks-logo-white-360.webp' %}" alt="ROCKS" width="360" height="120"></a>
       <button type="button" data-sidebar-close aria-label="إغلاق القائمة"><i data-lucide="x"></i></button>
     </div>
     <div class="cp-sidebar__caption"><span>مركز الإدارة</span><small>تحكم كامل في المتجر</small></div>
@@ -49,7 +46,7 @@
       {% block content %}{% endblock %}
     </main>
   </div>
-  <script src="{% static 'js/vendor/lucide.min.js' %}" defer></script>
+  <script src="{% static 'js/vendor/lucide-storefront.min.js' %}" defer></script>
   <script src="{% static 'js/controlpanel.js' %}" defer></script>
 </body>
 </html>

@@ -18,10 +18,12 @@ def _setting_int(name, default, minimum, maximum):
 
 
 def optimize_image_to_webp(uploaded_file):
-    """Return an uploaded image as a same-size, metadata-free WebP ContentFile."""
+    """Return an uploaded image as a web-sized, metadata-free WebP ContentFile."""
     if not features.check("webp"):
         raise ValidationError("WebP support is unavailable in the installed Pillow package.")
     quality = _setting_int("IMAGE_WEBP_QUALITY", 82, 45, 95)
+    method = _setting_int("IMAGE_WEBP_METHOD", 4, 0, 6)
+    max_dimension = _setting_int("IMAGE_MAX_DIMENSION", 2000, 800, 4000)
 
     try:
         uploaded_file.seek(0)
@@ -39,12 +41,19 @@ def optimize_image_to_webp(uploaded_file):
                 else:
                     image = image.convert("RGB")
 
+                if max(image.size) > max_dimension:
+                    image.thumbnail(
+                        (max_dimension, max_dimension),
+                        Image.Resampling.LANCZOS,
+                        reducing_gap=3.0,
+                    )
+
                 output = BytesIO()
                 image.save(
                     output,
                     format="WEBP",
                     quality=quality,
-                    method=6,
+                    method=method,
                     optimize=True,
                 )
     except (UnidentifiedImageError, OSError, ValueError, Image.DecompressionBombError, Image.DecompressionBombWarning) as exc:
