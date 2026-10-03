@@ -51,6 +51,8 @@ class Cart:
         available = variant.stock_quantity if variant else product.stock_quantity
         if available <= 0:
             raise ValueError("This product is currently unavailable.")
+        if (variant.price if variant and variant.price is not None else product.price) is None:
+            raise ValueError("This product is not available for purchase yet.")
         key = self.make_key(product.id, variant.id if variant else None)
         current = self._stored_quantity(self.data.get(key, 0))
         self.data[key] = min(available, current + self._quantity(quantity))
@@ -111,6 +113,9 @@ class Cart:
                 stale.append(key)
                 continue
             price = variant.price if variant and variant.price is not None else product.price
+            if price is None:
+                stale.append(key)
+                continue
             result.append({
                 "key": key, "product": product, "variant": variant,
                 "sku": variant.sku if variant else product.sku,

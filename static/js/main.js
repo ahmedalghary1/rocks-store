@@ -82,7 +82,7 @@ $('#liveSearch')?.addEventListener('input', event => {
     try {
       const response = await fetch(`${input.dataset.url}?q=${encodeURIComponent(input.value)}`);
       const data = await response.json();
-      target.innerHTML = data.results.length ? data.results.map(item => `<a class="search-result" href="${escapeHtml(item.url)}"><span><b>${escapeHtml(item.name)}</b><small>${escapeHtml(item.category)}</small></span><strong>${Number(item.price).toLocaleString(isArabic ? 'ar-EG' : 'en-EG')} ${t('EGP', 'ج.م')}</strong></a>`).join('') : `<div class="empty-search"><b>${t('No matching products', 'لا توجد منتجات مطابقة')}</b><p>${t('Try a shorter product name or search by SKU.', 'جرّب اسمًا أقصر أو ابحث برمز المنتج.')}</p></div>`;
+      target.innerHTML = data.results.length ? data.results.map(item => `<a class="search-result" href="${escapeHtml(item.url)}"><span><b>${escapeHtml(item.name)}</b><small>${escapeHtml(item.category)}</small></span><strong>${item.price ? Number(item.price).toLocaleString(isArabic ? 'ar-EG' : 'en-EG') : ''} ${item.price ? t('EGP', 'ج.م') : ''}</strong></a>`).join('') : `<div class="empty-search"><b>${t('No matching products', 'لا توجد منتجات مطابقة')}</b><p>${t('Try a shorter product name or search by SKU.', 'جرّب اسمًا أقصر أو ابحث برمز المنتج.')}</p></div>`;
     } catch { target.innerHTML = `<p>${t('Search is unavailable right now. Please try again.', 'البحث غير متاح حاليًا. يرجى المحاولة مرة أخرى.')}</p>`; }
   }, 280);
 });

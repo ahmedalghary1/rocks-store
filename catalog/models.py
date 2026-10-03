@@ -72,7 +72,7 @@ class Product(OptimizedImageFieldsMixin, models.Model):
     short_description_ar = models.CharField("الوصف المختصر بالعربية", max_length=260, blank=True)
     description = models.TextField()
     description_ar = models.TextField("الوصف بالعربية", blank=True)
-    price = models.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(Decimal("0.01"))])
+    price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(Decimal("0.01"))])
     old_price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(Decimal("0.01"))])
     main_image = models.ImageField(upload_to="products/", blank=True, validators=[validate_image_size])
     is_featured = models.BooleanField(default=False)
@@ -91,8 +91,11 @@ class Product(OptimizedImageFieldsMixin, models.Model):
         ordering = ("-created_at",)
         indexes = [models.Index(fields=("is_active", "category")), models.Index(fields=("is_active", "-created_at"))]
         constraints = [
-            models.CheckConstraint(condition=Q(price__gt=0), name="product_price_positive"),
-            models.CheckConstraint(condition=Q(old_price__isnull=True) | Q(old_price__gte=F("price")), name="product_old_price_valid"),
+            models.CheckConstraint(condition=Q(price__isnull=True) | Q(price__gt=0), name="product_price_positive"),
+            models.CheckConstraint(
+                condition=Q(old_price__isnull=True) | (Q(price__isnull=False) & Q(old_price__gte=F("price"))),
+                name="product_old_price_valid",
+            ),
         ]
 
     def __str__(self):
@@ -123,9 +126,19 @@ class Product(OptimizedImageFieldsMixin, models.Model):
 
     @property
     def discount_percentage(self):
-        if self.old_price and self.old_price > self.price:
+        if self.price is not None and self.old_price and self.old_price > self.price:
             return int((self.old_price - self.price) / self.old_price * Decimal("100"))
         return 0
+
+    @property
+    def has_variant_price(self):
+        prefetched = getattr(self, "_prefetched_objects_cache", {}).get("variants")
+        variants = prefetched if prefetched is not None else self.variants.filter(is_active=True)
+        return any(variant.is_active and variant.price is not None for variant in variants)
+
+    @property
+    def has_price_options(self):
+        return self.price is not None or self.has_variant_price
 
     @property
     def in_stock(self):
