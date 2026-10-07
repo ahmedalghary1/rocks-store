@@ -4,7 +4,9 @@
 
   const section = document.querySelector('[data-product-video-section]');
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  const players = shells.map((shell, index) => {
+  let sectionInView = false;
+  let hasStarted = false;
+  const players = shells.map(shell => {
     const video = shell.querySelector('[data-product-video]');
     const toggle = shell.querySelector('[data-product-video-toggle]');
     const label = toggle?.querySelector('[data-product-video-label]');
@@ -19,7 +21,6 @@
       label.textContent = text;
     };
     const playVideo = async () => {
-      if (video.ended) video.currentTime = 0;
       try {
         await video.play();
       } catch {
@@ -28,36 +29,13 @@
       }
     };
 
-    const player = {
-      video,
-      playVideo,
-      get userPaused() { return userPaused; },
-      set userPaused(value) { userPaused = value; },
-    };
+    video.autoplay = true;
+    video.loop = true;
+    video.muted = true;
     video.controls = false;
     toggle.hidden = false;
-    video.addEventListener('play', () => {
-      players.forEach(other => {
-        if (other && other.video !== video && !other.video.paused) {
-          other.userPaused = true;
-          other.video.pause();
-        }
-      });
-      syncButton();
-    });
+    video.addEventListener('play', syncButton);
     video.addEventListener('pause', syncButton);
-    video.addEventListener('ended', () => {
-      if (index === 0 && players[1]) {
-        players[1].userPaused = false;
-        players[1].playVideo();
-      }
-    });
-    video.addEventListener('pointerenter', event => {
-      if (event.pointerType === 'mouse') {
-        userPaused = false;
-        playVideo();
-      }
-    });
     toggle.addEventListener('click', () => {
       if (video.paused) {
         userPaused = false;
@@ -76,19 +54,21 @@
     });
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) video.pause();
+      else if (hasStarted && !userPaused && !reducedMotion.matches) playVideo();
     });
     syncButton();
-    return player;
+    return {video, playVideo, get userPaused() { return userPaused; }, set userPaused(value) { userPaused = value; }};
   });
 
   if ('IntersectionObserver' in window && section) {
     const observer = new IntersectionObserver(entries => {
       const entry = entries[0];
-      const inView = entry.isIntersecting && entry.intersectionRatio >= .12;
-      if (inView && !reducedMotion.matches && !players[0]?.userPaused) players[0]?.playVideo();
-      if (!inView) {
-        players.forEach(player => player?.video.pause());
-        if (players[0]) players[0].userPaused = false;
+      sectionInView = entry.isIntersecting && entry.intersectionRatio >= .12;
+      if (sectionInView && !reducedMotion.matches) {
+        hasStarted = true;
+        players.forEach(player => {
+          if (player && !player.userPaused) player.playVideo();
+        });
       }
     }, {threshold: [0, .12, .35]});
     observer.observe(section);

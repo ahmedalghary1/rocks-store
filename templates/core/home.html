@@ -52,7 +52,7 @@
       </div>
       <div class="ev-video-showcase__gallery">
       <div class="ev-video-showcase__media reveal" data-product-video-shell>
-        <video controls muted playsinline preload="none" poster="{% static 'images/home/rocks-product-video-poster.webp' %}" aria-describedby="product-video-description" data-product-video>
+        <video controls muted autoplay loop playsinline preload="none" poster="{% static 'images/home/rocks-product-video-poster.webp' %}" aria-describedby="product-video-description" data-product-video>
           <source src="{% static 'videos/rocks-product-showcase.mp4' %}" type="video/mp4">
           {% if current_language == 'ar' %}متصفحك لا يدعم تشغيل الفيديو.{% else %}Your browser does not support video playback.{% endif %}
         </video>
@@ -62,7 +62,7 @@
         </button>
       </div>
       <div class="ev-video-showcase__media reveal" data-product-video-shell>
-        <video controls muted playsinline preload="none" aria-describedby="product-video-description" data-product-video>
+        <video controls muted autoplay loop playsinline preload="none" aria-describedby="product-video-description" data-product-video>
           <source src="{% static 'videos/rocks-product-demo.mp4' %}" type="video/mp4">
           {% if current_language == 'ar' %}متصفحك لا يدعم تشغيل الفيديو.{% else %}Your browser does not support video playback.{% endif %}
         </video>
