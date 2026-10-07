@@ -50,8 +50,9 @@
         <p id="product-video-description">{% if current_language == 'ar' %}شاهد تصميم ROCKS العملي وسهولة توصيل أجهزتك في عرض سريع وواضح للمنتج.{% else %}See the practical ROCKS design and how easily it powers your everyday devices in one clear product demonstration.{% endif %}</p>
         <a class="ev-button ev-button--solid" href="{% url 'catalog:list' %}">{% if current_language == 'ar' %}استكشف المنتجات{% else %}Explore our products{% endif %} <i data-lucide="arrow-right" aria-hidden="true"></i></a>
       </div>
+      <div class="ev-video-showcase__gallery">
       <div class="ev-video-showcase__media reveal" data-product-video-shell>
-        <video controls muted loop playsinline preload="none" poster="{% static 'images/home/rocks-product-video-poster.webp' %}" aria-describedby="product-video-description" data-product-video>
+        <video controls muted playsinline preload="none" poster="{% static 'images/home/rocks-product-video-poster.webp' %}" aria-describedby="product-video-description" data-product-video>
           <source src="{% static 'videos/rocks-product-showcase.mp4' %}" type="video/mp4">
           {% if current_language == 'ar' %}متصفحك لا يدعم تشغيل الفيديو.{% else %}Your browser does not support video playback.{% endif %}
         </video>
@@ -59,6 +60,17 @@
           <span class="ev-video-toggle__icon" aria-hidden="true"></span>
           <span data-product-video-label>{% if current_language == 'ar' %}شاهد الفيديو{% else %}Watch video{% endif %}</span>
         </button>
+      </div>
+      <div class="ev-video-showcase__media reveal" data-product-video-shell>
+        <video controls muted playsinline preload="none" aria-describedby="product-video-description" data-product-video>
+          <source src="{% static 'videos/rocks-product-demo.mp4' %}" type="video/mp4">
+          {% if current_language == 'ar' %}متصفحك لا يدعم تشغيل الفيديو.{% else %}Your browser does not support video playback.{% endif %}
+        </video>
+        <button type="button" class="ev-video-toggle" aria-pressed="false" aria-label="{% if current_language == 'ar' %}تشغيل الفيديو{% else %}Play video{% endif %}" data-play-label="{% if current_language == 'ar' %}تشغيل الفيديو{% else %}Play video{% endif %}" data-pause-label="{% if current_language == 'ar' %}إيقاف الفيديو مؤقتًا{% else %}Pause video{% endif %}" data-product-video-toggle hidden>
+          <span class="ev-video-toggle__icon" aria-hidden="true"></span>
+          <span data-product-video-label>{% if current_language == 'ar' %}شاهد الفيديو{% else %}Watch video{% endif %}</span>
+        </button>
+      </div>
       </div>
     </div>
   </section>
