@@ -86,6 +86,7 @@ class SharedTextControlForm(DashboardModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields["products"].widget.attrs["class"] = "cp-product-options"
         self.fields["name"].label = "اسم القالب (للإدارة)"
         self.fields["text"].widget.attrs["dir"] = "ltr"
         self.fields["text_ar"].widget.attrs["dir"] = "rtl"
