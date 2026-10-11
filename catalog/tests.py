@@ -4,6 +4,8 @@ from tempfile import TemporaryDirectory
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.test import override_settings
+from django.test.utils import CaptureQueriesContext
+from django.db import connection
 from django.urls import reverse
 from PIL import Image
 from .models import Category, Product, ProductVariant
@@ -114,6 +116,37 @@ class CatalogTests(TestCase):
         ProductVariant.objects.create(product=product, sku="SW-WHITE", label="White", stock_quantity=3)
         response = self.client.get(reverse("catalog:list"), {"available": "1"})
         self.assertContains(response, "Switch with Variants")
+
+    def test_listing_query_count_does_not_grow_with_product_count(self):
+        with CaptureQueriesContext(connection) as initial_queries:
+            self.client.get(reverse("catalog:list"))
+        for index in range(20):
+            Product.objects.create(
+                name=f"Extra lamp {index}", slug=f"extra-lamp-{index}", sku=f"EXTRA-{index}",
+                category=self.category, short_description="Lamp", description="Lamp", price=100, stock_quantity=4,
+            )
+        with CaptureQueriesContext(connection) as listing_queries:
+            response = self.client.get(reverse("catalog:list"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Extra lamp 19")
+        self.assertEqual(len(listing_queries), len(initial_queries))
+        self.assertLessEqual(len(listing_queries), 7)
+
+    def test_prefetched_stock_uses_no_queries_and_ignores_inactive_variants(self):
+        product = Product.objects.prefetch_related("variants").get(pk=self.product.pk)
+        with self.assertNumQueries(0):
+            self.assertTrue(product.in_stock)
+        variant = ProductVariant.objects.create(
+            product=self.product, sku="INACTIVE-1", label="Inactive", is_active=False, stock_quantity=0,
+        )
+        product = Product.objects.prefetch_related("variants").get(pk=self.product.pk)
+        with self.assertNumQueries(0):
+            self.assertTrue(product.in_stock)
+        variant.is_active = True
+        variant.save(update_fields=("is_active",))
+        product = Product.objects.prefetch_related("variants").get(pk=self.product.pk)
+        with self.assertNumQueries(0):
+            self.assertFalse(product.in_stock)
 
 
 class ProductImageProcessingTests(TestCase):

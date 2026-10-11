@@ -6,6 +6,22 @@ const csrf = () => document.cookie.split('; ').find(row => row.startsWith('csrft
 const escapeHtml = value => String(value).replace(/[&<>'"]/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' })[char]);
 const renderIcons = (root = document) => window.lucide?.createIcons({ root, attrs: { 'stroke-width': 1.8, 'aria-hidden': 'true' } });
 const iconMarkup = (name) => `<i data-lucide="${name}" aria-hidden="true"></i>`;
+const requestData = async (url, options = {}, format = 'json') => {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 15000);
+  try {
+    const response = await fetch(url, { ...options, signal: controller.signal });
+    const data = await response[format]();
+    return { response, data };
+  } catch (error) {
+    if (controller.signal.aborted) {
+      throw new Error(t('The connection timed out. Please try again.', 'انتهت مهلة الاتصال. حاول مرة أخرى.'));
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
+};
 const parseLocalizedNumber = value => {
   let normalized = String(value ?? '').trim()
     .replace(/[٠-٩]/g, digit => String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit)))
@@ -80,8 +96,8 @@ $('#liveSearch')?.addEventListener('input', event => {
     if (input.value.trim().length < 2) { target.innerHTML = `<p>${t('Enter at least two characters to search.', 'أدخل حرفين على الأقل للبحث.')}</p>`; return; }
     target.innerHTML = `<p>${t('Searching the ROCKS collection…', 'جارٍ البحث في منتجات ROCKS…')}</p>`;
     try {
-      const response = await fetch(`${input.dataset.url}?q=${encodeURIComponent(input.value)}`);
-      const data = await response.json();
+      const { response, data } = await requestData(`${input.dataset.url}?q=${encodeURIComponent(input.value)}`);
+      if (!response.ok) throw new Error('Search request failed');
       target.innerHTML = data.results.length ? data.results.map(item => `<a class="search-result" href="${escapeHtml(item.url)}"><span><b>${escapeHtml(item.name)}</b><small>${escapeHtml(item.category)}</small></span><strong>${item.price ? Number(item.price).toLocaleString(isArabic ? 'ar-EG' : 'en-EG') : ''} ${item.price ? t('EGP', 'ج.م') : ''}</strong></a>`).join('') : `<div class="empty-search"><b>${t('No matching products', 'لا توجد منتجات مطابقة')}</b><p>${t('Try a shorter product name or search by SKU.', 'جرّب اسمًا أقصر أو ابحث برمز المنتج.')}</p></div>`;
     } catch { target.innerHTML = `<p>${t('Search is unavailable right now. Please try again.', 'البحث غير متاح حاليًا. يرجى المحاولة مرة أخرى.')}</p>`; }
   }, 280);
@@ -96,8 +112,7 @@ setTimeout(() => $$('.toast').forEach(el => el.remove()), 3800);
 $$('.ajax-cart').forEach(form => form.addEventListener('submit', async event => {
   event.preventDefault(); const button = $('button[type=submit]', form); button.disabled = true;
   try {
-    const response = await fetch(form.action, { method: 'POST', body: new FormData(form), headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': csrf() } });
-    const data = await response.json();
+    const { response, data } = await requestData(form.action, { method: 'POST', body: new FormData(form), headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': csrf() } });
     if (!response.ok) throw new Error(data.message || 'Could not add this product.');
     $$('[data-cart-count]').forEach(el => el.textContent = data.count); toast(data.message);
     button.animate([{ transform: 'scale(.9)' }, { transform: 'scale(1.08)' }, { transform: 'scale(1)' }], { duration: 380 });
@@ -112,11 +127,10 @@ const updateCartForm = form => {
     const buttons = $$('button', form);
     buttons.forEach(button => { button.disabled = true; });
     try {
-      const response = await fetch(form.action, {
+      const { response, data } = await requestData(form.action, {
         method: 'POST', body: new FormData(form),
         headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': csrf() },
       });
-      const data = await response.json();
       if (!response.ok) throw new Error(data.message || 'Could not update the quantity.');
       input.value = data.quantity;
       const line = form.closest('.cart-item');
@@ -171,8 +185,9 @@ $('.cart-checkout-link')?.addEventListener('click', async event => {
 
 $$('[data-wishlist]').forEach(button => button.addEventListener('click', async () => {
   try {
-    const response = await fetch(button.dataset.url, { method: 'POST', headers: { 'X-CSRFToken': csrf(), 'X-Requested-With': 'XMLHttpRequest' } });
-    const data = await response.json(); button.classList.toggle('active', data.active); button.setAttribute('aria-pressed', String(data.active));
+    const { response, data } = await requestData(button.dataset.url, { method: 'POST', headers: { 'X-CSRFToken': csrf(), 'X-Requested-With': 'XMLHttpRequest' } });
+    if (!response.ok) throw new Error('Wishlist request failed');
+    button.classList.toggle('active', data.active); button.setAttribute('aria-pressed', String(data.active));
     toast(data.active ? t('Product added to wishlist.', 'تمت إضافة المنتج إلى المفضلة.') : t('Product removed from wishlist.', 'تمت إزالة المنتج من المفضلة.'));
   } catch { toast(t('Could not update your wishlist.', 'تعذر تحديث المفضلة.')); }
 }));
@@ -189,17 +204,16 @@ $$('[data-quick]').forEach(button => button.addEventListener('click', async () =
   quickContent.innerHTML = `<p>${t('Loading product details…', 'جارٍ تحميل تفاصيل المنتج…')}</p>`;
   toggleQuickModal(true);
   try {
-    const response = await fetch(button.dataset.quick, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+    const { response, data: html } = await requestData(button.dataset.quick, { headers: { 'X-Requested-With': 'XMLHttpRequest' } }, 'text');
     if (!response.ok) throw new Error(`Quick view request failed: ${response.status}`);
-    quickContent.innerHTML = await response.text();
+    quickContent.innerHTML = html;
     renderIcons(quickContent);
     const form = $('.ajax-cart', quickContent);
     if (form) form.addEventListener('submit', async event => {
       event.preventDefault();
       try {
-        const response = await fetch(form.action, { method:'POST', body:new FormData(form), headers:{'X-Requested-With':'XMLHttpRequest','X-CSRFToken':csrf()} });
+        const { response, data } = await requestData(form.action, { method:'POST', body:new FormData(form), headers:{'X-Requested-With':'XMLHttpRequest','X-CSRFToken':csrf()} });
         if (!response.ok) throw new Error(`Cart request failed: ${response.status}`);
-        const data = await response.json();
         $$('[data-cart-count]').forEach(el => el.textContent = data.count);
         toast(data.message);
         toggleQuickModal(false);

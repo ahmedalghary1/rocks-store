@@ -116,7 +116,7 @@ def newsletter_subscribe(request):
 
 def wishlist(request):
     ids = request.session.get("wishlist", [])[:100]
-    products = Product.objects.filter(id__in=ids, is_active=True, category__is_active=True).select_related("category")
+    products = Product.objects.filter(id__in=ids, is_active=True, category__is_active=True).select_related("category").prefetch_related("variants")
     return render(request, "core/wishlist.html", {"products": products})
 
 

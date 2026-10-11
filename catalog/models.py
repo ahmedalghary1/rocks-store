@@ -192,11 +192,11 @@ class Product(OptimizedImageFieldsMixin, models.Model):
     @property
     def in_stock(self):
         prefetched = getattr(self, "_prefetched_objects_cache", {}).get("variants")
-        if prefetched is not None and prefetched:
-            return any(variant.is_active and variant.stock_quantity > 0 for variant in prefetched)
-        if self.variants.filter(is_active=True).exists():
-            return self.variants.filter(is_active=True, stock_quantity__gt=0).exists()
-        return self.stock_quantity > 0
+        if prefetched is not None:
+            quantities = [variant.stock_quantity for variant in prefetched if variant.is_active]
+        else:
+            quantities = list(self.variants.filter(is_active=True).values_list("stock_quantity", flat=True))
+        return any(quantity > 0 for quantity in quantities) if quantities else self.stock_quantity > 0
 
 
 class ProductImage(OptimizedImageFieldsMixin, models.Model):

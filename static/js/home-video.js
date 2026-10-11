@@ -2,17 +2,17 @@
   const shells = [...document.querySelectorAll('[data-product-video-shell]')];
   if (!shells.length) return;
 
-  const section = document.querySelector('[data-product-video-section]');
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  let sectionInView = false;
-  let hasStarted = false;
+  const saveData = Boolean(navigator.connection?.saveData);
   const players = shells.map(shell => {
     const video = shell.querySelector('[data-product-video]');
     const toggle = shell.querySelector('[data-product-video-toggle]');
     const label = toggle?.querySelector('[data-product-video-label]');
     if (!video || !toggle || !label) return null;
 
-    let userPaused = reducedMotion.matches;
+    let userPaused = reducedMotion.matches || saveData;
+    let inView = false;
+    let sourceLoaded = false;
     const syncButton = () => {
       const playing = !video.paused && !video.ended;
       const text = playing ? toggle.dataset.pauseLabel : toggle.dataset.playLabel;
@@ -21,6 +21,14 @@
       label.textContent = text;
     };
     const playVideo = async () => {
+      if (!sourceLoaded) {
+        video.querySelectorAll('source[data-src]').forEach(source => {
+          source.src = source.dataset.src;
+          source.removeAttribute('data-src');
+        });
+        video.load();
+        sourceLoaded = true;
+      }
       try {
         await video.play();
       } catch {
@@ -29,7 +37,7 @@
       }
     };
 
-    video.autoplay = true;
+    video.autoplay = false;
     video.loop = true;
     video.muted = true;
     video.controls = false;
@@ -54,23 +62,22 @@
     });
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) video.pause();
-      else if (hasStarted && !userPaused && !reducedMotion.matches) playVideo();
+      else if (inView && !userPaused && !reducedMotion.matches) playVideo();
     });
     syncButton();
-    return {video, playVideo, get userPaused() { return userPaused; }, set userPaused(value) { userPaused = value; }};
+    return {shell, video, playVideo, get inView() { return inView; }, set inView(value) { inView = value; }, get userPaused() { return userPaused; }};
   });
 
-  if ('IntersectionObserver' in window && section) {
+  if ('IntersectionObserver' in window) {
     const observer = new IntersectionObserver(entries => {
-      const entry = entries[0];
-      sectionInView = entry.isIntersecting && entry.intersectionRatio >= .12;
-      if (sectionInView && !reducedMotion.matches) {
-        hasStarted = true;
-        players.forEach(player => {
-          if (player && !player.userPaused) player.playVideo();
-        });
-      }
+      entries.forEach(entry => {
+        const player = players.find(item => item?.shell === entry.target);
+        if (!player) return;
+        player.inView = entry.isIntersecting && entry.intersectionRatio >= .12;
+        if (!player.inView) player.video.pause();
+        else if (!document.hidden && !reducedMotion.matches && !player.userPaused) player.playVideo();
+      });
     }, {threshold: [0, .12, .35]});
-    observer.observe(section);
+    players.forEach(player => { if (player) observer.observe(player.shell); });
   }
 })();
