@@ -143,10 +143,19 @@ class PublicPagesTests(TestCase):
     def test_about_page_has_no_untranslated_current_copy_in_arabic(self):
         self.client.post(reverse("set_language"), {"language": "ar", "next": reverse("core:about")})
         response = self.client.get(reverse("core:about"))
-        self.assertContains(response, "الطاقة الآمنة ليست تفصيلًا.")
-        self.assertContains(response, "من طاقة الحياة اليومية إلى كل رحلة")
+        self.assertContains(response, "قوة الاتصال... وثقة تدوم")
+        self.assertContains(response, "شركة الوسام")
+        self.assertContains(response, "كابلات شحن السيارات الكهربائية والمشتركات الكهربائية")
+        self.assertContains(response, "OUR VISION")
+        self.assertContains(response, "رضا العملاء:")
         self.assertNotContains(response, "Safe power is not a detail.")
         self.assertNotContains(response, "FROM EVERYDAY POWER TO EVERY JOURNEY")
+        self.client.post(reverse("set_language"), {"language": "en", "next": reverse("core:about")})
+        response = self.client.get(reverse("core:about"))
+        self.assertContains(response, "Al-Wesam Company")
+        self.assertContains(response, "Our mission")
+        self.assertContains(response, "Customer satisfaction:")
+        self.assertNotContains(response, "قوة الاتصال... وثقة تدوم")
 
     def test_newsletter_subscription(self):
         response = self.client.post(reverse("core:newsletter_subscribe"), {"email": "USER@example.com"})

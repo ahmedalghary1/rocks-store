@@ -1,4 +1,76 @@
-{% extends 'base.html' %}{% block title %}About ROCKS Electrical &amp; EV Solutions Egypt{% endblock %}{% block meta_description %}Learn how ROCKS selects dependable EV charging cables, power strips, plugs, lighting and electrical tools for customers in Egypt.{% endblock %}{% block content %}
-<section class="page-hero"><div class="container"><span class="eyebrow eyebrow--light">OUR STORY</span><h1>Safe power is not a detail.<br>It supports everyday life.</h1><p>We offer carefully selected electrical products and EV charging solutions that combine safety, practical design and clear specifications.</p></div></section>
-<section class="about-section section"><div class="container about-grid"><div><span class="eyebrow">FROM EVERYDAY POWER TO EVERY JOURNEY</span><h2>ROCKS means confidence you can build on.</h2></div><div><p>A dependable electrical product must perform safely and consistently, day after day. That is why we select ROCKS products against clear standards and put simple purchasing and responsible after-sales support at the heart of the experience.</p><p>From EV charging cables and power strips to plugs, switches, lighting, decorative lamp holders and electrical tools, our goal is simple: help you find the right product quickly and understand exactly what you are buying.</p></div></div><div class="container values-grid"><article><b>01</b><h3>Precision</h3><p>Clear information and specifications without ambiguity.</p></article><article><b>02</b><h3>Performance</h3><p>Dependable materials selected for everyday use.</p></article><article><b>03</b><h3>Trust</h3><p>Responsible support before and after your purchase.</p></article></div></section>
+{% extends 'base.html' %}
+{% block title %}{% if current_language == 'ar' %}من نحن | rocks - روكس{% else %}About us | rocks{% endif %}{% endblock %}
+{% block meta_description %}{% if current_language == 'ar' %}روكس، أحد فروع شركة الوسام، متخصصة في تصنيع كابلات شحن السيارات الكهربائية والمشتركات الكهربائية بجودة وكفاءة وتصميم عملي.{% else %}rocks, a division of Al-Wesam Company, manufactures EV charging cables and power strips with a focus on quality, efficiency and practical design.{% endif %}{% endblock %}
+{% block body_class %}about-page{% endblock %}
+{% block content %}
+<section class="page-hero"><div class="container">
+  <span class="eyebrow eyebrow--light">{% if current_language == 'ar' %}من نحن | <bdi lang="en">ABOUT US</bdi>{% else %}ABOUT US{% endif %}</span>
+  <h1>{% if current_language == 'ar' %}<bdi>rocks - روكس</bdi>{% else %}rocks{% endif %}</h1>
+  <p class="about-tagline">{% if current_language == 'ar' %}قوة الاتصال... وثقة تدوم{% else %}The power of connection... trust that lasts{% endif %}</p>
+</div></section>
+<section class="about-section section"><div class="container">
+  <div class="about-copy">
+    {% if current_language == 'ar' %}
+    <p>في عالم تتسارع فيه التكنولوجيا وتتطور فيه احتياجات الطاقة، تأتي <strong><bdi>rocks - روكس</bdi></strong>، أحد فروع <strong>شركة الوسام</strong>، لتقدم حلولًا كهربائية مبتكرة تجمع بين الجودة والكفاءة والتصميم العملي.</p>
+    <p>نتخصص في تصنيع <strong>كابلات شحن السيارات الكهربائية والمشتركات الكهربائية</strong>، مع التركيز على تقديم منتجات تتميز بالمتانة وسهولة الاستخدام، وتواكب التطور المستمر في عالم الطاقة.</p>
+    <p>في روكس، نؤمن أن الجودة تبدأ من التفاصيل، لذلك نسعى إلى تقديم منتجات تعكس رؤيتنا في القوة والاعتمادية، وتلبي احتياجات عملائنا اليومية.</p>
+    {% else %}
+    <p>In a world of rapidly advancing technology and evolving energy needs, <strong>rocks</strong>, a division of <strong>Al-Wesam Company</strong>, provides innovative electrical solutions that combine quality, efficiency and practical design.</p>
+    <p>We specialize in manufacturing <strong>EV charging cables and power strips</strong>, focusing on durable, easy-to-use products that keep pace with the ongoing evolution of energy technology.</p>
+    <p>At rocks, we believe quality begins with the details. We strive to offer products that reflect our commitment to strength and dependability while meeting our customers’ everyday needs.</p>
+    {% endif %}
+  </div>
+  <div class="about-purpose-grid">
+    <article>
+      <h2>{% if current_language == 'ar' %}رؤيتنا | <bdi lang="en">OUR VISION</bdi>{% else %}Our vision{% endif %}</h2>
+      {% if current_language == 'ar' %}
+      <p>نسعى إلى أن تصبح <strong><bdi>rocks - روكس</bdi></strong> علامة تجارية رائدة في مجال الحلول الكهربائية، من خلال تقديم منتجات تجمع بين الابتكار والجودة والأداء الموثوق.</p>
+      <p>نطمح إلى مواكبة مستقبل الطاقة الكهربائية والمساهمة في تطوير حلول أكثر كفاءة وعملية تناسب احتياجات الأفراد والشركات.</p>
+      {% else %}
+      <p>We aim to make <strong>rocks</strong> a leading brand in electrical solutions by offering products that combine innovation, quality and reliable performance.</p>
+      <p>We aspire to keep pace with the future of electrical energy and contribute to more efficient, practical solutions for individuals and businesses.</p>
+      {% endif %}
+    </article>
+    <article>
+      <h2>{% if current_language == 'ar' %}رسالتنا | <bdi lang="en">OUR MISSION</bdi>{% else %}Our mission{% endif %}</h2>
+      {% if current_language == 'ar' %}
+      <p>تقديم حلول كهربائية عملية ومتطورة تلبي تطلعات عملائنا، مع الاهتمام بجودة التصنيع والتصميم وسهولة الاستخدام.</p>
+      <p>نؤمن بأن ثقة العملاء هي أساس نجاحنا، ولذلك نعمل باستمرار على تطوير منتجاتنا لتقديم قيمة حقيقية وتجربة استخدام مميزة.</p>
+      {% else %}
+      <p>To provide practical, advanced electrical solutions that meet our customers’ expectations, with close attention to manufacturing quality, design and ease of use.</p>
+      <p>We believe customer trust is the foundation of our success. We continually develop our products to deliver real value and an excellent user experience.</p>
+      {% endif %}
+    </article>
+  </div>
+  <div class="about-content-block">
+    <h2>{% if current_language == 'ar' %}منتجاتنا | <bdi lang="en">OUR PRODUCTS</bdi>{% else %}Our products{% endif %}</h2>
+    <div class="about-purpose-grid">
+      <article><h3>{% if current_language == 'ar' %}كابلات شحن السيارات الكهربائية{% else %}EV charging cables{% endif %}</h3>
+        <p>{% if current_language == 'ar' %}نقدم كابلات شحن مصممة لتلبية احتياجات مستخدمي السيارات الكهربائية، مع التركيز على جودة المكونات والمتانة وسهولة الاستخدام، لمواكبة التطور في عالم التنقل الكهربائي.{% else %}We offer charging cables designed to meet the needs of EV drivers, focusing on component quality, durability and ease of use to keep pace with the evolution of electric mobility.{% endif %}</p>
+      </article>
+      <article><h3>{% if current_language == 'ar' %}المشتركات الكهربائية{% else %}Power strips{% endif %}</h3>
+        <p>{% if current_language == 'ar' %}نوفر مشتركات كهربائية تجمع بين التصميم العملي وكفاءة الأداء، لتناسب الاستخدامات اليومية في المنازل والمكاتب ومساحات العمل المختلفة.{% else %}We provide power strips that combine practical design and efficient performance for everyday use in homes, offices and a variety of workspaces.{% endif %}</p>
+      </article>
+    </div>
+  </div>
+  <div class="about-content-block">
+    <h2>{% if current_language == 'ar' %}لماذا روكس؟ | <bdi lang="en">WHY ROCKS</bdi>{% else %}Why rocks?{% endif %}</h2>
+    <p>{% if current_language == 'ar' %}في <strong><bdi>rocks - روكس</bdi></strong>، نركز على مجموعة من القيم التي تميز هويتنا:{% else %}At <strong>rocks</strong>, we focus on a set of values that define our identity:{% endif %}</p>
+    <ul class="about-values">
+      {% if current_language == 'ar' %}
+      <li><strong>الجودة:</strong> الاهتمام بالتفاصيل ومكونات التصنيع.</li>
+      <li><strong>الاعتمادية:</strong> تقديم منتجات عملية تستحق ثقة العملاء.</li>
+      <li><strong>الابتكار:</strong> مواكبة أحدث التطورات في الحلول الكهربائية.</li>
+      <li><strong>المتانة:</strong> التركيز على قوة المنتج وقدرته على تحمل الاستخدام.</li>
+      <li><strong>رضا العملاء:</strong> تقديم حلول تناسب الاحتياجات المختلفة.</li>
+      {% else %}
+      <li><strong>Quality:</strong> Attention to details and manufacturing components.</li>
+      <li><strong>Dependability:</strong> Practical products that earn our customers’ trust.</li>
+      <li><strong>Innovation:</strong> Keeping pace with the latest developments in electrical solutions.</li>
+      <li><strong>Durability:</strong> A focus on product strength and the ability to withstand use.</li>
+      <li><strong>Customer satisfaction:</strong> Solutions suited to a range of needs.</li>
+      {% endif %}
+    </ul>
+  </div>
+</div></section>
 {% endblock %}
