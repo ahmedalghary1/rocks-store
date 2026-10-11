@@ -6,9 +6,19 @@
   <section class="cp-card cp-form-card">
     <header><div><span>تفاصيل العنصر</span><h2>البيانات الأساسية</h2></div><i data-lucide="file-pen-line"></i></header>
     <div class="cp-form-grid">
-      {% for field in form %}<div class="cp-field {% if field.field.widget.input_type == 'checkbox' %}cp-field--check{% endif %} {% if field.name == 'description' or field.name == 'description_ar' or field.name == 'message' or field.name == 'notes' or field.name == 'last_error' or field.name == 'user_permissions' %}cp-field--wide{% endif %}"><label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %}<b>*</b>{% endif %}</label>{{ field }}{% if field.help_text %}<small>{{ field.help_text|safe }}</small>{% endif %}{% for error in field.errors %}<em>{{ error }}</em>{% endfor %}</div>{% endfor %}
+      {% for field in form %}{% if field.name not in product_content_fields %}<div class="cp-field {% if field.field.widget.input_type == 'checkbox' %}cp-field--check{% endif %} {% if field.name == 'specifications_text' or field.name == 'specifications_text_ar' or field.name == 'warranty_text' or field.name == 'warranty_text_ar' or field.name == 'text' or field.name == 'text_ar' or field.name == 'products' or field.name == 'description' or field.name == 'description_ar' or field.name == 'message' or field.name == 'notes' or field.name == 'last_error' or field.name == 'user_permissions' %}cp-field--wide{% endif %}"><label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %}<b>*</b>{% endif %}</label>{% if field.name == 'products' %}<div data-product-picker><input type="search" class="cp-input" data-product-search placeholder="ابحث باسم المنتج أو رمز المخزون" aria-label="البحث في المنتجات"><div class="cp-product-picker-list">{{ field }}</div></div>{% else %}{{ field }}{% endif %}{% if field.help_text %}<small>{{ field.help_text|safe }}</small>{% endif %}{% for error in field.errors %}<em>{{ error }}</em>{% endfor %}</div>{% endif %}{% endfor %}
     </div>
   </section>
+  {% if product_content_fields %}
+  <section class="cp-card cp-form-card">
+    <header><div><span>تفاصيل المنتج</span><h2>المواصفات والضمان</h2><p>أدخل النص باللغتين، أو اختر قالبًا مشتركًا من صفحات المواصفات والضمانات المشتركة.</p></div><i data-lucide="list-checks"></i></header>
+    <div class="cp-form-grid">
+      {% for field in form %}{% if field.name in product_content_fields %}
+      <div class="cp-field {% if field.field.widget.attrs.rows %}cp-field--wide{% endif %}"><label for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% if field.help_text %}<small>{{ field.help_text }}</small>{% endif %}{% for error in field.errors %}<em>{{ error }}</em>{% endfor %}</div>
+      {% endif %}{% endfor %}
+    </div>
+  </section>
+  {% endif %}
   {% if length_formset %}
   <section class="cp-card cp-form-card cp-length-editor" data-length-formset>
     <header><div><span>خيارات المنتج</span><h2>الأطوال والأسعار</h2><p>أضف كل طول بسعره ورمز المخزون والكمية المتاحة.</p></div><i data-lucide="ruler"></i></header>

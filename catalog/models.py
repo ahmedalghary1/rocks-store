@@ -61,6 +61,31 @@ class Category(OptimizedImageFieldsMixin, models.Model):
         return localized_value(self, "meta_description") or self.display_description or f"Shop {self.display_name} from ROCKS with clear specifications and delivery across Egypt."
 
 
+class SharedProductText(models.Model):
+    name = models.CharField("اسم القالب", max_length=180)
+    text = models.TextField("النص بالإنجليزية")
+    text_ar = models.TextField("النص بالعربية")
+
+    class Meta:
+        abstract = True
+        ordering = ("name", "pk")
+
+    def __str__(self):
+        return self.name
+
+    @property
+    def display_text(self):
+        return localized_value(self, "text")
+
+
+class SpecificationTemplate(SharedProductText):
+    pass
+
+
+class WarrantyTemplate(SharedProductText):
+    pass
+
+
 class Product(OptimizedImageFieldsMixin, models.Model):
     optimized_image_fields = ("main_image",)
     name = models.CharField(max_length=180)
@@ -71,6 +96,18 @@ class Product(OptimizedImageFieldsMixin, models.Model):
     short_description = models.CharField(max_length=260)
     short_description_ar = models.CharField("الوصف المختصر بالعربية", max_length=260, blank=True)
     description = models.TextField()
+    specifications_text = models.TextField("المواصفات بالإنجليزية", blank=True)
+    specifications_text_ar = models.TextField("المواصفات بالعربية", blank=True)
+    warranty_text = models.TextField("الضمان بالإنجليزية", blank=True)
+    warranty_text_ar = models.TextField("الضمان بالعربية", blank=True)
+    specification_template = models.ForeignKey(
+        SpecificationTemplate, null=True, blank=True, on_delete=models.SET_NULL, related_name="products",
+        verbose_name="قالب المواصفات المشترك",
+    )
+    warranty_template = models.ForeignKey(
+        WarrantyTemplate, null=True, blank=True, on_delete=models.SET_NULL, related_name="products",
+        verbose_name="قالب الضمان المشترك",
+    )
     description_ar = models.TextField("الوصف بالعربية", blank=True)
     price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(Decimal("0.01"))])
     old_price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True, validators=[MinValueValidator(Decimal("0.01"))])
@@ -115,6 +152,18 @@ class Product(OptimizedImageFieldsMixin, models.Model):
     @property
     def display_description(self):
         return localized_value(self, "description")
+
+    @property
+    def display_specifications_text(self):
+        if self.specification_template_id:
+            return self.specification_template.display_text
+        return localized_value(self, "specifications_text")
+
+    @property
+    def display_warranty_text(self):
+        if self.warranty_template_id:
+            return self.warranty_template.display_text
+        return localized_value(self, "warranty_text")
 
     @property
     def display_meta_title(self):

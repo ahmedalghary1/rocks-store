@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from django.db import models
 from django.forms import inlineformset_factory, modelform_factory
 
-from catalog.models import Product, ProductVariant
+from catalog.models import Product, ProductVariant, SpecificationTemplate, WarrantyTemplate
 
 from .registry import FIELD_LABELS
 
@@ -48,6 +48,56 @@ class DashboardModelForm(forms.ModelForm):
             if isinstance(english_value, str) and english_value.strip() and not str(arabic_value or "").strip():
                 self.add_error(arabic_name, "أدخل النسخة العربية حتى لا يظهر النص الإنجليزي في الواجهة العربية.")
         return cleaned
+
+
+class ProductControlForm(DashboardModelForm):
+    class Meta:
+        model = Product
+        fields = "__all__"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for name in ("specification_template", "warranty_template"):
+            self.fields[name].help_text = "عند اختيار قالب مشترك يظهر نصه بدل النص الخاص بالمنتج. اتركه فارغًا لاستخدام النص الخاص."
+        for name in ("specifications_text", "warranty_text"):
+            self.fields[name].widget.attrs["dir"] = "ltr"
+            self.fields[f"{name}_ar"].widget.attrs["dir"] = "rtl"
+
+    def clean(self):
+        cleaned = super().clean()
+        for name in ("specifications_text", "warranty_text"):
+            if cleaned.get(f"{name}_ar") and not cleaned.get(name):
+                self.add_error(name, "أدخل النسخة الإنجليزية أيضًا.")
+        return cleaned
+
+
+class ProductSelectionField(forms.ModelMultipleChoiceField):
+    def label_from_instance(self, obj):
+        return f"{obj.name_ar or obj.name} — {obj.name} ({obj.sku})"
+
+
+class SharedTextControlForm(DashboardModelForm):
+    products = ProductSelectionField(
+        queryset=Product.objects.order_by("name", "pk"),
+        label="المنتجات المرتبطة", required=False,
+        widget=forms.CheckboxSelectMultiple,
+        help_text="اختر المنتجات التي تستخدم هذا النص. الاختيار يستبدل قالب هذا القسم فقط، وإلغاء الاختيار يعيد النص الخاص بالمنتج. تعديل النص يحدّث جميع المنتجات المرتبطة.",
+    )
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["name"].label = "اسم القالب (للإدارة)"
+        self.fields["text"].widget.attrs["dir"] = "ltr"
+        self.fields["text_ar"].widget.attrs["dir"] = "rtl"
+        if self.instance.pk:
+            self.initial["products"] = self.instance.products.values_list("pk", flat=True)
+
+    def _save_m2m(self):
+        super()._save_m2m()
+        field = "specification_template" if isinstance(self.instance, SpecificationTemplate) else "warranty_template"
+        selected = self.cleaned_data["products"]
+        self.instance.products.exclude(pk__in=selected).update(**{field: None})
+        selected.update(**{field: self.instance})
 
 
 class ProductLengthForm(DashboardModelForm):
@@ -137,5 +187,9 @@ def _formfield_callback(db_field, **kwargs):
 def form_for(config):
     if config["model"] is User:
         return UserControlForm
+    if config["model"] is Product:
+        return ProductControlForm
+    if config["model"] in (SpecificationTemplate, WarrantyTemplate):
+        return modelform_factory(config["model"], form=SharedTextControlForm, fields=("name", "text", "text_ar", "products"))
     base_form = modelform_factory(config["model"], form=DashboardModelForm, fields="__all__", formfield_callback=_formfield_callback)
     return base_form

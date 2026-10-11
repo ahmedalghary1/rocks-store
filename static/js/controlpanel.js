@@ -21,6 +21,16 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('input[name="selected"]').forEach(input => { input.checked = selectAll.checked; });
   });
 
+  document.querySelectorAll('[data-product-picker]').forEach(picker => {
+    picker.querySelector('[data-product-search]')?.addEventListener('input', event => {
+      const query = event.target.value.trim().toLocaleLowerCase();
+      picker.querySelectorAll('.cp-product-picker-list input[type="checkbox"]').forEach(input => {
+        const row = input.closest('label')?.parentElement;
+        if (row) row.hidden = !row.textContent.toLocaleLowerCase().includes(query);
+      });
+    });
+  });
+
   const lengthFormset = document.querySelector('[data-length-formset]');
   if (lengthFormset) {
     const rows = lengthFormset.querySelector('[data-formset-rows]');

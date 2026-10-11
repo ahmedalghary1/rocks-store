@@ -15,7 +15,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.formats import date_format
 
-from catalog.models import Product
+from catalog.models import Product, SpecificationTemplate, WarrantyTemplate
 from core.models import ContactMessage
 from orders.models import Order
 from orders.services import restore_order_stock, send_order_notifications
@@ -305,6 +305,8 @@ def resource_form(request, resource, pk=None):
         _require(request, config, "view")
     else:
         _require(request, config, action)
+    if config["model"] in (SpecificationTemplate, WarrantyTemplate):
+        _require(request, RESOURCES["products"], "change")
     if not pk and config.get("singleton") and config["model"].objects.exists():
         existing = config["model"].objects.first()
         return redirect("controlpanel:edit", resource=resource, pk=existing.pk)
@@ -353,6 +355,10 @@ def resource_form(request, resource, pk=None):
         resource=resource,
         form=form,
         length_formset=length_formset,
+        product_content_fields=(
+            "specifications_text", "specifications_text_ar", "specification_template",
+            "warranty_text", "warranty_text_ar", "warranty_template",
+        ) if config["model"] is Product else (),
         object=instance,
         can_change=bool(instance and _allowed(request, config, "change")),
         can_delete=bool(instance and _allowed(request, config, "delete") and instance != request.user),

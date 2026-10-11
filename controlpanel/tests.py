@@ -4,10 +4,123 @@ from django.contrib.auth.models import Permission, User
 from django.test import TestCase
 from django.urls import reverse
 
-from catalog.models import Category, HomepageProduct, Product, ProductVariant
+from catalog.models import Category, HomepageProduct, Product, ProductVariant, SpecificationTemplate, WarrantyTemplate
+from controlpanel.forms import ProductControlForm, form_for
 from controlpanel.registry import RESOURCES
 from marketing.models import Banner
 from orders.models import Order, OrderItem
+
+
+class ProductContentTests(TestCase):
+    def setUp(self):
+        self.admin = User.objects.create_superuser("content-admin", "content@example.com", "password")
+        self.client.force_login(self.admin)
+        category = Category.objects.create(name="Content", slug="content")
+        self.products = [Product.objects.create(
+            name=f"Product {index}", name_ar=f"منتج {index}", slug=f"content-{index}", sku=f"CONTENT-{index}",
+            category=category, short_description="Short", short_description_ar="مختصر",
+            description="Details", description_ar="تفاصيل", stock_quantity=1,
+            specifications_text="Individual specs", specifications_text_ar="مواصفات خاصة",
+            warranty_text="Individual warranty", warranty_text_ar="ضمان خاص",
+        ) for index in range(3)]
+
+    def test_shared_text_assignment_edit_reassignment_and_removal(self):
+        for resource, model, field in (
+            ("specification-templates", SpecificationTemplate, "specification_template"),
+            ("warranty-templates", WarrantyTemplate, "warranty_template"),
+        ):
+            with self.subTest(resource=resource):
+                payload = {"name": "Shared", "text": "Shared text", "text_ar": "نص مشترك",
+                           "products": [p.pk for p in self.products[:2]]}
+                response = self.client.post(reverse("controlpanel:create", args=(resource,)), payload)
+                self.assertRedirects(response, reverse("controlpanel:list", args=(resource,)))
+                template = model.objects.get(name="Shared")
+                self.assertEqual(template.products.count(), 2)
+                form = form_for(RESOURCES[resource])(instance=template)
+                self.assertEqual(set(form.initial["products"]), {p.pk for p in self.products[:2]})
+                payload.update(text="Updated shared text", text_ar="نص مشترك محدث",
+                               products=[p.pk for p in self.products[1:]])
+                self.client.post(reverse("controlpanel:edit", args=(resource, template.pk)), payload)
+                self.products[0].refresh_from_db()
+                self.assertIsNone(getattr(self.products[0], field))
+                self.assertEqual(set(template.products.values_list("pk", flat=True)), {p.pk for p in self.products[1:]})
+                for product in self.products[1:]:
+                    self.assertContains(self.client.get(product.get_absolute_url()), "Updated shared text")
+                replacement = model.objects.create(name="Replacement", text="Replacement", text_ar="بديل")
+                payload.update(name="Replacement", products=[self.products[1].pk])
+                self.client.post(reverse("controlpanel:edit", args=(resource, replacement.pk)), payload)
+                self.assertEqual(set(template.products.values_list("pk", flat=True)), {self.products[2].pk})
+                replacement.delete()
+                self.products[1].refresh_from_db()
+                self.assertIsNone(getattr(self.products[1], field))
+                self.assertEqual(self.products[1].specifications_text, "Individual specs")
+                self.assertEqual(self.products[1].warranty_text, "Individual warranty")
+
+    def test_public_content_switches_language_and_escapes_markup(self):
+        product = self.products[0]
+        for shared in (False, True):
+            if shared:
+                product.specification_template = SpecificationTemplate.objects.create(
+                    name="Specs", text="Shared specs <script>alert(1)</script>", text_ar="مواصفات مشتركة")
+                product.warranty_template = WarrantyTemplate.objects.create(
+                    name="Warranty", text="Shared warranty", text_ar="ضمان مشترك")
+                product.save()
+            self.client.cookies["rocks_language"] = "en"
+            response = self.client.get(product.get_absolute_url())
+            self.assertContains(response, "Shared specs" if shared else "Individual specs")
+            self.assertContains(response, "Shared warranty" if shared else "Individual warranty")
+            if shared:
+                self.assertContains(response, "&lt;script&gt;alert(1)&lt;/script&gt;")
+                self.assertNotContains(response, "Individual specs")
+            self.client.cookies["rocks_language"] = "ar"
+            response = self.client.get(product.get_absolute_url())
+            self.assertContains(response, "مواصفات مشتركة" if shared else "مواصفات خاصة")
+            self.assertContains(response, "ضمان مشترك" if shared else "ضمان خاص")
+
+    def test_product_create_and_edit_save_bilingual_content(self):
+        product = self.products[0]
+        payload = {name: getattr(product, name) for name in (
+            "name", "name_ar", "slug", "sku", "short_description", "short_description_ar",
+            "description", "description_ar", "specifications_text", "specifications_text_ar",
+            "warranty_text", "warranty_text_ar", "stock_quantity",
+        )}
+        payload.update(category=product.category_id, is_active="on",
+                       **{"lengths-TOTAL_FORMS": "0", "lengths-INITIAL_FORMS": "0"})
+        response = self.client.post(reverse("controlpanel:edit", args=("products", product.pk)), payload)
+        self.assertRedirects(response, reverse("controlpanel:list", args=("products",)))
+        product.refresh_from_db()
+        self.assertEqual(product.warranty_text_ar, "ضمان خاص")
+        payload.update(slug="new-content", sku="NEW-CONTENT")
+        response = self.client.post(reverse("controlpanel:create", args=("products",)), payload)
+        self.assertRedirects(response, reverse("controlpanel:list", args=("products",)))
+        self.assertEqual(Product.objects.get(slug="new-content").specifications_text_ar, "مواصفات خاصة")
+        payload["warranty_text_ar"] = ""
+        form = ProductControlForm(payload, instance=product)
+        self.assertFalse(form.is_valid())
+        self.assertIn("warranty_text_ar", form.errors)
+        payload.update(warranty_text="", warranty_text_ar="ضمان")
+        form = ProductControlForm(payload, instance=product)
+        self.assertFalse(form.is_valid())
+        self.assertIn("warranty_text", form.errors)
+
+    def test_invalid_shared_text_does_not_modify_products(self):
+        response = self.client.post(reverse("controlpanel:create", args=("warranty-templates",)), {
+            "name": "Incomplete", "text": "English only", "products": [self.products[0].pk],
+        })
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(WarrantyTemplate.objects.exists())
+        self.products[0].refresh_from_db()
+        self.assertIsNone(self.products[0].warranty_template)
+
+    def test_shared_assignment_requires_product_change_permission(self):
+        staff = User.objects.create_user("content-staff", is_staff=True)
+        staff.user_permissions.add(Permission.objects.get(codename="add_warrantytemplate"))
+        self.client.force_login(staff)
+        response = self.client.post(reverse("controlpanel:create", args=("warranty-templates",)), {
+            "name": "Denied", "text": "Denied", "text_ar": "مرفوض", "products": [self.products[0].pk],
+        })
+        self.assertEqual(response.status_code, 403)
+        self.assertFalse(WarrantyTemplate.objects.exists())
 
 
 class ControlPanelTests(TestCase):

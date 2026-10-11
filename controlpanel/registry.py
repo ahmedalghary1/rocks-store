@@ -3,7 +3,7 @@ from collections import OrderedDict
 from django.contrib.auth.models import Group, User
 
 from accounts.models import Address
-from catalog.models import Category, HomepageProduct, Product, ProductAttribute, ProductImage, ProductSpecification, ProductVariant
+from catalog.models import Category, HomepageProduct, Product, ProductAttribute, ProductImage, ProductSpecification, ProductVariant, SpecificationTemplate, WarrantyTemplate
 from core.models import ContactMessage, SiteSettings
 from marketing.models import Banner, Subscriber
 from orders.models import Coupon, Order, OrderItem, OrderNotification, ShippingZone
@@ -25,6 +25,8 @@ RESOURCES = OrderedDict({
     "variants": {"model": ProductVariant, "label": "خيارات المنتجات", "singular": "خيار منتج", "icon": "boxes", "group": "catalog", "list": ("product", "label", "sku", "price", "stock_quantity", "is_active"), "search": ("product__name", "label", "label_ar", "sku"), "filters": ("product", "is_active"), "select": ("product",)},
     "product-images": {"model": ProductImage, "label": "صور المنتجات", "singular": "صورة منتج", "icon": "images", "group": "catalog", "list": ("image", "product", "alt_text", "sort_order"), "search": ("product__name", "alt_text", "alt_text_ar"), "filters": ("product",), "select": ("product",)},
     "specifications": {"model": ProductSpecification, "label": "مواصفات المنتجات", "singular": "مواصفة", "icon": "list-checks", "group": "catalog", "list": ("product", "name", "value", "sort_order"), "search": ("product__name", "name", "name_ar", "value", "value_ar"), "filters": ("product",), "select": ("product",)},
+    "specification-templates": {"model": SpecificationTemplate, "label": "المواصفات المشتركة", "singular": "قالب مواصفات", "icon": "list-checks", "group": "catalog", "list": ("name", "text", "text_ar"), "search": ("name", "text", "text_ar")},
+    "warranty-templates": {"model": WarrantyTemplate, "label": "الضمانات المشتركة", "singular": "قالب ضمان", "icon": "shield-check", "group": "catalog", "list": ("name", "text", "text_ar"), "search": ("name", "text", "text_ar")},
     "attributes": {"model": ProductAttribute, "label": "خصائص المنتجات", "singular": "خاصية", "icon": "sliders-horizontal", "group": "catalog", "list": ("name", "name_ar", "slug"), "search": ("name", "name_ar", "slug")},
 
     "site-settings": {"model": SiteSettings, "label": "إعدادات الموقع", "singular": "إعدادات الموقع", "icon": "settings", "group": "content", "list": ("company_name", "phone", "email", "currency"), "search": ("company_name", "phone", "email"), "singleton": True},
@@ -46,6 +48,11 @@ GROUPS = (
 
 
 FIELD_LABELS = {
+    "specifications_text": "المواصفات بالإنجليزية", "specifications_text_ar": "المواصفات بالعربية",
+    "warranty_text": "الضمان بالإنجليزية", "warranty_text_ar": "الضمان بالعربية",
+    "specification_template": "قالب المواصفات المشترك", "warranty_template": "قالب الضمان المشترك",
+    "text": "النص بالإنجليزية", "text_ar": "النص بالعربية",
+
     "name": "الاسم", "name_ar": "الاسم بالعربية", "title": "العنوان", "title_ar": "العنوان بالعربية", "subtitle": "العنوان الفرعي", "subtitle_ar": "العنوان الفرعي بالعربية",
     "slug": "الرابط المختصر", "description": "الوصف", "description_ar": "الوصف بالعربية",
     "short_description": "الوصف المختصر", "short_description_ar": "الوصف المختصر بالعربية",
