@@ -1,4 +1,6 @@
-html,body{direction:ltr}
+html{direction:ltr}
+html[dir=rtl]{direction:rtl}
+body{direction:inherit}
 body{background:#f8faf9;color:#07120f}
 .topbar{background:#020705}.topbar .container{direction:ltr}.topbar .container>span:first-child{display:flex;align-items:center;gap:7px}.topbar svg{width:14px;height:14px;color:#59e13b}.topbar-links{display:flex;align-items:center;gap:9px}
 .site-header{direction:ltr;background:#020705!important;color:#fff;border-color:rgba(255,255,255,.1)}.site-header.scrolled{background:#020705!important;box-shadow:0 10px 35px rgba(0,0,0,.22)}.site-header .brand{background:#020705}.desktop-nav{direction:ltr}.desktop-nav>a:after,.nav-mega>a:after{background:#59e13b}.nav-mega .mega-panel{direction:ltr;text-align:left}.mega-feature{background:linear-gradient(135deg,#061b13,#0b3a23)}.mega-feature .text-link{color:#59e13b}.ev-quote{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 21px;border-radius:999px;background:linear-gradient(135deg,#59e13b,#22bd37);color:#061109;font-size:.76rem;font-weight:800;white-space:nowrap}.mobile-drawer{direction:ltr;text-align:left}
@@ -19,6 +21,10 @@ body{background:#f8faf9;color:#07120f}
 [dir=rtl] h1,[dir=rtl] h2,[dir=rtl] h3,[dir=rtl] h4,[dir=rtl] h5,[dir=rtl] h6,[dir=rtl] strong,[dir=rtl] b,[dir=rtl] .btn,[dir=rtl] button,[dir=rtl] .eyebrow{font-family:"Cairo","IBM Plex Sans Arabic",sans-serif}
 [dir=rtl] .eyebrow,[dir=rtl] .product-category,[dir=rtl] .brand-name small{letter-spacing:0}
 html[dir=rtl],html[dir=rtl] body{max-width:100%;overflow-x:hidden}
+
+/* Product copy follows the selected language, including line-leading symbols. */
+.product-copy{direction:inherit;text-align:start;unicode-bidi:isolate;white-space:pre-line;overflow-wrap:anywhere}
+.spec-grid span,.spec-grid b{text-align:start;unicode-bidi:isolate;overflow-wrap:anywhere}
 
 /* Keep product imagery uncropped and proportional at every breakpoint. */
 .product-visual,.main-product-image,.quick-visual,.cart-thumb{aspect-ratio:1/1;height:auto!important}
