@@ -16,10 +16,11 @@ body{background:#f8faf9;color:#07120f}
 @media(max-width:900px){.language-switch:not(.language-switch--drawer){display:none}.mobile-drawer[aria-hidden="true"]{display:none!important}.mobile-drawer.open[aria-hidden="false"]{display:block!important}[dir=rtl] .mobile-drawer{right:0;left:auto;transform:none;visibility:visible;pointer-events:auto;z-index:700}[dir=rtl] .drawer-close{right:auto;left:20px}[dir=rtl] .filters{right:0!important;left:auto!important;transform:translateX(105%)!important}}
 @media(max-width:1000px){[dir=rtl] .rocks-footer__links,[dir=rtl] .rocks-footer__contact{padding:0;border:0}}
 
-/* Arabic type system: IBM Plex Sans Arabic for reading, Cairo for display. */
-[dir=rtl] body{font-family:"IBM Plex Sans Arabic","Cairo",sans-serif}
+/* Arabic type system: Cairo is primary; IBM Plex Sans Arabic supports metadata. */
+[dir=rtl] body{font-family:"Cairo","IBM Plex Sans Arabic",sans-serif}
 [dir=rtl] h1,[dir=rtl] h2,[dir=rtl] h3,[dir=rtl] h4,[dir=rtl] h5,[dir=rtl] h6,[dir=rtl] strong,[dir=rtl] b,[dir=rtl] .btn,[dir=rtl] button,[dir=rtl] .eyebrow{font-family:"Cairo","IBM Plex Sans Arabic",sans-serif}
 [dir=rtl] .eyebrow,[dir=rtl] .product-category,[dir=rtl] .brand-name small{letter-spacing:0}
+html[dir=rtl] small,html[dir=rtl] .eyebrow,html[dir=rtl] .product-category,html[dir=rtl] .sku,html[dir=rtl] .gallery-note,html[dir=rtl] .length-help{font-family:"IBM Plex Sans Arabic","Cairo",sans-serif;font-weight:500}
 html[dir=rtl],html[dir=rtl] body{max-width:100%;overflow-x:hidden}
 
 /* Product copy follows the selected language, including line-leading symbols. */

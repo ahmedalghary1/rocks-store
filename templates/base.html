@@ -9,6 +9,7 @@
   <meta name="robots" content="{% block robots %}index,follow,max-image-preview:large{% endblock %}">
   <link rel="canonical" href="{{ canonical_url }}">
   <meta name="theme-color" content="#021108">
+  <link rel="stylesheet" href="{% static 'css/fonts.css' %}">
   <link rel="icon" type="image/webp" href="{% static 'images/rocks-favicon-black.webp' %}">
   <meta property="og:type" content="{% block og_type %}website{% endblock %}"><meta property="og:locale" content="{% if current_language == 'ar' %}ar_EG{% else %}en_US{% endif %}"><meta property="og:url" content="{{ canonical_url }}">
   <meta property="og:site_name" content="ROCKS"><meta property="og:title" content="{% block og_title %}ROCKS Electrical &amp; EV Solutions{% endblock %}"><meta property="og:description" content="{% block og_description %}Reliable electrical products and EV charging solutions for homes and businesses in Egypt.{% endblock %}"><meta property="og:image" content="{% block og_image %}{{ default_og_image }}{% endblock %}">
