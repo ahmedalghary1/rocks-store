@@ -27,21 +27,6 @@ html[dir=rtl],html[dir=rtl] body{max-width:100%;overflow-x:hidden}
 .product-copy{direction:inherit;text-align:start;unicode-bidi:isolate;white-space:pre-line;overflow-wrap:anywhere}
 .spec-grid span,.spec-grid b{text-align:start;unicode-bidi:isolate;overflow-wrap:anywhere}
 
-/* About content uses the same reading direction and type system as the store. */
-.about-copy{max-width:960px;font-size:1.05rem}
-.about-copy p+p,.about-purpose-grid p+p{margin-block-start:18px}
-.about-page .about-tagline{font-size:clamp(1.1rem,2vw,1.55rem);font-weight:700;max-width:none}
-.about-purpose-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;margin-block-start:36px}
-.about-purpose-grid article{min-width:0;padding:clamp(22px,3vw,36px);border:1px solid #dce9df;border-radius:20px;background:#fff}
-.about-purpose-grid h2,.about-content-block>h2{font-size:clamp(1.3rem,2.2vw,1.9rem);line-height:1.65;margin-block-end:18px}
-.about-purpose-grid h3{font-size:1.2rem;line-height:1.65;margin-block-end:14px}
-.about-content-block{margin-block-start:56px}
-.about-content-block .about-purpose-grid{margin-block-start:24px}
-.about-page p,.about-values{text-align:start;line-height:1.95;overflow-wrap:anywhere}
-.about-values{padding-inline-start:24px;margin-block-start:20px}
-.about-values li+li{margin-block-start:12px}
-.about-page h2 bdi{font-size:.65em;color:var(--muted);font-weight:500}
-@media(max-width:700px){.about-purpose-grid{grid-template-columns:1fr;gap:16px}.about-content-block{margin-block-start:40px}}
 
 /* Keep product imagery uncropped and proportional at every breakpoint. */
 .product-visual,.main-product-image,.quick-visual,.cart-thumb{aspect-ratio:1/1;height:auto!important}
