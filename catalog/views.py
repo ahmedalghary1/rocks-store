@@ -3,6 +3,7 @@ from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from .models import Category, Product
+from core.seo import absolute_url, product_schema, breadcrumbs_schema
 
 
 def product_list(request, slug=None):
@@ -18,7 +19,7 @@ def product_list(request, slug=None):
     if category_slug:
         products = products.filter(category__slug=category_slug)
     if query:
-        products = products.filter(Q(name__icontains=query) | Q(short_description__icontains=query) | Q(sku__icontains=query))
+        products = products.filter(Q(name__icontains=query) | Q(name_ar__icontains=query) | Q(short_description__icontains=query) | Q(short_description_ar__icontains=query) | Q(sku__icontains=query))
     if request.GET.get("available") == "1":
         products = products.filter(
             Q(variants__isnull=True, stock_quantity__gt=0)
@@ -34,6 +35,7 @@ def product_list(request, slug=None):
         "categories": Category.objects.filter(is_active=True),
         "selected_category": category_slug,
         "category": category,
+        "breadcrumbs_json_ld": breadcrumbs_schema(request, category),
         "listing_indexable": valid_page and not any(key != "page" for key in request.GET),
     })
 
@@ -41,8 +43,8 @@ def product_list(request, slug=None):
 def product_detail(request, slug):
     product = get_object_or_404(Product.objects.select_related("category", "specification_template", "warranty_template").prefetch_related("images", "specifications", "variants"), slug=slug, is_active=True, category__is_active=True)
     related = Product.objects.filter(category=product.category, is_active=True, category__is_active=True).select_related("category").prefetch_related("variants").exclude(pk=product.pk)[:4]
-    product_og_image = request.build_absolute_uri(product.main_image.url) if product.main_image else None
-    return render(request, "catalog/product_detail.html", {"product": product, "related_products": related, "product_og_image": product_og_image})
+    product_og_image = absolute_url(request, product.main_image.url) if product.main_image else None
+    return render(request, "catalog/product_detail.html", {"product": product, "related_products": related, "product_og_image": product_og_image, "product_json_ld": product_schema(request, product), "breadcrumbs_json_ld": breadcrumbs_schema(request, product.category, product)})
 
 
 def quick_view(request, slug):

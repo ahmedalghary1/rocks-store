@@ -7,11 +7,15 @@ from django.test import override_settings
 from django.test.utils import CaptureQueriesContext
 from django.db import connection
 from django.urls import reverse
+from django.utils import translation
 from PIL import Image
 from .models import Category, Product, ProductVariant
 
 
 class CatalogTests(TestCase):
+    def setUp(self):
+        translation.activate("en")
+
     @classmethod
     def setUpTestData(cls):
         cls.category = Category.objects.create(name="Lighting", slug="lights")
@@ -83,7 +87,7 @@ class CatalogTests(TestCase):
         self.assertContains(response, 'type="submit" disabled', html=False)
 
         self.client.post(reverse("set_language"), {"language": "ar", "next": self.product.get_absolute_url()})
-        response = self.client.get(self.product.get_absolute_url())
+        response = self.client.get(f"/ar/products/{self.product.slug}/")
         self.assertContains(response, "اختر الطول")
         self.assertContains(response, "٢ متر")
         self.assertContains(response, 'data-price="180.00"', html=False)
@@ -101,7 +105,7 @@ class CatalogTests(TestCase):
         self.product.save(update_fields=("name_ar", "short_description_ar"))
         self.client.post(reverse("set_language"), {"language": "ar", "next": self.product.get_absolute_url()})
 
-        response = self.client.get(self.product.get_absolute_url())
+        response = self.client.get(f"/ar/products/{self.product.slug}/")
         self.assertContains(response, "مصباح تجريبي")
         self.assertContains(response, "الإضاءة")
 

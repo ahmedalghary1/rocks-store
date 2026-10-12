@@ -8,6 +8,10 @@
   <meta name="description" content="{% block meta_description %}Shop ROCKS electrical products in Egypt, including EV charging cables, power strips, plugs, switches, lighting and electrical tools.{% endblock %}">
   <meta name="robots" content="{% block robots %}index,follow,max-image-preview:large{% endblock %}">
   <link rel="canonical" href="{{ canonical_url }}">
+  {% if language_alternates.en != language_alternates.ar %}<link rel="alternate" hreflang="en" href="{{ language_alternates.en }}">
+  <link rel="alternate" hreflang="ar-EG" href="{{ language_alternates.ar }}">
+  <link rel="alternate" hreflang="x-default" href="{{ language_alternates.en }}">{% endif %}
+  <script type="application/ld+json" nonce="{{ csp_nonce }}">{{ store_json_ld }}</script>
   <meta name="theme-color" content="#021108">
   <link rel="stylesheet" href="{% static 'css/fonts.css' %}">
   <link rel="icon" type="image/webp" href="{% static 'images/rocks-favicon-black.webp' %}">
@@ -17,6 +21,7 @@
   <link rel="stylesheet" href="{% static 'css/variables.css' %}"><link rel="stylesheet" href="{% static 'css/site.css' %}"><link rel="stylesheet" href="{% static 'css/polish.css' %}"><link rel="stylesheet" href="{% static 'css/home-footer.css' %}"><link rel="stylesheet" href="{% static 'css/brand-system.css' %}">
   {% block extra_head %}{% endblock %}
   <link rel="stylesheet" href="{% static 'css/motion.css' %}">
+  <link rel="stylesheet" href="{% static 'css/search-content.css' %}">
 </head>
 <body class="{% block body_class %}{% endblock %}" data-icon-library="{% static 'js/vendor/lucide-storefront.min.js' %}">
   <a class="skip-link" href="#main">Skip to content</a>

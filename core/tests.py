@@ -4,6 +4,7 @@ from django.core.cache import cache
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import translation
 
 from marketing.models import Banner, Subscriber
 from .models import ContactMessage, SiteSettings
@@ -12,6 +13,7 @@ from .models import ContactMessage, SiteSettings
 class PublicPagesTests(TestCase):
     def setUp(self):
         cache.clear()
+        translation.activate("en")
 
     def test_language_switch_renders_complete_arabic_shell(self):
         from catalog.models import Category, Product
@@ -29,10 +31,10 @@ class PublicPagesTests(TestCase):
             is_featured=True,
         )
         response = self.client.post(reverse("set_language"), {"language": "ar", "next": reverse("core:home")})
-        self.assertRedirects(response, reverse("core:home"))
-        response = self.client.get(reverse("core:home"))
+        self.assertRedirects(response, "/ar/")
+        response = self.client.get("/ar/")
         self.assertContains(response, '<html lang="ar" dir="rtl">', html=False)
-        self.assertContains(response, "حلول الكهرباء وشحن السيارات")
+        self.assertContains(response, "روكس الوسام — كابلات ومشتركات كهرباء")
         self.assertContains(response, "لكل")
         self.assertContains(response, "توصيلة")
         self.assertContains(response, "تصنيفات المنتجات")
@@ -45,7 +47,7 @@ class PublicPagesTests(TestCase):
         self.assertContains(response, "hero-ev-original.webp")
 
         self.client.post(reverse("set_language"), {"language": "en", "next": reverse("core:home")})
-        response = self.client.get(reverse("core:home"))
+        response = self.client.get("/")
         self.assertContains(response, '<html lang="en" dir="ltr">', html=False)
         self.assertContains(response, "ELECTRICAL &amp; EV SOLUTIONS")
         self.assertContains(response, "hero-ev-original.webp")
@@ -66,7 +68,7 @@ class PublicPagesTests(TestCase):
         self.assertNotContains(response, "نقود الطريق نحو المستقبل.")
 
         self.client.post(reverse("set_language"), {"language": "ar", "next": reverse("core:home")})
-        response = self.client.get(reverse("core:home"))
+        response = self.client.get("/ar/")
         self.assertContains(response, "نقود الطريق نحو المستقبل.")
 
     def test_navigation_uses_real_active_catalog_categories(self):
@@ -133,7 +135,7 @@ class PublicPagesTests(TestCase):
         self.assertNotContains(response, "لنجد التوصيلة المناسبة.")
 
         self.client.post(reverse("set_language"), {"language": "ar", "next": reverse("core:contact")})
-        response = self.client.get(reverse("core:contact"))
+        response = self.client.get("/ar/contact/")
         self.assertContains(response, "لنجد التوصيلة المناسبة.")
         self.assertContains(response, "اسأل عن التوافق أو المواصفات أو التوفر أو التوصيل")
         self.assertContains(response, "الاسم بالكامل")
@@ -142,7 +144,7 @@ class PublicPagesTests(TestCase):
 
     def test_about_page_has_no_untranslated_current_copy_in_arabic(self):
         self.client.post(reverse("set_language"), {"language": "ar", "next": reverse("core:about")})
-        response = self.client.get(reverse("core:about"))
+        response = self.client.get("/ar/about/")
         self.assertContains(response, "الطاقة الآمنة ليست تفصيلًا.")
         self.assertContains(response, "من طاقة الحياة اليومية إلى كل رحلة")
         self.assertNotContains(response, "Safe power is not a detail.")

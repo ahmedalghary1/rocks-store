@@ -11,12 +11,15 @@ from django.db.models import Case, Exists, F, IntegerField, Q, Value, When
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils import translation
+from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
 from catalog.models import Category, HomepageProduct, Product
 from marketing.models import Banner, Subscriber
 from .forms import ContactForm, NewsletterForm
+from .seo import absolute_url, faq_context, language_urls
 
 logger = logging.getLogger(__name__)
 
@@ -60,11 +63,16 @@ def home(request):
     return render(request, "core/home.html", {
         "featured_products": homepage_products,
         "marketing_banner": banner,
+        **faq_context(),
     })
 
 
 def about(request):
     return render(request, "core/about.html")
+
+
+def buying_guide(request):
+    return render(request, "core/buying_guide.html", faq_context())
 
 
 def contact(request):
@@ -137,31 +145,39 @@ def wishlist_toggle(request, product_id):
 
 
 def sitemap(request):
+    if request.path != "/sitemap.xml":
+        return redirect("/sitemap.xml", permanent=True)
     namespace = "http://www.sitemaps.org/schemas/sitemap/0.9"
     image_namespace = "http://www.google.com/schemas/sitemap-image/1.1"
     ET.register_namespace("", namespace)
     ET.register_namespace("image", image_namespace)
+    xhtml_namespace = "http://www.w3.org/1999/xhtml"
+    ET.register_namespace("xhtml", xhtml_namespace)
     root = ET.Element(f"{{{namespace}}}urlset")
 
     def add_url(path, lastmod=None, image_url=None, image_title=None):
         node = ET.SubElement(root, f"{{{namespace}}}url")
-        ET.SubElement(node, f"{{{namespace}}}loc").text = request.build_absolute_uri(path)
+        ET.SubElement(node, f"{{{namespace}}}loc").text = absolute_url(request, path)
+        for code, url in language_urls(request, path).items():
+            ET.SubElement(node, f"{{{xhtml_namespace}}}link", rel="alternate", hreflang="ar-EG" if code == "ar" else "en", href=url)
         if lastmod:
             ET.SubElement(node, f"{{{namespace}}}lastmod").text = lastmod.date().isoformat()
         if image_url:
             image = ET.SubElement(node, f"{{{image_namespace}}}image")
-            ET.SubElement(image, f"{{{image_namespace}}}loc").text = request.build_absolute_uri(image_url)
+            ET.SubElement(image, f"{{{image_namespace}}}loc").text = absolute_url(request, image_url)
             if image_title:
                 ET.SubElement(image, f"{{{image_namespace}}}title").text = image_title
 
-    for path in ("/", "/products/", "/about/", "/contact/", "/privacy/", "/terms/", "/shipping-policy/", "/returns-policy/"):
-        add_url(path)
-    categories = Category.objects.filter(is_active=True, products__is_active=True).distinct()
-    for category in categories:
-        add_url(category.get_absolute_url(), category.updated_at, category.image.url if category.image else None, category.display_name)
-    products = Product.objects.filter(is_active=True, category__is_active=True).select_related("category")
-    for product in products:
-        add_url(product.get_absolute_url(), product.updated_at, product.main_image.url if product.main_image else None, product.display_name)
+    categories = list(Category.objects.filter(is_active=True, products__is_active=True).distinct())
+    products = list(Product.objects.filter(is_active=True, category__is_active=True).select_related("category"))
+    for code in ("en", "ar"):
+        with translation.override(code):
+            for name in ("core:home", "catalog:list", "core:about", "core:contact", "core:buying_guide", "core:privacy", "core:terms", "core:shipping_policy", "core:returns_policy"):
+                add_url(reverse(name))
+            for category in categories:
+                add_url(category.get_absolute_url(), category.updated_at, category.image.url if category.image else None, category.display_name)
+            for product in products:
+                add_url(product.get_absolute_url(), product.updated_at, product.main_image.url if product.main_image else None, product.display_name)
     return HttpResponse(ET.tostring(root, encoding="unicode"), content_type="application/xml")
 
 

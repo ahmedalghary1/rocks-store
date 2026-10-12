@@ -1,0 +1,11 @@
+{% load i18n %}{% get_current_language as faq_language %}
+<section class="section store-guide" aria-labelledby="store-guide-title"><div class="container">
+  <h2 id="store-guide-title">{% if faq_language == 'ar' %}كابلات ومشتركات كهرباء روكس الوسام{% else %}ROCKS ELWSAM cables and power strips{% endif %}</h2>
+  <p>{% if faq_language == 'ar' %}روكس الوسام (ROCKS ELWSAM) — متجر روكس للمنتجات الكهربائية في مصر. استكشف كابلات الكهرباء والمشتركات والفيش والمفاتيح والإضاءة ومنتجات شحن السيارات، وراجع مواصفات كل منتج قبل الطلب.{% else %}ROCKS ELWSAM (روكس الوسام) is the ROCKS electrical products store in Egypt. Explore electrical cables, power strips, plugs, switches, lighting and EV charging products, and review each product's specifications before ordering.{% endif %}</p>
+  <nav class="store-guide__links" aria-label="{% if faq_language == 'ar' %}أقسام منتجات روكس{% else %}ROCKS product categories{% endif %}">
+    {% for category in navigation_categories %}<a class="text-link" href="{{ category.get_absolute_url }}">{{ category.display_name }}</a>{% endfor %}
+  </nav>
+  <h3>{% if faq_language == 'ar' %}أسئلة عن منتجات روكس{% else %}Questions about ROCKS products{% endif %}</h3>
+  <div class="store-guide__questions">{% for question, answer in store_faq %}<details><summary>{{ question }}</summary><p>{{ answer }}</p></details>{% endfor %}</div>
+  <p><a class="text-link" href="{% url 'catalog:list' %}">{% if faq_language == 'ar' %}تصفح المنتجات{% else %}Browse products{% endif %}</a> · <a class="text-link" href="{% url 'core:contact' %}">{% if faq_language == 'ar' %}اسأل فريق روكس{% else %}Ask the ROCKS team{% endif %}</a> · <a class="text-link" href="{% url 'core:shipping_policy' %}">{% if faq_language == 'ar' %}سياسة الشحن{% else %}Shipping policy{% endif %}</a> · <a class="text-link" href="{% url 'core:returns_policy' %}">{% if faq_language == 'ar' %}الاسترجاع والاستبدال{% else %}Returns and exchanges{% endif %}</a></p>
+</div></section>

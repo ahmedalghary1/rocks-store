@@ -10,15 +10,25 @@ from .translations import translate_markup
 
 
 class DefaultEnglishLocaleMiddleware(LocaleMiddleware):
-    """Use English on a visitor's first request; honor an explicit language cookie."""
+    """Serve stable English/Arabic public URLs and cookie-localized checkout."""
 
     def process_request(self, request):
-        language = request.COOKIES.get(settings.LANGUAGE_COOKIE_NAME, settings.LANGUAGE_CODE)
+        language = translation.get_language_from_path(request.path_info)
+        if not language:
+            # Public URLs have a stable language even when cookies differ.
+            private = request.path.startswith(("/cart/", "/checkout/", "/account/", "/auth/", "/dashboard/", "/admin/"))
+            language = request.COOKIES.get(settings.LANGUAGE_COOKIE_NAME, settings.LANGUAGE_CODE) if private else settings.LANGUAGE_CODE
         supported = {code for code, _name in settings.LANGUAGES}
         if language not in supported:
             language = settings.LANGUAGE_CODE
         translation.activate(language)
         request.LANGUAGE_CODE = translation.get_language()
+
+    def process_response(self, request, response):
+        # Both languages are discoverable without cookies or Accept-Language.
+        response.setdefault("Content-Language", request.LANGUAGE_CODE)
+        patch_vary_headers(response, ("Cookie",))
+        return response
 
 
 class SecurityHeadersMiddleware:
@@ -44,7 +54,8 @@ class SecurityHeadersMiddleware:
         )
         response.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()")
         response.setdefault("Cross-Origin-Opener-Policy", "same-origin")
-        if request.path.startswith(self.private_prefixes):
+        public_path = request.path.removeprefix("/ar") if request.path.startswith("/ar/") else request.path
+        if public_path.startswith(self.private_prefixes) or public_path.startswith("/products/search/") or "/quick-view/" in public_path or response.status_code >= 400:
             response.setdefault("X-Robots-Tag", "noindex, nofollow, noarchive")
         return response
 

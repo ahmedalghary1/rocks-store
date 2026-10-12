@@ -5,6 +5,7 @@ app_name = "core"
 urlpatterns = [
     path("", views.home, name="home"), path("about/", views.about, name="about"),
     path("contact/", views.contact, name="contact"), path("wishlist/", views.wishlist, name="wishlist"),
+    path("buying-guide/", views.buying_guide, name="buying_guide"),
     path("wishlist/<int:product_id>/toggle/", views.wishlist_toggle, name="wishlist_toggle"),
     path("newsletter/subscribe/", views.newsletter_subscribe, name="newsletter_subscribe"),
     path("privacy/", views.legal_page, {"template_name": "core/privacy.html"}, name="privacy"),

@@ -66,14 +66,14 @@ class ProductContentTests(TestCase):
                     name="Warranty", text="Shared warranty", text_ar="ضمان مشترك")
                 product.save()
             self.client.cookies["rocks_language"] = "en"
-            response = self.client.get(product.get_absolute_url())
+            response = self.client.get(f"/products/{product.slug}/")
             self.assertContains(response, "Shared specs" if shared else "Individual specs")
             self.assertContains(response, "Shared warranty" if shared else "Individual warranty")
             if shared:
                 self.assertContains(response, "&lt;script&gt;alert(1)&lt;/script&gt;")
                 self.assertNotContains(response, "Individual specs")
             self.client.cookies["rocks_language"] = "ar"
-            response = self.client.get(product.get_absolute_url())
+            response = self.client.get(f"/ar/products/{product.slug}/")
             self.assertContains(response, "مواصفات مشتركة" if shared else "مواصفات خاصة")
             self.assertContains(response, "ضمان مشترك" if shared else "ضمان خاص")
 

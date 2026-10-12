@@ -54,11 +54,15 @@ class Category(OptimizedImageFieldsMixin, models.Model):
 
     @property
     def display_meta_title(self):
-        return localized_value(self, "meta_title") or f"{self.display_name} | ROCKS Egypt"
+        return localized_value(self, "meta_title") or f"{self.display_name} | {'روكس الوسام' if translation.get_language() == 'ar' else 'ROCKS ELWSAM Egypt'}"
 
     @property
     def display_meta_description(self):
-        return localized_value(self, "meta_description") or self.display_description or f"Shop {self.display_name} from ROCKS with clear specifications and delivery across Egypt."
+        return localized_value(self, "meta_description") or self.display_description or (
+            f"تصفح {self.display_name} من روكس الوسام في مصر، وراجع مواصفات المنتجات والأسعار المتاحة قبل الطلب."
+            if translation.get_language() == "ar" else
+            f"Browse {self.display_name} from ROCKS ELWSAM Egypt. Check product specifications and available prices before ordering."
+        )
 
 
 class SharedProductText(models.Model):
@@ -167,7 +171,7 @@ class Product(OptimizedImageFieldsMixin, models.Model):
 
     @property
     def display_meta_title(self):
-        return localized_value(self, "meta_title") or self.display_name
+        return localized_value(self, "meta_title") or f"{self.display_name} | {'روكس الوسام' if translation.get_language() == 'ar' else 'ROCKS ELWSAM'}"
 
     @property
     def display_meta_description(self):

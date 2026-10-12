@@ -28,6 +28,12 @@ if not SECRET_KEY:
         raise ImproperlyConfigured("SECRET_KEY must be configured when DEBUG=False.")
 ALLOWED_HOSTS = [h.strip() for h in os.getenv("ALLOWED_HOSTS", "127.0.0.1,localhost,testserver").split(",") if h.strip()]
 CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",") if origin.strip()]
+SITE_URL = os.getenv("SITE_URL", "" if DEBUG else "https://rocks-ev.com").strip().rstrip("/")
+if SITE_URL:
+    from urllib.parse import urlsplit
+    site_parts = urlsplit(SITE_URL)
+    if site_parts.scheme not in {"https", "http"} or not site_parts.netloc or site_parts.path or site_parts.query or site_parts.fragment or site_parts.username:
+        raise ImproperlyConfigured("SITE_URL must be an absolute origin, for example https://rocks-ev.com.")
 
 INSTALLED_APPS = [
     "django.contrib.admin", "django.contrib.auth", "django.contrib.contenttypes",

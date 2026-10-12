@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
 Disallow: /products/search/
-Sitemap: {{ request.scheme }}://{{ request.get_host }}/sitemap.xml
+Disallow: /ar/products/search/
+Sitemap: {{ sitemap_url }}
