@@ -274,7 +274,7 @@ addEventListener('pageshow', () => submitOnceButtons.forEach(button => {
   renderIcons(button);
 }));
 
-// Section and interaction motion is coordinated in motion.js using GSAP.
+// Motion is progressive enhancement in motion.js without external engines.
 // Keep legacy reveal-marked content visible if that enhancement cannot load.
 $$('.reveal').forEach(element => element.classList.add('visible'));
 document.documentElement.classList.add('page-ready');

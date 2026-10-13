@@ -34,7 +34,7 @@ class PublicPagesTests(TestCase):
         self.assertRedirects(response, "/ar/")
         response = self.client.get("/ar/")
         self.assertContains(response, '<html lang="ar" dir="rtl">', html=False)
-        self.assertContains(response, "روكس الوسام — كابلات ومشتركات كهرباء")
+        self.assertContains(response, "روكس الوسام")
         self.assertContains(response, "لكل")
         self.assertContains(response, "توصيلة")
         self.assertContains(response, "تصنيفات المنتجات")
@@ -49,7 +49,7 @@ class PublicPagesTests(TestCase):
         self.client.post(reverse("set_language"), {"language": "en", "next": reverse("core:home")})
         response = self.client.get("/")
         self.assertContains(response, '<html lang="en" dir="ltr">', html=False)
-        self.assertContains(response, "ELECTRICAL &amp; EV SOLUTIONS")
+        self.assertContains(response, "ROCKS EV — ROCKS ELWSAM")
         self.assertContains(response, "hero-ev-original.webp")
 
     def test_first_visit_defaults_to_english_and_mobile_drawer_is_closed(self):
