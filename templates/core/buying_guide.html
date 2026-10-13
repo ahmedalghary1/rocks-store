@@ -1,8 +1,8 @@
 {% extends 'base.html' %}{% load i18n %}
-{% block title %}{% if current_language == 'ar' %}دليل اختيار كابلات الكهرباء والمشتركات | روكس الوسام{% else %}Electrical Cable &amp; Power Strip Buying Guide | ROCKS ELWSAM{% endif %}{% endblock %}
-{% block meta_description %}{% if current_language == 'ar' %}إجابات روكس الوسام عن اختيار مشترك كهرباء وكابلات شحن السيارات، ومراجعة الأسعار والمواصفات والشحن والضمان قبل الطلب.{% else %}ROCKS ELWSAM answers questions about power strips, EV charging cables, product specifications, prices, shipping and warranty before you order.{% endif %}{% endblock %}
+{% block title %}{% if current_language == 'ar' %}دليل كابلات شحن سيارات كهرباء ومشتركات | ROCKS EV{% else %}EV Charging Cable &amp; Power Strip Buying Guide | ROCKS EV{% endif %}{% endblock %}
+{% block meta_description %}{% if current_language == 'ar' %}دليل روكس الوسام ROCKS EV لاختيار كابلات شحن سيارات كهرباء ومشتركات مناسبة. راجع نوع الوصلات وطول الكابل والمواصفات والأسعار والشحن والضمان قبل الطلب.{% else %}ROCKS EV answers questions about EV charging cables, power strips, connector types, cable length, specifications, prices, shipping and warranty before you order.{% endif %}{% endblock %}
 {% block extra_head %}<script type="application/ld+json" nonce="{{ csp_nonce }}">{{ faq_json_ld }}</script>{% endblock %}
 {% block content %}
-<section class="page-hero page-hero--small"><div class="container"><h1>{% if current_language == 'ar' %}دليل اختيار كابلات الكهرباء والمشتركات{% else %}Electrical cable and power strip buying guide{% endif %}</h1><p>{% if current_language == 'ar' %}افهم مواصفات المنتج، وقارن الخيارات، وتواصل معنا لتأكيد التفاصيل قبل الشراء.{% else %}Understand product specifications, compare options and contact us to confirm details before buying.{% endif %}</p></div></section>
+<section class="page-hero page-hero--small"><div class="container"><h1>{% if current_language == 'ar' %}دليل اختيار كابلات شحن سيارات كهرباء ومشتركات{% else %}EV charging cable and power strip buying guide{% endif %}</h1><p>{% if current_language == 'ar' %}افهم مواصفات المنتج، وقارن الخيارات، وتواصل معنا لتأكيد التفاصيل قبل الشراء.{% else %}Understand product specifications, compare options and contact us to confirm details before buying.{% endif %}</p></div></section>
 {% include 'includes/store_faq.html' %}
 {% endblock %}

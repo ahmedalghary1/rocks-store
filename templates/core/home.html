@@ -1,6 +1,6 @@
 {% extends 'base.html' %}{% load static i18n %}{% get_current_language as current_language %}
-{% block title %}{% if current_language == "ar" %}روكس الوسام | كابلات كهرباء ومشتركات | ROCKS ELWSAM{% else %}ROCKS ELWSAM Egypt | Electrical Cables &amp; Power Strips{% endif %}{% endblock %}
-{% block meta_description %}{% if current_language == "ar" %}تسوق كابلات الكهرباء والمشتركات الكهربائية ومنتجات شحن السيارات من روكس الوسام ROCKS ELWSAM في مصر. تصفح المنتجات والأسعار والمواصفات وتواصل معنا قبل الطلب.{% else %}Shop electrical cables, power strips, plugs, lighting and EV charging products from ROCKS ELWSAM in Egypt. Browse prices and specifications and contact our team.{% endif %}{% endblock %}
+{% block title %}{% if current_language == "ar" %}ROCKS EV | روكس الوسام — كابلات شحن ومشتركات{% else %}ROCKS EV Egypt | EV Charging Cables &amp; Power Strips{% endif %}{% endblock %}
+{% block meta_description %}{% if current_language == "ar" %}تسوق من روكس الوسام ROCKS EV في مصر: كابلات شحن سيارات كهرباء، كابلات شحن ومشتركات كهربائية. تصفح منتجات ROCKS وقارن الأسعار والمواصفات قبل الطلب.{% else %}Shop ROCKS EV charging cables, electrical cables and power strips in Egypt from ROCKS ELWSAM. Compare product prices and specifications before ordering.{% endif %}{% endblock %}
 {% block body_class %}home-page ev-home{% endblock %}
 {% block extra_head %}
   <link rel="preload" as="image" type="image/webp" fetchpriority="high" media="(min-width: 701px)" href="{% if marketing_banner.image %}{{ marketing_banner.image.url }}{% else %}{% static 'images/home/hero-ev-original.webp' %}{% endif %}">
@@ -19,9 +19,9 @@
     <div class="ev-hero__shade" aria-hidden="true"></div>
     <div class="container ev-hero__inner">
       <div class="ev-hero__copy">
-        <span class="ev-kicker">{% if current_language == "ar" %}روكس الوسام — كابلات ومشتركات كهرباء{% else %}ROCKS ELWSAM — ELECTRICAL &amp; EV SOLUTIONS{% endif %}</span>
+        <span class="ev-kicker">{% if current_language == "ar" %}ROCKS EV — روكس الوسام{% else %}ROCKS EV — ROCKS ELWSAM{% endif %}</span>
         {% if marketing_banner.title %}<h1 id="hero-title">{{ marketing_banner.display_title|linebreaksbr }}</h1>{% else %}<h1 id="hero-title">POWER<br>FOR EVERY<br><em>CONNECTION</em></h1>{% endif %}
-        <p>{% if marketing_banner.subtitle %}{{ marketing_banner.display_subtitle }}{% else %}{% if current_language == "ar" %}كابلات ومشتركات كهرباء ومنتجات شحن سيارات للمنزل والعمل من روكس الوسام.{% else %}Electrical cables, power strips and EV charging products for your home and business from ROCKS ELWSAM.{% endif %}{% endif %}</p>
+        <p>{% if marketing_banner.subtitle %}{{ marketing_banner.display_subtitle }}{% else %}{% if current_language == "ar" %}كابلات شحن سيارات كهرباء ومشتركات وكابلات كهرباء للمنزل والعمل من روكس الوسام ROCKS EV.{% else %}EV charging cables, power strips and electrical cables for your home and business from ROCKS EV in Egypt.{% endif %}{% endif %}</p>
         <a class="ev-button ev-button--solid" href="{{ marketing_banner.link|default:'/products/' }}">{% if marketing_banner.display_button_text %}{{ marketing_banner.display_button_text }}{% else %}Explore electrical products{% endif %} <i data-lucide="arrow-right" aria-hidden="true"></i></a>
       </div>
     </div>
@@ -35,7 +35,7 @@
 
   <section class="ev-products" id="products" aria-labelledby="products-title">
     <div class="container">
-      <header class="ev-section-title"><span>OUR PRODUCTS</span><h2 id="products-title">ELECTRICAL &amp; EV ESSENTIALS</h2><p>Cables, power strips, plugs, lighting and tools selected for dependable everyday use.</p></header>
+      <header class="ev-section-title"><span>{% if current_language == 'ar' %}منتجات ROCKS{% else %}ROCKS PRODUCTS{% endif %}</span><h2 id="products-title">{% if current_language == 'ar' %}كابلات شحن ومشتركات روكس{% else %}ROCKS EV CHARGING CABLES &amp; POWER STRIPS{% endif %}</h2><p>{% if current_language == 'ar' %}استكشف كابلات شحن سيارات كهرباء وكابلات الكهرباء والمشتركات والفيش والإضاءة، وراجع مواصفات كل منتج لاختيار ما يناسبك.{% else %}Explore EV charging cables, electrical cables, power strips, plugs and lighting, and review each product's specifications to find the right fit.{% endif %}</p></header>
       <div class="ev-product-grid">
         {% for product in featured_products %}<article class="ev-product-card reveal"><a class="ev-product-card__image" href="{{ product.get_absolute_url }}" aria-label="View {{ product.display_name }}">{% if product.main_image %}<img src="{{ product.main_image.url }}" alt="{{ product.display_name }}" width="{{ product.main_image.width }}" height="{{ product.main_image.height }}" loading="lazy" decoding="async">{% else %}<span class="ev-product-card__placeholder"><i data-lucide="package-open" aria-hidden="true"></i></span>{% endif %}</a><div class="ev-product-card__body"><span>{{ product.category.display_name }}</span><h3>{{ product.display_name }}</h3><p>{{ product.display_short_description }}</p><a class="ev-button ev-button--outline" href="{{ product.get_absolute_url }}">View details <i data-lucide="arrow-right" aria-hidden="true"></i></a></div></article>{% empty %}<div class="ev-products__empty"><i data-lucide="package-search" aria-hidden="true"></i><h3>No featured products yet.</h3><p>Select products from the control panel to show them here.</p></div>{% endfor %}
       </div>

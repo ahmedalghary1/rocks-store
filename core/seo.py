@@ -8,7 +8,7 @@ from django.utils.html import strip_tags
 from django.utils.safestring import mark_safe
 
 
-BRAND_ALIASES = ["ROCKS", "روكس", "روكس الوسام", "ROCKS ELWSAM"]
+BRAND_ALIASES = ["ROCKS", "ROCKS EV", "روكس", "روكس الوسام", "وركس الوسام", "ROCKS ELWSAM"]
 
 
 def absolute_url(request, path):
@@ -105,17 +105,19 @@ def product_schema(request, product):
 
 FAQ = {
     "ar": [
+        ("هل ROCKS وROCKS EV وروكس ووركس الوسام تشير إلى المتجر نفسه؟", "نعم، ROCKS وROCKS EV وروكس هي أسماء تشير إلى متجر روكس الوسام (ROCKS ELWSAM) في مصر. ويمكن العثور عليه أيضًا بصيغة البحث «وركس الوسام». يضم المتجر كابلات شحن سيارات كهرباء وكابلات كهرباء ومشتركات، ويمكنك مراجعة المنتجات المتاحة ومواصفاتها قبل الطلب."),
         ("ما هو متجر روكس الوسام ROCKS ELWSAM؟", "روكس الوسام هو متجر ROCKS للمنتجات الكهربائية في مصر. يمكنك تصفح الكابلات والمشتركات الكهربائية والفيش والمفاتيح والإضاءة ومنتجات شحن السيارات، ومراجعة المنتجات المتاحة في الأقسام."),
         ("كيف أختار مشترك كهرباء مناسبًا؟", "راجع عدد المخارج وطول الكابل والمواصفات وحدود الاستخدام المعلنة لكل مشترك. قارنها باحتياجات أجهزتك، واسأل فريق روكس عن أي مواصفة غير واضحة قبل الطلب."),
         ("أين أجد أسعار كابلات الكهرباء ومشتركات روكس؟", "تظهر الأسعار المتاحة في صفحة كل منتج، وقد تختلف حسب الطول أو الخيار المحدد. إذا لم يظهر سعر، تواصل مع المتجر للاستفسار عن المنتج وتوفره."),
-        ("كيف أختار كابل شحن سيارة كهربائية؟", "ابدأ بمتطلبات الشحن المحددة لسيارتك ومحطة الشحن، ثم قارنها بالمواصفات ونوع الوصلات والطول الموضح في صفحة الكابل. تواصل مع فريق روكس لتأكيد التوافق قبل الطلب."),
+        ("كيف أختار كابلات شحن سيارات كهرباء من ROCKS EV؟", "عند مقارنة كابلات شحن السيارات الكهربائية، ابدأ بمتطلبات الشحن المحددة لسيارتك ومحطة الشحن، ثم راجع نوع الوصلات والقدرة والتيار وطول الكابل الموضح في صفحة المنتج. تواصل مع فريق روكس لتأكيد التوافق والتوفر قبل الطلب."),
         ("كيف أعرف تفاصيل الشحن والاسترجاع والضمان؟", "راجع صفحات سياسة الشحن والاسترجاع، وقسم الضمان في صفحة المنتج. تواصل مع خدمة العملاء لتأكيد تفاصيل الطلب والتوصيل."),
     ],
     "en": [
+        ("Are ROCKS, ROCKS EV and روكس the same store?", "ROCKS, ROCKS EV and روكس refer to the ROCKS ELWSAM (روكس الوسام) store in Egypt. The store can also be found using the Arabic search spelling وركس الوسام. Browse EV charging cables, electrical cables and power strips, and check each product's availability and specifications before ordering."),
         ("What is ROCKS ELWSAM (روكس الوسام)?", "ROCKS ELWSAM is the ROCKS electrical products store in Egypt. Browse cables, power strips, plugs, switches, lighting and EV charging products, and check the categories for available products."),
         ("How do I choose a power strip?", "Check the number of outlets, cable length, specifications and stated usage limits for each power strip. Compare these with your devices and ask the ROCKS team about any unclear specification before ordering."),
         ("Where can I find ROCKS cable and power strip prices?", "Available prices appear on each product page and may vary by length or selected option. If a price is not displayed, contact the store to ask about the product and availability."),
-        ("How do I choose an EV charging cable?", "Start with the charging requirements specified for your car and charging station, then compare them with the cable specifications, connector type and length on the product page. Contact ROCKS to confirm compatibility before ordering."),
+        ("How do I choose ROCKS EV charging cables?", "Start with the charging requirements specified for your car and charging station, then check the connector type, power rating, current rating and cable length on the product page. Contact ROCKS to confirm compatibility and availability before ordering."),
         ("Where can I check shipping, returns and warranty details?", "Read the shipping and returns policy pages and the warranty section on the product page. Contact customer support to confirm order and delivery details."),
     ],
 }
