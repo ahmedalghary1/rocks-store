@@ -1,4 +1,33 @@
-{% extends 'base.html' %}{% block title %}About ROCKS Electrical &amp; EV Solutions Egypt{% endblock %}{% block meta_description %}Learn how ROCKS selects dependable EV charging cables, power strips, plugs, lighting and electrical tools for customers in Egypt.{% endblock %}{% block content %}
-<section class="page-hero"><div class="container"><span class="eyebrow eyebrow--light">OUR STORY</span><h1>Safe power is not a detail.<br>It supports everyday life.</h1><p>We offer carefully selected electrical products and EV charging solutions that combine safety, practical design and clear specifications.</p></div></section>
-<section class="about-section section"><div class="container about-grid"><div><span class="eyebrow">FROM EVERYDAY POWER TO EVERY JOURNEY</span><h2>ROCKS means confidence you can build on.</h2></div><div><p>A dependable electrical product must perform safely and consistently, day after day. That is why we select ROCKS products against clear standards and put simple purchasing and responsible after-sales support at the heart of the experience.</p><p>From EV charging cables and power strips to plugs, switches, lighting, decorative lamp holders and electrical tools, our goal is simple: help you find the right product quickly and understand exactly what you are buying.</p></div></div><div class="container values-grid"><article><b>01</b><h3>Precision</h3><p>Clear information and specifications without ambiguity.</p></article><article><b>02</b><h3>Performance</h3><p>Dependable materials selected for everyday use.</p></article><article><b>03</b><h3>Trust</h3><p>Responsible support before and after your purchase.</p></article></div></section>
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{% if current_language == 'ar' %}عن الشركة | روكس{% else %}About ROCKS | Electrical Products{% endif %}{% endblock %}
+{% block meta_description %}{% if current_language == 'ar' %}تعرف على شركة روكس، أحد فروع مجموعة مصانع شركة الوسام، وخبرتها منذ عام 1990 في المنتجات الكهربائية والجودة والضمان وخدمة العملاء.{% else %}Learn about ROCKS, part of Al Wesam's group of electrical product factories, its experience since 1990, quality standards, warranty and customer support.{% endif %}{% endblock %}
+{% block extra_head %}<link rel="stylesheet" href="{% static 'css/about.css' %}">{% endblock %}
+{% block content %}
+<section class="page-hero page-hero--small">
+  <div class="container">
+    <h1>{% if current_language == 'ar' %}عن الشركة{% else %}About the company{% endif %}</h1>
+  </div>
+</section>
+<section class="about-section section">
+  <div class="container">
+    <div class="about-copy" {% if current_language == 'ar' %}lang="ar" dir="rtl"{% endif %}>
+      {% if current_language == 'ar' %}
+      <p>شركة روكس (ROCKS) هي أحد فروع مجموعة مصانع شركة الوسام لصناعةوتجارةالأدواتالكهربائية، التي تأسست عام 1990، وتُعد من الشركات الرائدة في تصنيع وتجارة المنتجات الكهربائية.</p>
+      <p>تستند روكس إلى خبرة المجموعة الممتدة لأكثر من ثلاثة عقود، وتواصل تقديم منتجات كهربائية تجمع بين الجودة والأمان والابتكار، مع التركيز المستمر على قوة المنتج وجودته ورضا العملاء، بما يلبي احتياجاتهم ويواكب تطور السوق.</p>
+      <p>وتضم مجموعة مصانع شركة الوسام أكثر من 2500 موظف من المهندسين والمهرة والفنيين، يشكّلون أساس قوتها الصناعية ويسهمون في تطوير منتجاتها وتعزيز ثقة عملائها. كما تتميز المجموعة بامتلاك أحدث الماكينات وتوظيف أحدث التقنيات المستخدمة في عمليات التصنيع، بما يضمن جودة المنتجات وثبات أدائها.</p>
+      <p>وتحرص روكس على توفير الضمان اللازم لجميع منتجاتها، بما يعكس ثقتها بجودتها وحرصها على دعم عملائها. كما تقدم ضمانًا مدى الحياة على منتجاتها فيما يخص خدمات الصيانة، تأكيدًا لالتزامها المستمر برضا العملاء وتقديم أفضل مستويات الخدمة.</p>
+      <p>وتتميز الشركة أيضًا بامتلاكها مجموعة من الشهادات الموثقة التي تؤكد التزامها بأعلى معايير الجودة، من بينها شهادة الجودة ISO 9001، وشهادة CE للمنتجات، بالإضافة إلى جميع الشهادات الصناعية المعتمدة ذات الصلة.</p>
+      <p class="about-copy__closing">روكس… خبرة عريقة، جودة موثوقة، وضمان مستمر لرضا العملاء.</p>
+      {% else %}
+      <p>ROCKS is a branch of the Al Wesam group of factories for manufacturing and trading electrical tools. Founded in 1990, the group is a leader in manufacturing and trading electrical products.</p>
+      <p>ROCKS draws on more than three decades of the group's experience and continues to offer electrical products that combine quality, safety and innovation. Its ongoing focus on product strength, quality and customer satisfaction helps meet customers' needs as the market evolves.</p>
+      <p>The Al Wesam group of factories has more than 2,500 employees, including engineers, skilled workers and technicians. They are the foundation of its manufacturing strength and help develop its products and earn customers' trust. The group also uses modern machinery and manufacturing technologies to ensure product quality and consistent performance.</p>
+      <p>ROCKS provides the necessary warranty for all its products, reflecting its confidence in their quality and its commitment to supporting customers. It also offers a lifetime warranty for maintenance services on its products, reaffirming its commitment to customer satisfaction and excellent service.</p>
+      <p>The company also holds documented certifications that confirm its commitment to high quality standards, including ISO 9001 quality certification, CE certification for its products, and all relevant accredited industrial certifications.</p>
+      <p class="about-copy__closing">ROCKS… a long history of experience, trusted quality and an ongoing commitment to customer satisfaction.</p>
+      {% endif %}
+    </div>
+  </div>
+</section>
 {% endblock %}

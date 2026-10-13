@@ -142,13 +142,20 @@ class PublicPagesTests(TestCase):
         self.assertNotContains(response, "Let’s find the right connection.")
         self.assertNotContains(response, "Ask about compatibility, specifications, availability or delivery")
 
-    def test_about_page_has_no_untranslated_current_copy_in_arabic(self):
+    def test_about_page_shows_company_story_in_both_languages(self):
+        response = self.client.get(reverse("core:about"))
+        self.assertContains(response, "ROCKS is a branch of the Al Wesam group")
+        self.assertContains(response, "lifetime warranty for maintenance services")
+
         self.client.post(reverse("set_language"), {"language": "ar", "next": reverse("core:about")})
         response = self.client.get("/ar/about/")
-        self.assertContains(response, "الطاقة الآمنة ليست تفصيلًا.")
-        self.assertContains(response, "من طاقة الحياة اليومية إلى كل رحلة")
+        self.assertContains(response, "عن الشركة")
+        self.assertContains(response, "لصناعةوتجارةالأدواتالكهربائية")
+        self.assertContains(response, "أكثر من 2500 موظف")
+        self.assertContains(response, "ضمانًا مدى الحياة")
+        self.assertContains(response, "ISO 9001")
+        self.assertContains(response, "روكس… خبرة عريقة، جودة موثوقة، وضمان مستمر لرضا العملاء.")
         self.assertNotContains(response, "Safe power is not a detail.")
-        self.assertNotContains(response, "FROM EVERYDAY POWER TO EVERY JOURNEY")
 
     def test_newsletter_subscription(self):
         response = self.client.post(reverse("core:newsletter_subscribe"), {"email": "USER@example.com"})
