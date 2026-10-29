@@ -160,11 +160,12 @@ ADMINS = (("ROCKS Operations", ERROR_NOTIFICATION_EMAIL),) if ERROR_NOTIFICATION
 CART_SHIPPING_COST = os.getenv("CART_SHIPPING_COST", "75.00")
 FREE_SHIPPING_THRESHOLD = os.getenv("FREE_SHIPPING_THRESHOLD", "1500.00")
 
-CACHES = {"default": {
-    "BACKEND": "django.core.cache.backends.filebased.FileBasedCache",
-    "LOCATION": os.getenv("CACHE_LOCATION", str(BASE_DIR / ".cache")),
-    "OPTIONS": {"MAX_ENTRIES": 10000},
-}}
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
+        'LOCATION': '/home/rocksev/rocks-store/.cache',
+    }
+}
 TRUST_PROXY_HEADERS = env_bool("TRUST_PROXY_HEADERS", False)
 BACKUP_DIRECTORY = os.getenv("BACKUP_DIRECTORY", "").strip()
 LEGAL_CONTENT_APPROVED = env_bool("LEGAL_CONTENT_APPROVED", False)
