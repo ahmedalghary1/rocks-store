@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>إشعار بطلب جديد #{{ order.order_number }}</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #0f172a;
+      direction: rtl;
+      text-align: right;
+      -webkit-font-smoothing: antialiased;
+    }
+    .email-container {
+      max-width: 640px;
+      margin: 24px auto;
+      background-color: #ffffff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+      border: 1px solid #e2e8f0;
+    }
+    .email-header {
+      background: linear-gradient(135deg, #021108 0%, #0a2e16 100%);
+      color: #ffffff;
+      padding: 28px 24px;
+      text-align: center;
+      border-bottom: 3px solid #d97706;
+    }
+    .brand-title {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      color: #ffffff;
+    }
+    .brand-subtitle {
+      margin: 6px 0 0 0;
+      font-size: 13px;
+      color: #93c5fd;
+      opacity: 0.9;
+    }
+    .badge-pill {
+      display: inline-block;
+      margin-top: 14px;
+      padding: 6px 14px;
+      background-color: #d97706;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 700;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .email-body {
+      padding: 24px;
+    }
+    .order-hero {
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .order-hero-left {
+      text-align: right;
+    }
+    .order-hero-number {
+      font-size: 18px;
+      font-weight: 800;
+      color: #0f172a;
+      margin: 0;
+    }
+    .order-hero-date {
+      font-size: 13px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+    .order-hero-total {
+      text-align: left;
+    }
+    .order-hero-total-label {
+      font-size: 12px;
+      color: #64748b;
+      margin: 0;
+    }
+    .order-hero-total-val {
+      font-size: 22px;
+      font-weight: 800;
+      color: #059669;
+      margin-top: 2px;
+    }
+    .section-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 22px 0 10px 0;
+      padding-bottom: 6px;
+      border-bottom: 2px solid #f1f5f9;
+      display: flex;
+      align-items: center;
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 16px;
+    }
+    .data-table th, .data-table td {
+      padding: 10px 12px;
+      font-size: 13px;
+      border-bottom: 1px solid #f1f5f9;
+      text-align: right;
+    }
+    .data-table th {
+      background-color: #f8fafc;
+      color: #475569;
+      font-weight: 600;
+    }
+    .data-table td {
+      color: #1e293b;
+    }
+    .data-table td.text-center {
+      text-align: center;
+    }
+    .data-table td.text-left {
+      text-align: left;
+      direction: ltr;
+    }
+    .data-table th.text-left {
+      text-align: left;
+    }
+    .info-card {
+      background-color: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 18px;
+    }
+    .info-grid {
+      display: table;
+      width: 100%;
+    }
+    .info-row {
+      display: table-row;
+    }
+    .info-label {
+      display: table-cell;
+      padding: 6px 0;
+      font-size: 13px;
+      font-weight: 600;
+      color: #64748b;
+      width: 32%;
+    }
+    .info-value {
+      display: table-cell;
+      padding: 6px 0;
+      font-size: 13px;
+      color: #0f172a;
+      font-weight: 500;
+    }
+    .notes-box {
+      margin-top: 12px;
+      padding: 12px 14px;
+      background-color: #fffbeb;
+      border-right: 4px solid #f59e0b;
+      border-radius: 4px;
+      font-size: 13px;
+      color: #92400e;
+    }
+    .actions-container {
+      margin: 24px 0 16px 0;
+      text-align: center;
+    }
+    .btn {
+      display: inline-block;
+      padding: 11px 20px;
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      border-radius: 6px;
+      margin: 4px;
+    }
+    .btn-whatsapp {
+      background-color: #25D366;
+      color: #ffffff !important;
+    }
+    .btn-primary {
+      background-color: #0f172a;
+      color: #ffffff !important;
+    }
+    .btn-secondary {
+      background-color: #e2e8f0;
+      color: #1e293b !important;
+    }
+    .totals-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+    .totals-table td {
+      padding: 6px 12px;
+      font-size: 13px;
+    }
+    .totals-table .label-col {
+      text-align: right;
+      color: #64748b;
+    }
+    .totals-table .val-col {
+      text-align: left;
+      direction: ltr;
+      font-weight: 600;
+      color: #0f172a;
+    }
+    .totals-table tr.grand-total td {
+      padding-top: 12px;
+      border-top: 2px solid #e2e8f0;
+      font-size: 16px;
+      font-weight: 800;
+      color: #059669;
+    }
+    .email-footer {
+      background-color: #f8fafc;
+      padding: 20px;
+      text-align: center;
+      font-size: 12px;
+      color: #94a3b8;
+      border-top: 1px solid #e2e8f0;
+    }
+    .email-footer a {
+      color: #059669;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <!-- Header -->
+    <div class="email-header">
+      <h1 class="brand-title">ROCKS ELECTRIC | روكس للكهرباء</h1>
+      <p class="brand-subtitle">نظام إدارة وتنبيهات المتجر الإلكتروني</p>
+      <div class="badge-pill">🔔 إشعار بطلب جديد على الموقع</div>
+    </div>
+
+    <!-- Body -->
+    <div class="email-body">
+      <!-- Order Quick Stats -->
+      <table style="width: 100%; background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 16px; margin-bottom: 20px;">
+        <tr>
+          <td style="text-align: right; vertical-align: middle;">
+            <div style="font-size: 12px; color: #64748b; font-weight: 600;">رقم الطلب:</div>
+            <div style="font-size: 18px; font-weight: 800; color: #0f172a; font-family: monospace;">#{{ order.order_number }}</div>
+            <div style="font-size: 12px; color: #64748b; margin-top: 4px;">📅 {{ formatted_date }}</div>
+          </td>
+          <td style="text-align: left; vertical-align: middle; direction: ltr;">
+            <div style="font-size: 12px; color: #64748b; font-weight: 600;">إجمالي الطلب:</div>
+            <div style="font-size: 22px; font-weight: 800; color: #059669;">{{ order.total }} {{ currency }}</div>
+            <div style="font-size: 12px; color: #d97706; font-weight: 600; margin-top: 4px;">الدفع عند الاستلام (COD)</div>
+          </td>
+        </tr>
+      </table>
+
+      <!-- Quick Actions -->
+      <div class="actions-container">
+        {% if whatsapp_url %}
+        <a href="{{ whatsapp_url }}" class="btn btn-whatsapp" target="_blank">
+          💬 تواصل واتساب مع العميل
+        </a>
+        {% endif %}
+        <a href="tel:{{ order.phone }}" class="btn btn-secondary">
+          📞 اتصال: {{ order.phone }}
+        </a>
+        <a href="{{ controlpanel_order_url }}" class="btn btn-primary" target="_blank">
+          📦 عرض الطلب في لوحة التحكم
+        </a>
+        <a href="{{ admin_order_url }}" class="btn btn-secondary" target="_blank">
+          ⚙️ لوحة الإدارة
+        </a>
+      </div>
+
+      <!-- Customer Details -->
+      <div class="section-title">👤 بيانات العميل للتوصيل</div>
+      <div class="info-card">
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr>
+            <td style="padding: 6px 0; color: #64748b; font-weight: 600; width: 30%; font-size: 13px;">اسم العميل:</td>
+            <td style="padding: 6px 0; color: #0f172a; font-weight: 700; font-size: 14px;">{{ order.customer_name }}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; color: #64748b; font-weight: 600; font-size: 13px;">رقم الهاتف:</td>
+            <td style="padding: 6px 0; color: #0f172a; font-weight: 600; font-size: 13px;">
+              <a href="tel:{{ order.phone }}" style="color: #059669; text-decoration: none; font-weight: 700;">{{ order.phone }}</a>
+            </td>
+          </tr>
+          {% if order.second_phone %}
+          <tr>
+            <td style="padding: 6px 0; color: #64748b; font-weight: 600; font-size: 13px;">رقم هاتف إضافي:</td>
+            <td style="padding: 6px 0; color: #0f172a; font-size: 13px;">
+              <a href="tel:{{ order.second_phone }}" style="color: #059669; text-decoration: none;">{{ order.second_phone }}</a>
+            </td>
+          </tr>
+          {% endif %}
+          {% if order.email %}
+          <tr>
+            <td style="padding: 6px 0; color: #64748b; font-weight: 600; font-size: 13px;">البريد الإلكتروني:</td>
+            <td style="padding: 6px 0; color: #0f172a; font-size: 13px;">
+              <a href="mailto:{{ order.email }}" style="color: #2563eb; text-decoration: none;">{{ order.email }}</a>
+            </td>
+          </tr>
+          {% endif %}
+          <tr>
+            <td style="padding: 6px 0; color: #64748b; font-weight: 600; font-size: 13px;">المحافظة / المدينة:</td>
+            <td style="padding: 6px 0; color: #0f172a; font-size: 13px; font-weight: 600;">{{ order.governorate }} - {{ order.city }}</td>
+          </tr>
+          <tr>
+            <td style="padding: 6px 0; color: #64748b; font-weight: 600; font-size: 13px;">العنوان بالتفصيل:</td>
+            <td style="padding: 6px 0; color: #0f172a; font-size: 13px;">{{ order.address }}</td>
+          </tr>
+        </table>
+
+        {% if order.notes %}
+        <div class="notes-box">
+          <strong>📝 ملاحظات العميل:</strong><br>
+          {{ order.notes }}
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Order Items -->
+      <div class="section-title">🛒 تفاصيل المنتجات المطلوبة</div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>المنتج</th>
+            <th class="text-center">الكود (SKU)</th>
+            <th class="text-center">الكمية</th>
+            <th class="text-left">السعر</th>
+            <th class="text-left">الإجمالي</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in items %}
+          <tr>
+            <td>
+              <strong>{{ item.product_name_ar|default:item.product_name }}</strong>
+              {% if item.variant %}
+              <div style="font-size: 11px; color: #64748b;">{{ item.variant.label }}</div>
+              {% endif %}
+            </td>
+            <td class="text-center" style="font-family: monospace; font-size: 12px; color: #64748b;">
+              {{ item.sku }}
+            </td>
+            <td class="text-center" style="font-weight: 700;">
+              {{ item.quantity }}
+            </td>
+            <td class="text-left">
+              {{ item.price }} {{ currency }}
+            </td>
+            <td class="text-left" style="font-weight: 700; color: #0f172a;">
+              {{ item.total }} {{ currency }}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <!-- Financial Totals -->
+      <table class="totals-table">
+        <tr>
+          <td class="label-col">المجموع الفرعي:</td>
+          <td class="val-col">{{ order.subtotal }} {{ currency }}</td>
+        </tr>
+        {% if order.discount > 0 %}
+        <tr>
+          <td class="label-col" style="color: #dc2626;">
+            الخصم {% if order.coupon %}(كوبون: {{ order.coupon.code }}){% endif %}:
+          </td>
+          <td class="val-col" style="color: #dc2626;">- {{ order.discount }} {{ currency }}</td>
+        </tr>
+        {% endif %}
+        <tr>
+          <td class="label-col">تكلفة الشحن والتوصيل:</td>
+          <td class="val-col">
+            {% if order.shipping_cost > 0 %}
+              {{ order.shipping_cost }} {{ currency }}
+            {% else %}
+              <span style="color: #059669; font-weight: 700;">شحن مجاني</span>
+            {% endif %}
+          </td>
+        </tr>
+        <tr class="grand-total">
+          <td class="label-col" style="color: #059669; font-size: 15px;">المبلغ الإجمالي المطلوب تحصيله:</td>
+          <td class="val-col">{{ order.total }} {{ currency }}</td>
+        </tr>
+      </table>
+
+      <!-- Status notice -->
+      <div style="margin-top: 24px; padding: 12px 14px; background-color: #f1f5f9; border-radius: 6px; font-size: 12px; color: #64748b;">
+        ℹ️ <strong>حالة الطلب الحالية:</strong> قيد المراجعة (Pending) | 
+        <strong>حالة الدفع:</strong> غير مدفوع - يتم التحصيل نقداً عند الاستلام.
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="email-footer">
+      <p style="margin: 0 0 6px 0;">تم إرسال هذا الإشعار تلقائياً من نظام متجر <a href="{{ site_url }}">{{ site_url }}</a></p>
+      <p style="margin: 0;">ROCKS ELECTRIC © 2026 - جميع الحقوق محفوظة</p>
+    </div>
+  </div>
+</body>
+</html>
+

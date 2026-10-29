@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>تم استلام طلبك بنجاح #{{ order.order_number }}</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f1f5f9;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      color: #0f172a;
+      direction: rtl;
+      text-align: right;
+    }
+    .email-container {
+      max-width: 620px;
+      margin: 24px auto;
+      background-color: #ffffff;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+      border: 1px solid #e2e8f0;
+    }
+    .email-header {
+      background: linear-gradient(135deg, #021108 0%, #0a2e16 100%);
+      color: #ffffff;
+      padding: 30px 24px;
+      text-align: center;
+      border-bottom: 3px solid #059669;
+    }
+    .brand-title {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 800;
+      color: #ffffff;
+    }
+    .email-body {
+      padding: 24px;
+    }
+    .greeting-card {
+      background-color: #ecfdf5;
+      border: 1px solid #a7f3d0;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+    }
+    .greeting-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #065f46;
+      margin: 0 0 6px 0;
+    }
+    .greeting-desc {
+      font-size: 13px;
+      color: #047857;
+      margin: 0;
+      line-height: 1.5;
+    }
+    .section-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 20px 0 10px 0;
+      padding-bottom: 6px;
+      border-bottom: 2px solid #f1f5f9;
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 16px;
+    }
+    .data-table th, .data-table td {
+      padding: 10px 12px;
+      font-size: 13px;
+      border-bottom: 1px solid #f1f5f9;
+      text-align: right;
+    }
+    .data-table th {
+      background-color: #f8fafc;
+      color: #475569;
+      font-weight: 600;
+    }
+    .data-table td.text-left {
+      text-align: left;
+      direction: ltr;
+    }
+    .totals-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+    }
+    .totals-table td {
+      padding: 6px 12px;
+      font-size: 13px;
+    }
+    .totals-table .label-col {
+      text-align: right;
+      color: #64748b;
+    }
+    .totals-table .val-col {
+      text-align: left;
+      direction: ltr;
+      font-weight: 600;
+      color: #0f172a;
+    }
+    .totals-table tr.grand-total td {
+      padding-top: 12px;
+      border-top: 2px solid #e2e8f0;
+      font-size: 16px;
+      font-weight: 800;
+      color: #059669;
+    }
+    .btn-track {
+      display: inline-block;
+      padding: 12px 26px;
+      background-color: #059669;
+      color: #ffffff !important;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 14px;
+      border-radius: 6px;
+      margin: 16px 0;
+    }
+    .email-footer {
+      background-color: #f8fafc;
+      padding: 20px;
+      text-align: center;
+      font-size: 12px;
+      color: #94a3b8;
+      border-top: 1px solid #e2e8f0;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="email-header">
+      <h1 class="brand-title">ROCKS ELECTRIC | روكس للكهرباء</h1>
+      <p style="margin: 6px 0 0 0; font-size: 13px; color: #a7f3d0;">تأكيد استلام الطلب</p>
+    </div>
+
+    <div class="email-body">
+      <div class="greeting-card">
+        <h2 class="greeting-title">مرحباً {{ order.customer_name }}، شكراً لتسوقك معنا!</h2>
+        <p class="greeting-desc">
+          تم استلام طلبك بنجاح وجاري مراجعته من قبل فريق العمل لتجهيزه والشحن.
+        </p>
+      </div>
+
+      <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px;">
+        <table style="width: 100%;">
+          <tr>
+            <td style="font-size: 13px; color: #64748b;">رقم الطلب: <strong style="color: #0f172a; font-family: monospace;">#{{ order.order_number }}</strong></td>
+            <td style="text-align: left; font-size: 13px; color: #64748b;">طريقة الدفع: <strong style="color: #0f172a;">عند الاستلام</strong></td>
+          </tr>
+        </table>
+      </div>
+
+      <div class="section-title">📦 المنتجات المطلوبة</div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>المنتج</th>
+            <th style="text-align: center;">الكمية</th>
+            <th class="text-left">السعر</th>
+            <th class="text-left">الإجمالي</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in items %}
+          <tr>
+            <td>
+              <strong>{{ item.product_name_ar|default:item.product_name }}</strong>
+              {% if item.variant %}
+              <div style="font-size: 11px; color: #64748b;">{{ item.variant.label }}</div>
+              {% endif %}
+            </td>
+            <td style="text-align: center; font-weight: 700;">{{ item.quantity }}</td>
+            <td class="text-left">{{ item.price }} {{ currency }}</td>
+            <td class="text-left" style="font-weight: 700;">{{ item.total }} {{ currency }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <!-- Financial Totals -->
+      <table class="totals-table">
+        <tr>
+          <td class="label-col">المجموع الفرعي:</td>
+          <td class="val-col">{{ order.subtotal }} {{ currency }}</td>
+        </tr>
+        {% if order.discount > 0 %}
+        <tr>
+          <td class="label-col" style="color: #dc2626;">الخصم:</td>
+          <td class="val-col" style="color: #dc2626;">- {{ order.discount }} {{ currency }}</td>
+        </tr>
+        {% endif %}
+        <tr>
+          <td class="label-col">الشحن:</td>
+          <td class="val-col">
+            {% if order.shipping_cost > 0 %}
+              {{ order.shipping_cost }} {{ currency }}
+            {% else %}
+              <span style="color: #059669;">مجاناً</span>
+            {% endif %}
+          </td>
+        </tr>
+        <tr class="grand-total">
+          <td class="label-col">المبلغ المطلوب عند الاستلام:</td>
+          <td class="val-col">{{ order.total }} {{ currency }}</td>
+        </tr>
+      </table>
+
+      <!-- Delivery Address -->
+      <div class="section-title">📍 عنوان التوصيل</div>
+      <div style="background-color: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 16px; font-size: 13px; color: #334155; line-height: 1.6;">
+        <strong>المحافظة:</strong> {{ order.governorate }} - {{ order.city }}<br>
+        <strong>العنوان:</strong> {{ order.address }}<br>
+        <strong>الهاتف المسجل للتوصيل:</strong> {{ order.phone }}
+      </div>
+
+      <!-- Action -->
+      <div style="text-align: center; margin: 24px 0 12px 0;">
+        <a href="{{ track_order_url }}" class="btn-track" target="_blank">
+          🔍 تتبع حالة طلبك على الموقع
+        </a>
+      </div>
+    </div>
+
+    <div class="email-footer">
+      <p style="margin: 0 0 6px 0;">شكراً لتسوقك من <a href="{{ site_url }}" style="color: #059669; text-decoration: none;">ROCKS ELECTRIC</a></p>
+      <p style="margin: 0;">إذا كان لديك أي استفسار، يرجى التواصل معنا عبر الموقع.</p>
+    </div>
+  </div>
+</body>
+</html>
+

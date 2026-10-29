@@ -14,6 +14,7 @@ from cart.service import Cart
 from catalog.models import Product, ProductVariant
 from .forms import CheckoutForm, TrackOrderForm, resolve_shipping_zone
 from .models import Coupon, Order, OrderItem, OrderNotification, ShippingZone
+from .services import send_order_notifications
 
 
 class InsufficientStock(Exception):
@@ -113,6 +114,8 @@ def checkout(request):
                             ) for item in items
                         ])
                         OrderNotification.objects.create(order=order)
+                        order_id = order.pk
+                        transaction.on_commit(lambda: send_order_notifications(order_id))
                 except InsufficientStock:
                     messages.error(request, "Available stock has changed. Review your cart and try again.")
                     return redirect("cart:detail")

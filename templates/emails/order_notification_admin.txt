@@ -1,0 +1,51 @@
+======================================================================
+               إشعار بطلب جديد | NEW ORDER ALERT
+                 ROCKS ELECTRIC - روكس للكهرباء
+======================================================================
+
+رقم الطلب / Order Number: #{{ order.order_number }}
+تاريخ الطلب / Date: {{ formatted_date }}
+حالة الطلب / Status: قيد المراجعة (Pending)
+طريقة الدفع / Payment Method: الدفع عند الاستلام (Cash on Delivery)
+حالة الدفع / Payment Status: غير مدفوع (Unpaid)
+
+----------------------------------------------------------------------
+بيانات العميل للتوصيل / CUSTOMER DETAILS
+----------------------------------------------------------------------
+الاسم: {{ order.customer_name }}
+الهاتف: {{ order.phone }}
+{% if order.second_phone %}الهاتف الإضافي: {{ order.second_phone }}{% endif %}
+{% if order.email %}البريد الإلكتروني: {{ order.email }}{% endif %}
+المحافظة: {{ order.governorate }}
+المدينة / الحي: {{ order.city }}
+العنوان بالتفصيل: {{ order.address }}
+{% if order.notes %}ملاحظات العميل: {{ order.notes }}{% endif %}
+
+----------------------------------------------------------------------
+تفاصيل المنتجات المطلوبة / ORDER ITEMS
+----------------------------------------------------------------------
+{% for item in items %}
+- {{ item.product_name_ar|default:item.product_name }}{% if item.variant %} ({{ item.variant.label }}){% endif %}
+  الكود (SKU): {{ item.sku }} | الكمية: {{ item.quantity }} | السعر: {{ item.price }} {{ currency }} | الإجمالي: {{ item.total }} {{ currency }}
+{% endfor %}
+
+----------------------------------------------------------------------
+الملخص المالي / FINANCIAL SUMMARY
+----------------------------------------------------------------------
+المجموع الفرعي: {{ order.subtotal }} {{ currency }}
+{% if order.discount > 0 %}الخصم {% if order.coupon %}(كوبون: {{ order.coupon.code }}){% endif %}: - {{ order.discount }} {{ currency }}{% endif %}
+الشحن والتوصيل: {% if order.shipping_cost > 0 %}{{ order.shipping_cost }} {{ currency }}{% else %}شحن مجاني{% endif %}
+----------------------------------------------------------------------
+الإجمالي المطلوب تحصيله: {{ order.total }} {{ currency }}
+======================================================================
+
+روابط سريعة للمدير / QUICK ACTIONS:
+{% if whatsapp_url %}- محادثة واتساب مع العميل: {{ whatsapp_url }}{% endif %}
+- اتصال هاتفي: tel:{{ order.phone }}
+- إدارة الطلب في لوحة التحكم: {{ controlpanel_order_url }}
+- إدارة الطلب في Django Admin: {{ admin_order_url }}
+
+----------------------------------------------------------------------
+نظام إدارة وتنبيهات متجر ROCKS ELECTRIC
+رابط المتجر: {{ site_url }}
+

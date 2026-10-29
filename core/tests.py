@@ -150,7 +150,7 @@ class PublicPagesTests(TestCase):
         self.client.post(reverse("set_language"), {"language": "ar", "next": reverse("core:about")})
         response = self.client.get("/ar/about/")
         self.assertContains(response, "عن الشركة")
-        self.assertContains(response, "لصناعةوتجارةالأدواتالكهربائية")
+        self.assertContains(response, "لصناعة وتجارة الأدوات الكهربائية")
         self.assertContains(response, "أكثر من 2500 موظف")
         self.assertContains(response, "ضمانًا مدى الحياة")
         self.assertContains(response, "ISO 9001")

@@ -176,3 +176,54 @@ class CheckoutTests(TestCase):
         session.save()
         response = self.client.post(reverse("orders:track"), {"order_number": order.order_number, "phone": order.phone})
         self.assertRedirects(response, reverse("orders:success", args=[order.public_token]))
+
+    @override_settings(ORDER_NOTIFICATION_EMAIL="admin@rocks-ev.com")
+    def test_checkout_triggers_order_notification_on_commit(self):
+        self.client.post(reverse("cart:add", args=[self.product.id]), {"quantity": 1})
+        self.client.get(reverse("orders:checkout"))
+        with patch("orders.services.send_mail", return_value=1) as mock_send_mail:
+            with self.captureOnCommitCallbacks(execute=True):
+                response = self.client.post(reverse("orders:checkout"), self.checkout_payload())
+        self.assertEqual(response.status_code, 302)
+        order = Order.objects.get()
+        notification = OrderNotification.objects.get(order=order)
+        self.assertEqual(notification.status, "sent")
+        self.assertTrue(mock_send_mail.called)
+        call_kwargs = mock_send_mail.call_args.kwargs
+        subject = mock_send_mail.call_args.args[0] if mock_send_mail.call_args.args else call_kwargs.get("subject", "")
+        self.assertIn(order.order_number, subject)
+        recipients = mock_send_mail.call_args.args[3] if len(mock_send_mail.call_args.args) > 3 else call_kwargs.get("recipient_list")
+        self.assertEqual(recipients, ["admin@rocks-ev.com"])
+
+    @override_settings(ORDER_NOTIFICATION_EMAIL="admin1@rocks-ev.com, admin2@rocks-ev.com")
+    def test_send_order_notifications_supports_multiple_admin_recipients_and_renders_html(self):
+        self.client.post(reverse("cart:add", args=[self.product.id]), {"quantity": 2})
+        self.client.get(reverse("orders:checkout"))
+        self.client.post(reverse("orders:checkout"), self.checkout_payload(
+            customer_name="أحمد محمود", phone="01012345678", email="customer@example.com",
+            governorate="Cairo", city="مدينة نصر", address="شارع الطاقة", notes="برجاء الاتصال قبل التوصيل"
+        ))
+        order = Order.objects.get()
+        with patch("orders.services.send_mail", return_value=1) as mock_send_mail:
+            self.assertTrue(send_order_notifications(order.pk))
+
+        self.assertEqual(mock_send_mail.call_count, 2)
+        admin_call = mock_send_mail.call_args_list[0]
+        admin_recipients = admin_call.kwargs.get("recipient_list") or admin_call.args[3]
+        self.assertEqual(admin_recipients, ["admin1@rocks-ev.com", "admin2@rocks-ev.com"])
+        admin_subject = admin_call.kwargs.get("subject") or admin_call.args[0]
+        self.assertIn(order.order_number, admin_subject)
+        self.assertIn("طلب جديد", admin_subject)
+        admin_html = admin_call.kwargs.get("html_message")
+        self.assertIsNotNone(admin_html)
+        self.assertIn("أحمد محمود", admin_html)
+        self.assertIn("01012345678", admin_html)
+        self.assertIn("برجاء الاتصال قبل التوصيل", admin_html)
+        self.assertIn("wa.me/201012345678", admin_html)
+
+        cust_call = mock_send_mail.call_args_list[1]
+        cust_recipients = cust_call.kwargs.get("recipient_list") or cust_call.args[3]
+        self.assertEqual(cust_recipients, ["customer@example.com"])
+        cust_subject = cust_call.kwargs.get("subject") or cust_call.args[0]
+        self.assertIn("تم استلام طلبك بنجاح", cust_subject)
+
