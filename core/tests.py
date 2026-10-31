@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 from django.core.management import call_command
 from django.core.management.base import CommandError
 from django.core.cache import cache
@@ -127,6 +129,14 @@ class PublicPagesTests(TestCase):
         self.assertContains(response, 'poster="/static/images/home/rocks-product-video-poster.webp"', html=False)
         self.assertContains(response, 'preload="none"', html=False)
         self.assertContains(response, 'src="/static/js/home-video.js"', html=False)
+
+    def test_video_urls_do_not_depend_on_static_manifest_entries(self):
+        # The static server may have an original video but lack its manifest name.
+        with patch("django.contrib.staticfiles.storage.staticfiles_storage.url", return_value="/static/videos/missing-hash.mp4"):
+            response = self.client.get(reverse("core:home"))
+        for name in ("rocks-product-showcase", "rocks-product-demo", "rocks"):
+            self.assertContains(response, f'data-src="/static/videos/{name}.mp4"', html=False)
+        self.assertNotContains(response, 'data-src="/static/videos/missing-hash.mp4"', html=False)
 
     def test_health_and_legal_pages(self):
         self.assertEqual(self.client.get(reverse("core:health")).status_code, 200)
