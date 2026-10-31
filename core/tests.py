@@ -52,6 +52,30 @@ class PublicPagesTests(TestCase):
         self.assertContains(response, "ROCKS EV — ROCKS ELWSAM")
         self.assertContains(response, "hero-ev-original.webp")
 
+    def test_coming_soon_featured_product_shows_launch_graphic_on_homepage(self):
+        from catalog.models import Category, Product
+
+        category = Category.objects.create(name="Coming Soon", slug="coming-soon-home")
+        Product.objects.create(
+            name="Upcoming Product",
+            slug="upcoming-product-home",
+            sku="COMING-SOON-HOME",
+            category=category,
+            short_description="An upcoming product.",
+            description="Test product",
+            price=100,
+            is_active=True,
+            is_featured=True,
+            is_coming_soon=True,
+        )
+
+        for path in (reverse("core:home"), "/ar/"):
+            with self.subTest(path=path):
+                response = self.client.get(path)
+                self.assertContains(response, 'class="product-launch-graphic"')
+                self.assertContains(response, 'src="/static/images/coming-soon-flame.jpeg"')
+                self.assertContains(response, 'alt="COMING SOON · قريبًا"')
+
     def test_first_visit_defaults_to_english_and_mobile_drawer_is_closed(self):
         response = self.client.get(reverse("core:home"), HTTP_ACCEPT_LANGUAGE="ar-EG,ar;q=0.9")
         self.assertContains(response, '<html lang="en" dir="ltr">', html=False)
