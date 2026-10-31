@@ -37,11 +37,10 @@ html[dir=rtl],html[dir=rtl] body{max-width:100%;overflow-x:hidden}
 /* Launch teaser for products being prepared. */
 .product-card--coming-soon{border:1px solid rgba(37,159,72,.24)}
 .product-card--coming-soon .product-visual,.quick-visual:has(.coming-soon-ribbon),.main-product-image:has(.coming-soon-ribbon){background:radial-gradient(circle at 50% 25%,#f7ffec 0%,#e5f4e8 55%,#d8e9e0 100%)}
-.new-product-ribbon{position:absolute;z-index:3;top:18px;inset-inline-start:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:6px;width:clamp(82px,8.5vw,116px);min-height:100px;padding:13px 8px;background:linear-gradient(155deg,#08291b,#14773a 68%,#279f4b);color:#fff;text-align:center;border-radius:0 14px 14px 0;border-inline-start:3px solid #b9f978;box-shadow:7px 9px 24px rgba(5,59,30,.25)}
-.new-product-ribbon .lucide{width:19px;height:19px;flex:none;color:#c4ff84}
-.new-product-ribbon strong{font-size:clamp(.65rem,.78vw,.78rem);font-weight:900;line-height:1.25;letter-spacing:.035em}
-.new-product-ribbon span{display:block;width:100%;padding-top:5px;border-top:1px solid rgba(255,255,255,.3);font-size:clamp(.59rem,.69vw,.7rem);font-weight:800;line-height:1.2}
-[dir=rtl] .new-product-ribbon{border-radius:14px 0 0 14px;box-shadow:-7px 9px 24px rgba(5,59,30,.25)}
+.new-product-ribbon{position:absolute;z-index:3;top:40px;left:-52px;display:flex;justify-content:center;align-items:center;gap:6px;width:205px;min-height:42px;padding:8px 12px;transform:rotate(-45deg);transform-origin:center;background:linear-gradient(100deg,#07301c,#188241 65%,#28aa4e);color:#fff;text-align:center;box-shadow:0 7px 18px rgba(5,59,30,.28);border-block:1px solid rgba(211,255,171,.55)}
+.new-product-ribbon .lucide{width:14px;height:14px;flex:none;color:#c4ff84}
+.new-product-ribbon strong{font-size:clamp(.6rem,.7vw,.75rem);font-weight:900;line-height:1.2;letter-spacing:.015em;white-space:nowrap}
+[dir=rtl] .new-product-ribbon{left:auto;right:-52px;transform:rotate(45deg)}
 [dir=rtl] .new-product-ribbon strong{letter-spacing:0}
 .product-card--new .wish-button{left:auto;right:13px}
 [dir=rtl] .product-card--new .wish-button{right:auto;left:13px}
