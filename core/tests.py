@@ -122,6 +122,7 @@ class PublicPagesTests(TestCase):
         self.assertContains(response, 'fetchpriority="high" media="(max-width: 700px)"', html=False)
         self.assertContains(response, 'data-src="/static/videos/rocks-product-showcase.mp4"', html=False)
         self.assertContains(response, 'data-src="/static/videos/rocks-product-demo.mp4"', html=False)
+        self.assertContains(response, 'data-src="/static/videos/rocks.mp4"', html=False)
         self.assertNotContains(response, '<video controls muted autoplay', html=False)
         self.assertContains(response, 'poster="/static/images/home/rocks-product-video-poster.webp"', html=False)
         self.assertContains(response, 'preload="none"', html=False)

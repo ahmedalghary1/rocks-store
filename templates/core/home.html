@@ -71,6 +71,16 @@
           <span data-product-video-label>{% if current_language == 'ar' %}شاهد الفيديو{% else %}Watch video{% endif %}</span>
         </button>
       </div>
+      <div class="ev-video-showcase__media reveal" data-product-video-shell>
+        <video controls muted loop playsinline preload="none" poster="{% static 'images/home/rocks-product-video-poster.webp' %}" aria-describedby="product-video-description" data-product-video>
+          <source data-src="{% static 'videos/rocks.mp4' %}" type="video/mp4">
+          {% if current_language == 'ar' %}متصفحك لا يدعم تشغيل الفيديو.{% else %}Your browser does not support video playback.{% endif %}
+        </video>
+        <button type="button" class="ev-video-toggle" aria-pressed="false" aria-label="{% if current_language == 'ar' %}تشغيل الفيديو{% else %}Play video{% endif %}" data-play-label="{% if current_language == 'ar' %}تشغيل الفيديو{% else %}Play video{% endif %}" data-pause-label="{% if current_language == 'ar' %}إيقاف الفيديو مؤقتًا{% else %}Pause video{% endif %}" data-product-video-toggle hidden>
+          <span class="ev-video-toggle__icon" aria-hidden="true"></span>
+          <span data-product-video-label>{% if current_language == 'ar' %}شاهد الفيديو{% else %}Watch video{% endif %}</span>
+        </button>
+      </div>
       </div>
     </div>
   </section>
