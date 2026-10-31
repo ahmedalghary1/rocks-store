@@ -174,6 +174,79 @@ class ProductContentTests(TestCase):
             self.assertNotEqual(product.main_image.name, first_primary_name)
             self.assertEqual(product.name, original_name)
 
+    def test_main_image_can_be_replaced_when_product_has_gallery_images(self):
+        def upload(name, color):
+            data = BytesIO()
+            Image.new("RGB", (64, 64), color).save(data, format="PNG")
+            return SimpleUploadedFile(name, data.getvalue(), content_type="image/png")
+
+        product = self.products[0]
+        payload = {
+            "name": product.name, "name_ar": product.name_ar, "slug": product.slug, "sku": product.sku,
+            "category": product.category_id, "short_description": product.short_description,
+            "short_description_ar": product.short_description_ar, "description": product.description,
+            "description_ar": product.description_ar, "stock_quantity": product.stock_quantity,
+            "specifications_text": product.specifications_text,
+            "specifications_text_ar": product.specifications_text_ar,
+            "warranty_text": product.warranty_text, "warranty_text_ar": product.warranty_text_ar,
+            "is_active": "on", "gallery_primary": "current",
+            "lengths-TOTAL_FORMS": "0", "lengths-INITIAL_FORMS": "0",
+        }
+        with TemporaryDirectory() as media_root, override_settings(MEDIA_ROOT=media_root):
+            product.main_image = upload("original.png", "green")
+            product.save(update_fields=("main_image",))
+            original_main_name = product.main_image.name
+            ProductImage.objects.create(
+                product=product, image=upload("gallery.png", "blue"),
+                alt_text=product.name, alt_text_ar=product.name_ar,
+            )
+
+            response = self.client.post(
+                reverse("controlpanel:edit", args=("products", product.pk)),
+                {**payload, "main_image": upload("replacement.png", "red")},
+            )
+
+            self.assertRedirects(response, reverse("controlpanel:list", args=("products",)))
+            product.refresh_from_db()
+            self.assertNotEqual(product.main_image.name, original_main_name)
+            self.assertTrue(product.main_image.storage.exists(product.main_image.name))
+            self.assertEqual(product.images.count(), 2)
+            self.assertTrue(any("original.webp" in image.image.name for image in product.images.all()))
+            self.assertFalse(any("replacement.webp" in image.image.name for image in product.images.all()))
+
+    def test_conflicting_main_image_selection_returns_form_error(self):
+        def upload(name, color):
+            data = BytesIO()
+            Image.new("RGB", (64, 64), color).save(data, format="PNG")
+            return SimpleUploadedFile(name, data.getvalue(), content_type="image/png")
+
+        product = self.products[0]
+        with TemporaryDirectory() as media_root, override_settings(MEDIA_ROOT=media_root):
+            gallery_image = ProductImage.objects.create(
+                product=product, image=upload("gallery.png", "blue"),
+                alt_text=product.name, alt_text_ar=product.name_ar,
+            )
+            response = self.client.post(
+                reverse("controlpanel:edit", args=("products", product.pk)),
+                {
+                    "name": product.name, "name_ar": product.name_ar, "slug": product.slug, "sku": product.sku,
+                    "category": product.category_id, "short_description": product.short_description,
+                    "short_description_ar": product.short_description_ar, "description": product.description,
+                    "description_ar": product.description_ar, "stock_quantity": product.stock_quantity,
+                    "specifications_text": product.specifications_text,
+                    "specifications_text_ar": product.specifications_text_ar,
+                    "warranty_text": product.warranty_text, "warranty_text_ar": product.warranty_text_ar,
+                    "is_active": "on", "gallery_primary": f"existing:{gallery_image.pk}",
+                    "lengths-TOTAL_FORMS": "0", "lengths-INITIAL_FORMS": "0",
+                    "main_image": upload("replacement.png", "red"),
+                },
+            )
+
+            self.assertEqual(response.status_code, 200)
+            self.assertContains(response, "اختر طريقة واحدة لتحديد الصورة الرئيسية")
+            product.refresh_from_db()
+            self.assertFalse(product.main_image)
+
     def test_invalid_gallery_upload_does_not_change_product(self):
         product = self.products[0]
         response = self.client.post(reverse("controlpanel:edit", args=("products", product.pk)), {

@@ -18,7 +18,7 @@ from django.utils import timezone
 from django.utils.formats import date_format
 
 from catalog.models import Product, ProductImage, SpecificationTemplate, WarrantyTemplate
-from catalog.validators import validate_image_size
+from catalog.validators import MAX_IMAGE_SIZE, validate_image_size
 from core.models import ContactMessage
 from orders.models import Order
 from orders.services import restore_order_stock, send_order_notifications
@@ -322,9 +322,24 @@ def resource_form(request, resource, pk=None):
     gallery_images = []
     gallery_primary = ""
     can_add_gallery_images = False
+    gallery_errors = []
+    old_main = None
+    main_image_data = None
+    main_image_name = ""
     if config["model"] is Product:
         can_add_gallery_images = request.user.has_perm("catalog.add_productimage")
         gallery_primary = request.POST.get("gallery_primary", "current") if request.method == "POST" else "current"
+        main_image_upload = request.FILES.get("main_image")
+        if main_image_upload and main_image_upload.size <= MAX_IMAGE_SIZE:
+            main_image_upload.seek(0)
+            main_image_data = main_image_upload.read()
+            main_image_name = main_image_upload.name
+            main_image_upload.seek(0)
+        if isinstance(instance, Product) and instance.main_image and (
+            main_image_upload or gallery_primary not in ("", "current")
+        ):
+            with instance.main_image.open("rb") as stored:
+                old_main = ContentFile(stored.read(), name=Path(instance.main_image.name).name)
         if request.method == "POST" and can_add_gallery_images:
             image_field = forms.ImageField(validators=[validate_image_size])
             for uploaded in request.FILES.getlist("gallery_images"):
@@ -333,22 +348,22 @@ def resource_form(request, resource, pk=None):
                     uploaded.seek(0)
                     gallery_images.append(uploaded)
                 except forms.ValidationError as error:
-                    form.add_error(None, f"{uploaded.name}: {error.messages[0]}")
+                    gallery_errors.append(f"{uploaded.name}: {error.messages[0]}")
         elif request.method == "POST" and request.FILES.getlist("gallery_images"):
-            form.add_error(None, "ليس لديك صلاحية إضافة صور للمنتجات.")
+            gallery_errors.append("ليس لديك صلاحية إضافة صور للمنتجات.")
         if request.method == "POST" and gallery_primary not in ("", "current"):
             if request.FILES.get("main_image"):
-                form.add_error(None, "اختر طريقة واحدة لتحديد الصورة الرئيسية: رفع مباشر أو اختيار من المعرض.")
+                gallery_errors.append("اختر طريقة واحدة لتحديد الصورة الرئيسية: رفع مباشر أو اختيار من المعرض.")
             if gallery_primary.startswith("existing:"):
                 image_id = gallery_primary.partition(":")[2]
                 if not instance or not image_id.isdecimal() or not instance.images.filter(pk=image_id).exists():
-                    form.add_error(None, "الصورة الرئيسية المختارة لا تتبع هذا المنتج.")
+                    gallery_errors.append("الصورة الرئيسية المختارة لا تتبع هذا المنتج.")
             elif gallery_primary.startswith("new:"):
                 image_index = gallery_primary.partition(":")[2]
                 if not can_add_gallery_images or not image_index.isdecimal() or int(image_index) >= len(gallery_images):
-                    form.add_error(None, "اختر صورة مرفوعة صالحة لتكون الرئيسية.")
+                    gallery_errors.append("اختر صورة مرفوعة صالحة لتكون الرئيسية.")
             else:
-                form.add_error(None, "اختيار الصورة الرئيسية غير صالح.")
+                gallery_errors.append("اختيار الصورة الرئيسية غير صالح.")
         can_manage_lengths = (
             request.user.has_perm("catalog.add_productvariant")
             and request.user.has_perm("catalog.change_productvariant")
@@ -363,6 +378,14 @@ def resource_form(request, resource, pk=None):
                 prefix="lengths",
             )
     forms_are_valid = form.is_valid()
+    if forms_are_valid and main_image_data is not None:
+        main_image_copy = ContentFile(main_image_data, name=main_image_name)
+        form.cleaned_data["main_image"] = main_image_copy
+        form.instance.main_image = main_image_copy
+    for error in gallery_errors:
+        form.add_error(None, error)
+    if gallery_errors:
+        forms_are_valid = False
     if length_formset is not None:
         forms_are_valid = length_formset.is_valid() and forms_are_valid
     if request.method == "POST" and forms_are_valid:
@@ -370,10 +393,6 @@ def resource_form(request, resource, pk=None):
             form.add_error("is_staff", "لا يمكنك تعطيل حسابك الإداري الحالي أو إزالة صفة الموظف منه.")
         else:
             with transaction.atomic():
-                old_main = None
-                if isinstance(instance, Product) and instance.main_image and (request.FILES.get("main_image") or gallery_primary not in ("", "current")):
-                    with instance.main_image.open("rb") as stored:
-                        old_main = ContentFile(stored.read(), name=Path(instance.main_image.name).name)
                 obj = form.save()
                 if isinstance(obj, Product):
                     order = obj.images.aggregate(max_order=Max("sort_order"))["max_order"] or 0

@@ -33,6 +33,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const galleryEditor = document.querySelector('[data-gallery-editor]');
   const galleryUpload = galleryEditor?.querySelector('[data-gallery-upload]');
+  const mainImageUpload = galleryEditor?.querySelector('#id_main_image');
+  mainImageUpload?.addEventListener('change', () => {
+    if (mainImageUpload.files.length) {
+      galleryEditor.querySelectorAll('input[name="gallery_primary"]').forEach(radio => { radio.checked = false; });
+    }
+  });
   galleryUpload?.addEventListener('change', () => {
     const previews = galleryEditor.querySelector('[data-gallery-previews]');
     previews.replaceChildren();
