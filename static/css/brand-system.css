@@ -38,15 +38,12 @@ html[dir=rtl],html[dir=rtl] body{max-width:100%;overflow-x:hidden}
 /* Launch teaser for products being prepared. */
 .product-card--coming-soon{border:1px solid rgba(37,159,72,.24)}
 .product-card--coming-soon .product-visual,.quick-visual:has(.coming-soon-ribbon),.main-product-image:has(.coming-soon-ribbon){background:radial-gradient(circle at 50% 25%,#f7ffec 0%,#e5f4e8 55%,#d8e9e0 100%)}
-.product-card--coming-soon .product-image-link{grid-template-rows:minmax(0,42%) minmax(0,58%)}
-.product-launch-graphic{grid-row:1;display:grid;place-items:center;align-self:stretch;width:100%;height:100%;overflow:hidden;background:#030603;border-bottom:2px solid #32d944;box-shadow:0 5px 18px rgba(22,160,53,.22)}
-.product-launch-graphic img{display:block;width:100%;height:100%;padding:0;object-fit:contain}
-.product-card--coming-soon .product-image-link>.product-photo,.product-card--coming-soon .product-image-link>.product-art{grid-row:2;align-self:center;justify-self:center}
-.product-card--coming-soon .product-image-link>.product-art{max-height:90%;max-width:70%}
+.product-launch-graphic{display:block;width:100%;height:clamp(70px,7vw,88px);overflow:hidden;background:#030603;border-bottom:2px solid #32d944;box-shadow:0 5px 18px rgba(22,160,53,.17)}
+.product-launch-graphic img{display:block;width:100%;height:100%;object-fit:contain}
+.product-launch-graphic:focus-visible{outline:3px solid #32d944;outline-offset:-4px}
 .new-product-pill{position:absolute;z-index:3;top:14px;inset-inline-start:14px;padding:7px 10px;border:1px solid rgba(189,255,163,.65);border-radius:8px;background:linear-gradient(110deg,#092d1d,#168242);color:#fff;font-size:.67rem;font-weight:900;box-shadow:0 5px 15px rgba(7,65,32,.18);pointer-events:none}
 .product-card--new .wish-button{left:auto;right:13px}
 [dir=rtl] .product-card--new .wish-button{right:auto;left:13px}
-.product-card--coming-soon .wish-button{top:calc(42% + 12px)}
 .product-card--new .discount{top:65px}
 .coming-soon-ribbon{position:absolute;z-index:3;top:0;inset-inline:0;display:flex;justify-content:center;align-items:center;gap:8px;min-height:37px;padding:7px 12px;background:linear-gradient(100deg,#082719,#136b35,#20a548);color:#fff;text-align:center;font-size:clamp(.61rem,.75vw,.73rem);font-weight:800;letter-spacing:.02em;box-shadow:0 6px 18px rgba(5,62,27,.18)}
 .coming-soon-ribbon .lucide{width:15px;height:15px;color:#bbff79;flex:none}
