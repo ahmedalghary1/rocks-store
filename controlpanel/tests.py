@@ -247,6 +247,81 @@ class ProductContentTests(TestCase):
             product.refresh_from_db()
             self.assertFalse(product.main_image)
 
+    def test_existing_product_images_can_be_deleted(self):
+        def upload(name, color):
+            data = BytesIO()
+            Image.new("RGB", (64, 64), color).save(data, format="PNG")
+            return SimpleUploadedFile(name, data.getvalue(), content_type="image/png")
+
+        product = self.products[0]
+        payload = {
+            "name": product.name, "name_ar": product.name_ar, "slug": product.slug, "sku": product.sku,
+            "category": product.category_id, "short_description": product.short_description,
+            "short_description_ar": product.short_description_ar, "description": product.description,
+            "description_ar": product.description_ar, "stock_quantity": product.stock_quantity,
+            "specifications_text": product.specifications_text,
+            "specifications_text_ar": product.specifications_text_ar,
+            "warranty_text": product.warranty_text, "warranty_text_ar": product.warranty_text_ar,
+            "is_active": "on", "lengths-TOTAL_FORMS": "0", "lengths-INITIAL_FORMS": "0",
+        }
+        with TemporaryDirectory() as media_root, override_settings(MEDIA_ROOT=media_root):
+            product.main_image = upload("main.png", "green")
+            product.save(update_fields=("main_image",))
+            main_image_name = product.main_image.name
+            gallery_image = ProductImage.objects.create(
+                product=product, image=upload("gallery.png", "blue"),
+                alt_text=product.name, alt_text_ar=product.name_ar,
+            )
+            gallery_image_name = gallery_image.image.name
+
+            response = self.client.post(
+                reverse("controlpanel:edit", args=("products", product.pk)),
+                {
+                    **payload,
+                    "delete_main_image": "1",
+                    "delete_gallery_images": [str(gallery_image.pk)],
+                },
+            )
+
+            self.assertRedirects(response, reverse("controlpanel:list", args=("products",)))
+            product.refresh_from_db()
+            self.assertFalse(product.main_image)
+            self.assertFalse(product.main_image.storage.exists(main_image_name))
+            self.assertFalse(ProductImage.objects.filter(pk=gallery_image.pk).exists())
+            self.assertFalse(product.images.model.image.field.storage.exists(gallery_image_name))
+
+    def test_cannot_delete_gallery_image_selected_as_primary(self):
+        def upload(name, color):
+            data = BytesIO()
+            Image.new("RGB", (64, 64), color).save(data, format="PNG")
+            return SimpleUploadedFile(name, data.getvalue(), content_type="image/png")
+
+        product = self.products[0]
+        with TemporaryDirectory() as media_root, override_settings(MEDIA_ROOT=media_root):
+            gallery_image = ProductImage.objects.create(
+                product=product, image=upload("gallery.png", "blue"),
+                alt_text=product.name, alt_text_ar=product.name_ar,
+            )
+            response = self.client.post(
+                reverse("controlpanel:edit", args=("products", product.pk)),
+                {
+                    "name": product.name, "name_ar": product.name_ar, "slug": product.slug, "sku": product.sku,
+                    "category": product.category_id, "short_description": product.short_description,
+                    "short_description_ar": product.short_description_ar, "description": product.description,
+                    "description_ar": product.description_ar, "stock_quantity": product.stock_quantity,
+                    "specifications_text": product.specifications_text,
+                    "specifications_text_ar": product.specifications_text_ar,
+                    "warranty_text": product.warranty_text, "warranty_text_ar": product.warranty_text_ar,
+                    "is_active": "on", "gallery_primary": f"existing:{gallery_image.pk}",
+                    "delete_gallery_images": [str(gallery_image.pk)],
+                    "lengths-TOTAL_FORMS": "0", "lengths-INITIAL_FORMS": "0",
+                },
+            )
+
+            self.assertEqual(response.status_code, 200)
+            self.assertContains(response, "لا يمكن تعيين صورة للحذف كصورة رئيسية")
+            self.assertTrue(ProductImage.objects.filter(pk=gallery_image.pk).exists())
+
     def test_invalid_gallery_upload_does_not_change_product(self):
         product = self.products[0]
         response = self.client.post(reverse("controlpanel:edit", args=("products", product.pk)), {

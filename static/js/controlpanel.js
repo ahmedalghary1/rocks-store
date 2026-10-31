@@ -34,8 +34,30 @@ document.addEventListener('DOMContentLoaded', () => {
   const galleryEditor = document.querySelector('[data-gallery-editor]');
   const galleryUpload = galleryEditor?.querySelector('[data-gallery-upload]');
   const mainImageUpload = galleryEditor?.querySelector('#id_main_image');
+  const deleteMainImage = galleryEditor?.querySelector('[data-delete-main-image]');
+  deleteMainImage?.addEventListener('change', () => {
+    const currentRadio = galleryEditor.querySelector('input[name="gallery_primary"][value="current"]');
+    if (deleteMainImage.checked) {
+      if (currentRadio) currentRadio.checked = false;
+    } else if (currentRadio && !galleryEditor.querySelector('input[name="gallery_primary"]:checked')) {
+      currentRadio.checked = true;
+    }
+  });
+  galleryEditor?.querySelectorAll('[data-delete-gallery-image]').forEach(checkbox => {
+    checkbox.addEventListener('change', () => {
+      if (!checkbox.checked) return;
+      const tile = checkbox.closest('.cp-gallery-tile');
+      const radio = tile?.querySelector('input[name="gallery_primary"]');
+      if (radio) radio.checked = false;
+      const currentRadio = galleryEditor.querySelector('input[name="gallery_primary"][value="current"]');
+      if (!deleteMainImage?.checked && currentRadio && !galleryEditor.querySelector('input[name="gallery_primary"]:checked')) {
+        currentRadio.checked = true;
+      }
+    });
+  });
   mainImageUpload?.addEventListener('change', () => {
     if (mainImageUpload.files.length) {
+      if (deleteMainImage) deleteMainImage.checked = false;
       galleryEditor.querySelectorAll('input[name="gallery_primary"]').forEach(radio => { radio.checked = false; });
     }
   });
@@ -58,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
       label.append(picture, caption);
       previews.append(label);
     });
-    if (!galleryEditor.querySelector('input[name="gallery_primary"]:checked')) {
+    if (!deleteMainImage?.checked && !galleryEditor.querySelector('input[name="gallery_primary"]:checked')) {
       galleryEditor.querySelector('input[name="gallery_primary"]')?.click();
     }
   });

@@ -322,14 +322,35 @@ def resource_form(request, resource, pk=None):
     gallery_images = []
     gallery_primary = ""
     can_add_gallery_images = False
+    can_delete_gallery_images = False
     gallery_errors = []
+    deleted_gallery_ids = []
+    delete_main_image = False
     old_main = None
     main_image_data = None
     main_image_name = ""
     if config["model"] is Product:
         can_add_gallery_images = request.user.has_perm("catalog.add_productimage")
+        can_delete_gallery_images = request.user.has_perm("catalog.delete_productimage")
         gallery_primary = request.POST.get("gallery_primary", "current") if request.method == "POST" else "current"
         main_image_upload = request.FILES.get("main_image")
+        delete_main_image = request.method == "POST" and request.POST.get("delete_main_image") == "1"
+        requested_gallery_deletions = request.POST.getlist("delete_gallery_images")
+        if requested_gallery_deletions:
+            if not can_delete_gallery_images:
+                gallery_errors.append("ليس لديك صلاحية حذف صور المنتجات.")
+            elif not instance or any(not image_id.isdecimal() for image_id in requested_gallery_deletions):
+                gallery_errors.append("اختيار الصور المراد حذفها غير صالح.")
+            else:
+                deleted_gallery_ids = list(dict.fromkeys(requested_gallery_deletions))
+                if instance.images.filter(pk__in=deleted_gallery_ids).count() != len(deleted_gallery_ids):
+                    gallery_errors.append("إحدى الصور المختارة لا تتبع هذا المنتج.")
+        if delete_main_image and (not instance or not instance.main_image):
+            gallery_errors.append("لا توجد صورة رئيسية لحذفها.")
+        if delete_main_image and main_image_upload:
+            gallery_errors.append("ارفع صورة جديدة أو اختر حذف الصورة الرئيسية، وليس الاثنين معًا.")
+        if delete_main_image and gallery_primary == "current":
+            gallery_primary = ""
         if main_image_upload and main_image_upload.size <= MAX_IMAGE_SIZE:
             main_image_upload.seek(0)
             main_image_data = main_image_upload.read()
@@ -337,7 +358,7 @@ def resource_form(request, resource, pk=None):
             main_image_upload.seek(0)
         if isinstance(instance, Product) and instance.main_image and (
             main_image_upload or gallery_primary not in ("", "current")
-        ):
+        ) and not delete_main_image:
             with instance.main_image.open("rb") as stored:
                 old_main = ContentFile(stored.read(), name=Path(instance.main_image.name).name)
         if request.method == "POST" and can_add_gallery_images:
@@ -358,6 +379,8 @@ def resource_form(request, resource, pk=None):
                 image_id = gallery_primary.partition(":")[2]
                 if not instance or not image_id.isdecimal() or not instance.images.filter(pk=image_id).exists():
                     gallery_errors.append("الصورة الرئيسية المختارة لا تتبع هذا المنتج.")
+                elif image_id in deleted_gallery_ids:
+                    gallery_errors.append("لا يمكن تعيين صورة للحذف كصورة رئيسية.")
             elif gallery_primary.startswith("new:"):
                 image_index = gallery_primary.partition(":")[2]
                 if not can_add_gallery_images or not image_index.isdecimal() or int(image_index) >= len(gallery_images):
@@ -414,6 +437,13 @@ def resource_form(request, resource, pk=None):
                         with selected.image.open("rb") as stored:
                             obj.main_image = ContentFile(stored.read(), name=Path(selected.image.name).name)
                         obj.save(update_fields=("main_image",))
+                    elif delete_main_image:
+                        obj.main_image = ""
+                        obj.save(update_fields=("main_image",))
+                    if deleted_gallery_ids:
+                        for image in obj.images.filter(pk__in=deleted_gallery_ids):
+                            image.image.delete(save=False)
+                            image.delete()
                 if length_formset is not None:
                     length_formset.instance = obj
                     length_formset.save()
@@ -433,6 +463,7 @@ def resource_form(request, resource, pk=None):
         length_formset=length_formset,
         gallery_images=instance.images.all() if isinstance(instance, Product) else (),
         can_add_gallery_images=can_add_gallery_images,
+        can_delete_gallery_images=can_delete_gallery_images,
         product_content_fields=(
             "specifications_text", "specifications_text_ar", "specification_template",
             "warranty_text", "warranty_text_ar", "warranty_template",
