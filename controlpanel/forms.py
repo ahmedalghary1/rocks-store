@@ -57,6 +57,8 @@ class ProductControlForm(DashboardModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.fields["price"].help_text = "يمكن ترك السعر فارغًا للمنتج القادم قريبًا وإضافته لاحقًا عند إتاحته للبيع."
+        self.fields["is_coming_soon"].help_text = "اعرض المنتج كإطلاق جديد قريبًا، حتى لو لم تحدد له سعرًا بعد. لن يكون متاحًا للطلب حتى تلغي هذا الخيار."
         for name in ("specification_template", "warranty_template"):
             self.fields[name].help_text = "عند اختيار قالب مشترك يظهر نصه بدل النص الخاص بالمنتج. اتركه فارغًا لاستخدام النص الخاص."
         for name in ("specifications_text", "warranty_text"):

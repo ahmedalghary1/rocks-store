@@ -103,6 +103,26 @@ class ProductContentTests(TestCase):
         self.assertFalse(form.is_valid())
         self.assertIn("warranty_text", form.errors)
 
+    def test_coming_soon_product_can_be_created_without_price(self):
+        response = self.client.post(reverse("controlpanel:create", args=("products",)), {
+            "name": "New launch", "name_ar": "إطلاق جديد", "slug": "new-launch", "sku": "NEW-LAUNCH",
+            "category": self.products[0].category_id,
+            "short_description": "Made by ROCKS", "short_description_ar": "صنعته روكس",
+            "description": "Coming soon", "description_ar": "قريبًا",
+            "price": "", "old_price": "", "stock_quantity": "0",
+            "is_new": "on", "is_coming_soon": "on", "is_active": "on",
+            "lengths-TOTAL_FORMS": "0", "lengths-INITIAL_FORMS": "0",
+        })
+        self.assertRedirects(response, reverse("controlpanel:list", args=("products",)))
+        product = Product.objects.get(slug="new-launch")
+        self.assertIsNone(product.price)
+        self.assertTrue(product.is_new)
+        self.assertTrue(product.is_coming_soon)
+        public = self.client.get(product.get_absolute_url())
+        self.assertContains(public, "Fresh from ROCKS")
+        self.assertNotContains(public, 'class="price price--hero"')
+        self.assertNotContains(public, 'id="detail-cart-form"')
+
     def test_invalid_shared_text_does_not_modify_products(self):
         response = self.client.post(reverse("controlpanel:create", args=("warranty-templates",)), {
             "name": "Incomplete", "text": "English only", "products": [self.products[0].pk],
