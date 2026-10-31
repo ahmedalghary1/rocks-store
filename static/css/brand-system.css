@@ -37,10 +37,15 @@ html[dir=rtl],html[dir=rtl] body{max-width:100%;overflow-x:hidden}
 /* Launch teaser for products being prepared. */
 .product-card--coming-soon{border:1px solid rgba(37,159,72,.24)}
 .product-card--coming-soon .product-visual,.quick-visual:has(.coming-soon-ribbon),.main-product-image:has(.coming-soon-ribbon){background:radial-gradient(circle at 50% 25%,#f7ffec 0%,#e5f4e8 55%,#d8e9e0 100%)}
-.new-product-ribbon{position:absolute;z-index:3;top:0;inset-inline:0;display:flex;justify-content:center;align-items:center;gap:9px;min-height:39px;padding:8px 12px;background:linear-gradient(105deg,#071e16,#136b35 52%,#239c42);color:#fff;text-align:center;font-size:clamp(.65rem,.8vw,.79rem);font-weight:900;letter-spacing:.12em;box-shadow:0 7px 18px rgba(6,55,29,.2)}
-.new-product-ribbon .lucide{width:15px;height:15px;flex:none;color:#b9f978}
-[dir=rtl] .new-product-ribbon{letter-spacing:0}
-.product-card--new .wish-button,.product-card--new .discount{top:51px}
+.new-product-ribbon{position:absolute;z-index:3;top:18px;inset-inline-start:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:6px;width:clamp(82px,8.5vw,116px);min-height:100px;padding:13px 8px;background:linear-gradient(155deg,#08291b,#14773a 68%,#279f4b);color:#fff;text-align:center;border-radius:0 14px 14px 0;border-inline-start:3px solid #b9f978;box-shadow:7px 9px 24px rgba(5,59,30,.25)}
+.new-product-ribbon .lucide{width:19px;height:19px;flex:none;color:#c4ff84}
+.new-product-ribbon strong{font-size:clamp(.65rem,.78vw,.78rem);font-weight:900;line-height:1.25;letter-spacing:.035em}
+.new-product-ribbon span{display:block;width:100%;padding-top:5px;border-top:1px solid rgba(255,255,255,.3);font-size:clamp(.59rem,.69vw,.7rem);font-weight:800;line-height:1.2}
+[dir=rtl] .new-product-ribbon{border-radius:14px 0 0 14px;box-shadow:-7px 9px 24px rgba(5,59,30,.25)}
+[dir=rtl] .new-product-ribbon strong{letter-spacing:0}
+.product-card--new .wish-button{left:auto;right:13px}
+[dir=rtl] .product-card--new .wish-button{right:auto;left:13px}
+.product-card--new .discount{top:65px}
 .coming-soon-ribbon{position:absolute;z-index:3;top:0;inset-inline:0;display:flex;justify-content:center;align-items:center;gap:8px;min-height:37px;padding:7px 12px;background:linear-gradient(100deg,#082719,#136b35,#20a548);color:#fff;text-align:center;font-size:clamp(.61rem,.75vw,.73rem);font-weight:800;letter-spacing:.02em;box-shadow:0 6px 18px rgba(5,62,27,.18)}
 .coming-soon-ribbon .lucide{width:15px;height:15px;color:#bbff79;flex:none}
 .stock--coming-soon{color:#137843!important;font-weight:800}.stock--coming-soon i{background:#38bf59!important;box-shadow:0 0 0 4px rgba(56,191,89,.15)!important}

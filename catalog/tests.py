@@ -33,6 +33,7 @@ class CatalogTests(TestCase):
         self.product.save(update_fields=("is_coming_soon",))
         listing = self.client.get(reverse("catalog:list"))
         self.assertContains(listing, "NEW PRODUCT")
+        self.assertContains(listing, "<strong>NEW PRODUCT</strong><span>Coming soon</span>", html=True)
         self.assertContains(listing, "Coming soon")
         self.assertNotContains(listing, f'action="{reverse("cart:add", args=[self.product.id])}"')
         filtered = self.client.get(reverse("catalog:list"), {"available": "1"})
@@ -54,6 +55,7 @@ class CatalogTests(TestCase):
         listing = self.client.get("/ar/products/")
         self.assertContains(listing, "منتج جديد")
         self.assertContains(listing, "قريبًا")
+        self.assertContains(listing, "<strong>منتج جديد</strong><span>قريبًا</span>", html=True)
 
     def test_new_product_has_top_ribbon_in_both_languages(self):
         self.product.is_new = True
