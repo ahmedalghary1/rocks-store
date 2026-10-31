@@ -95,6 +95,7 @@ class CatalogTests(TestCase):
     def test_product_list_includes_working_quick_view_dialog(self):
         response = self.client.get(reverse("catalog:list"))
         self.assertContains(response, 'id="quickModal"')
+        self.assertContains(response, f'class="product-image-link" href="{self.product.get_absolute_url()}"')
         self.assertContains(response, f'data-quick="{reverse("catalog:quick_view", args=[self.product.slug])}"')
 
         quick_view = self.client.get(reverse("catalog:quick_view", args=[self.product.slug]))
