@@ -1,13 +1,15 @@
 import csv
+from pathlib import Path
 
 from django.contrib import messages
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth.models import Group, User
 from django.contrib.auth.views import LoginView
 from django.core.exceptions import PermissionDenied
+from django.core.files.base import ContentFile
 from django.core.paginator import Paginator
 from django.db import models, transaction
-from django.db.models import Q, Sum
+from django.db.models import Max, Q, Sum
 from django.db.models.deletion import ProtectedError
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -15,12 +17,14 @@ from django.urls import reverse
 from django.utils import timezone
 from django.utils.formats import date_format
 
-from catalog.models import Product, SpecificationTemplate, WarrantyTemplate
+from catalog.models import Product, ProductImage, SpecificationTemplate, WarrantyTemplate
+from catalog.validators import validate_image_size
 from core.models import ContactMessage
 from orders.models import Order
 from orders.services import restore_order_stock, send_order_notifications
 
 from .forms import StaffAuthenticationForm, form_for, product_length_formset
+from django import forms
 from .registry import CHOICE_LABELS, FIELD_LABELS, GROUPS, RESOURCES, permission_name, resource_for
 
 
@@ -315,7 +319,36 @@ def resource_form(request, resource, pk=None):
     FormClass = form_for(config)
     form = FormClass(request.POST or None, request.FILES or None, instance=instance)
     length_formset = None
+    gallery_images = []
+    gallery_primary = ""
+    can_add_gallery_images = False
     if config["model"] is Product:
+        can_add_gallery_images = request.user.has_perm("catalog.add_productimage")
+        gallery_primary = request.POST.get("gallery_primary", "current") if request.method == "POST" else "current"
+        if request.method == "POST" and can_add_gallery_images:
+            image_field = forms.ImageField(validators=[validate_image_size])
+            for uploaded in request.FILES.getlist("gallery_images"):
+                try:
+                    image_field.clean(uploaded)
+                    uploaded.seek(0)
+                    gallery_images.append(uploaded)
+                except forms.ValidationError as error:
+                    form.add_error(None, f"{uploaded.name}: {error.messages[0]}")
+        elif request.method == "POST" and request.FILES.getlist("gallery_images"):
+            form.add_error(None, "ليس لديك صلاحية إضافة صور للمنتجات.")
+        if request.method == "POST" and gallery_primary not in ("", "current"):
+            if request.FILES.get("main_image"):
+                form.add_error(None, "اختر طريقة واحدة لتحديد الصورة الرئيسية: رفع مباشر أو اختيار من المعرض.")
+            if gallery_primary.startswith("existing:"):
+                image_id = gallery_primary.partition(":")[2]
+                if not instance or not image_id.isdecimal() or not instance.images.filter(pk=image_id).exists():
+                    form.add_error(None, "الصورة الرئيسية المختارة لا تتبع هذا المنتج.")
+            elif gallery_primary.startswith("new:"):
+                image_index = gallery_primary.partition(":")[2]
+                if not can_add_gallery_images or not image_index.isdecimal() or int(image_index) >= len(gallery_images):
+                    form.add_error(None, "اختر صورة مرفوعة صالحة لتكون الرئيسية.")
+            else:
+                form.add_error(None, "اختيار الصورة الرئيسية غير صالح.")
         can_manage_lengths = (
             request.user.has_perm("catalog.add_productvariant")
             and request.user.has_perm("catalog.change_productvariant")
@@ -337,7 +370,31 @@ def resource_form(request, resource, pk=None):
             form.add_error("is_staff", "لا يمكنك تعطيل حسابك الإداري الحالي أو إزالة صفة الموظف منه.")
         else:
             with transaction.atomic():
+                old_main = None
+                if isinstance(instance, Product) and instance.main_image and (request.FILES.get("main_image") or gallery_primary not in ("", "current")):
+                    with instance.main_image.open("rb") as stored:
+                        old_main = ContentFile(stored.read(), name=Path(instance.main_image.name).name)
                 obj = form.save()
+                if isinstance(obj, Product):
+                    order = obj.images.aggregate(max_order=Max("sort_order"))["max_order"] or 0
+                    if old_main is not None:
+                        order += 1
+                        ProductImage.objects.create(product=obj, image=old_main, alt_text=obj.name, alt_text_ar=obj.name_ar, sort_order=order)
+                    new_gallery = []
+                    for uploaded in gallery_images:
+                        order += 1
+                        new_gallery.append(ProductImage.objects.create(product=obj, image=uploaded, alt_text=obj.name, alt_text_ar=obj.name_ar, sort_order=order))
+                    selected = None
+                    if gallery_primary.startswith("existing:"):
+                        selected = obj.images.get(pk=int(gallery_primary.partition(":")[2]))
+                    elif gallery_primary.startswith("new:"):
+                        selected = new_gallery[int(gallery_primary.partition(":")[2])]
+                    elif not obj.main_image and new_gallery:
+                        selected = new_gallery[0]
+                    if selected:
+                        with selected.image.open("rb") as stored:
+                            obj.main_image = ContentFile(stored.read(), name=Path(selected.image.name).name)
+                        obj.save(update_fields=("main_image",))
                 if length_formset is not None:
                     length_formset.instance = obj
                     length_formset.save()
@@ -355,6 +412,8 @@ def resource_form(request, resource, pk=None):
         resource=resource,
         form=form,
         length_formset=length_formset,
+        gallery_images=instance.images.all() if isinstance(instance, Product) else (),
+        can_add_gallery_images=can_add_gallery_images,
         product_content_fields=(
             "specifications_text", "specifications_text_ar", "specification_template",
             "warranty_text", "warranty_text_ar", "warranty_template",

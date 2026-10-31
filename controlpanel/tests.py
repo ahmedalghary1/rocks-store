@@ -1,10 +1,15 @@
 from decimal import Decimal
+from io import BytesIO
+from tempfile import TemporaryDirectory
 
 from django.contrib.auth.models import Permission, User
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
+from django.test import override_settings
 from django.urls import reverse
+from PIL import Image
 
-from catalog.models import Category, HomepageProduct, Product, ProductVariant, SpecificationTemplate, WarrantyTemplate
+from catalog.models import Category, HomepageProduct, Product, ProductImage, ProductVariant, SpecificationTemplate, WarrantyTemplate
 from controlpanel.forms import ProductControlForm, form_for
 from controlpanel.registry import RESOURCES
 from marketing.models import Banner
@@ -122,6 +127,71 @@ class ProductContentTests(TestCase):
         self.assertContains(public, "Fresh from ROCKS")
         self.assertNotContains(public, 'class="price price--hero"')
         self.assertNotContains(public, 'id="detail-cart-form"')
+
+    def test_multiple_gallery_uploads_and_primary_selection_preserve_product_data(self):
+        def upload(name, color):
+            data = BytesIO()
+            Image.new("RGB", (64, 64), color).save(data, format="PNG")
+            return SimpleUploadedFile(name, data.getvalue(), content_type="image/png")
+
+        product = self.products[0]
+        original_name = product.name
+        payload = {
+            "name": product.name, "name_ar": product.name_ar, "slug": product.slug, "sku": product.sku,
+            "category": product.category_id, "short_description": product.short_description,
+            "short_description_ar": product.short_description_ar, "description": product.description,
+            "description_ar": product.description_ar, "stock_quantity": product.stock_quantity,
+            "specifications_text": product.specifications_text,
+            "specifications_text_ar": product.specifications_text_ar,
+            "warranty_text": product.warranty_text, "warranty_text_ar": product.warranty_text_ar,
+            "is_active": "on", "lengths-TOTAL_FORMS": "0", "lengths-INITIAL_FORMS": "0",
+        }
+        with TemporaryDirectory() as media_root, override_settings(MEDIA_ROOT=media_root):
+            product.main_image = upload("original.png", "green")
+            product.save(update_fields=("main_image",))
+            response = self.client.post(
+                reverse("controlpanel:edit", args=("products", product.pk)),
+                {**payload, "gallery_primary": "new:1", "gallery_images": [
+                    upload("first.png", "red"), upload("second.png", "blue")
+                ]},
+            )
+            self.assertRedirects(response, reverse("controlpanel:list", args=("products",)))
+            product.refresh_from_db()
+            self.assertEqual(product.images.count(), 3)
+            self.assertTrue(product.main_image)
+            first_primary_name = product.main_image.name
+            self.assertEqual(product.name, original_name)
+            self.assertEqual(product.specifications_text, "Individual specs")
+            gallery_first = product.images.order_by("sort_order").first()
+            response = self.client.post(
+                reverse("controlpanel:edit", args=("products", product.pk)),
+                {**payload, "gallery_primary": f"existing:{gallery_first.pk}"},
+            )
+            self.assertRedirects(response, reverse("controlpanel:list", args=("products",)))
+            product.refresh_from_db()
+            self.assertEqual(product.images.count(), 4)
+            self.assertTrue(product.main_image.storage.exists(product.main_image.name))
+            self.assertNotEqual(product.main_image.name, first_primary_name)
+            self.assertEqual(product.name, original_name)
+
+    def test_invalid_gallery_upload_does_not_change_product(self):
+        product = self.products[0]
+        response = self.client.post(reverse("controlpanel:edit", args=("products", product.pk)), {
+            "name": "Changed name", "name_ar": product.name_ar, "slug": product.slug, "sku": product.sku,
+            "category": product.category_id, "short_description": product.short_description,
+            "short_description_ar": product.short_description_ar, "description": product.description,
+            "description_ar": product.description_ar, "stock_quantity": product.stock_quantity,
+            "specifications_text": product.specifications_text,
+            "specifications_text_ar": product.specifications_text_ar,
+            "warranty_text": product.warranty_text, "warranty_text_ar": product.warranty_text_ar,
+            "is_active": "on", "gallery_primary": "new:0",
+            "gallery_images": [SimpleUploadedFile("invalid.png", b"not an image", content_type="image/png")],
+            "lengths-TOTAL_FORMS": "0", "lengths-INITIAL_FORMS": "0",
+        })
+        self.assertEqual(response.status_code, 200)
+        product.refresh_from_db()
+        self.assertEqual(product.name, "Product 0")
+        self.assertFalse(product.images.exists())
 
     def test_invalid_shared_text_does_not_modify_products(self):
         response = self.client.post(reverse("controlpanel:create", args=("warranty-templates",)), {

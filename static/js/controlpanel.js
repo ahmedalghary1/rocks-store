@@ -31,6 +31,32 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  const galleryEditor = document.querySelector('[data-gallery-editor]');
+  const galleryUpload = galleryEditor?.querySelector('[data-gallery-upload]');
+  galleryUpload?.addEventListener('change', () => {
+    const previews = galleryEditor.querySelector('[data-gallery-previews]');
+    previews.replaceChildren();
+    Array.from(galleryUpload.files).forEach((file, index) => {
+      const label = document.createElement('label');
+      label.className = 'cp-gallery-tile';
+      const picture = document.createElement('img');
+      picture.alt = file.name;
+      picture.src = URL.createObjectURL(file);
+      picture.addEventListener('load', () => URL.revokeObjectURL(picture.src), {once: true});
+      const caption = document.createElement('span');
+      const radio = document.createElement('input');
+      radio.type = 'radio';
+      radio.name = 'gallery_primary';
+      radio.value = `new:${index}`;
+      caption.append(radio, document.createTextNode(' تعيين كرئيسية'));
+      label.append(picture, caption);
+      previews.append(label);
+    });
+    if (!galleryEditor.querySelector('input[name="gallery_primary"]:checked')) {
+      galleryEditor.querySelector('input[name="gallery_primary"]')?.click();
+    }
+  });
+
   const lengthFormset = document.querySelector('[data-length-formset]');
   if (lengthFormset) {
     const rows = lengthFormset.querySelector('[data-formset-rows]');

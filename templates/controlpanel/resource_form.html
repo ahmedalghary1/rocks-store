@@ -6,9 +6,23 @@
   <section class="cp-card cp-form-card">
     <header><div><span>تفاصيل العنصر</span><h2>البيانات الأساسية</h2></div><i data-lucide="file-pen-line"></i></header>
     <div class="cp-form-grid">
-      {% for field in form %}{% if field.name not in product_content_fields %}<div class="cp-field {% if field.field.widget.input_type == 'checkbox' and not field.field.widget.allow_multiple_selected %}cp-field--check{% endif %} {% if field.name == 'specifications_text' or field.name == 'specifications_text_ar' or field.name == 'warranty_text' or field.name == 'warranty_text_ar' or field.name == 'text' or field.name == 'text_ar' or field.name == 'products' or field.name == 'description' or field.name == 'description_ar' or field.name == 'message' or field.name == 'notes' or field.name == 'last_error' or field.name == 'user_permissions' %}cp-field--wide{% endif %}"><label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %}<b>*</b>{% endif %}</label>{% if field.name == 'products' %}<div data-product-picker><input type="search" class="cp-input" data-product-search placeholder="ابحث باسم المنتج أو رمز المخزون" aria-label="البحث في المنتجات"><div class="cp-product-picker-list">{{ field }}</div></div>{% else %}{{ field }}{% endif %}{% if field.help_text %}<small>{{ field.help_text|safe }}</small>{% endif %}{% for error in field.errors %}<em>{{ error }}</em>{% endfor %}</div>{% endif %}{% endfor %}
+      {% for field in form %}{% if field.name not in product_content_fields and field.name != 'main_image' %}<div class="cp-field {% if field.field.widget.input_type == 'checkbox' and not field.field.widget.allow_multiple_selected %}cp-field--check{% endif %} {% if field.name == 'specifications_text' or field.name == 'specifications_text_ar' or field.name == 'warranty_text' or field.name == 'warranty_text_ar' or field.name == 'text' or field.name == 'text_ar' or field.name == 'products' or field.name == 'description' or field.name == 'description_ar' or field.name == 'message' or field.name == 'notes' or field.name == 'last_error' or field.name == 'user_permissions' %}cp-field--wide{% endif %}"><label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %}<b>*</b>{% endif %}</label>{% if field.name == 'products' %}<div data-product-picker><input type="search" class="cp-input" data-product-search placeholder="ابحث باسم المنتج أو رمز المخزون" aria-label="البحث في المنتجات"><div class="cp-product-picker-list">{{ field }}</div></div>{% else %}{{ field }}{% endif %}{% if field.help_text %}<small>{{ field.help_text|safe }}</small>{% endif %}{% for error in field.errors %}<em>{{ error }}</em>{% endfor %}</div>{% endif %}{% endfor %}
     </div>
   </section>
+  {% if resource == 'products' %}
+  <section class="cp-card cp-form-card cp-gallery-editor" data-gallery-editor>
+    <header><div><span>صور المنتج</span><h2>الصورة الرئيسية ومعرض الصور</h2><p>أضف صورًا متعددة واختر الصورة التي تظهر على بطاقات المنتج. الصور الحالية تبقى محفوظة.</p></div><i data-lucide="images"></i></header>
+    <div class="cp-gallery-body">
+      <div class="cp-field"><label for="{{ form.main_image.id_for_label }}">{{ form.main_image.label }}</label>{{ form.main_image }}<small>يمكنك رفع صورة رئيسية مباشرة، أو اختيار واحدة من صور المعرض أدناه.</small>{% for error in form.main_image.errors %}<em>{{ error }}</em>{% endfor %}</div>
+      {% if can_add_gallery_images %}<div class="cp-field"><label for="gallery-images">إضافة صور للمعرض</label><input id="gallery-images" class="cp-input" type="file" name="gallery_images" accept="image/jpeg,image/png,image/webp" multiple data-gallery-upload><small>يمكن اختيار عدة صور دفعة واحدة. الحد الأقصى 5 ميجابايت لكل صورة.</small></div>{% endif %}
+      <div class="cp-gallery-grid" data-gallery-options>
+        {% if object and object.main_image %}<label class="cp-gallery-tile"><img src="{{ object.main_image.url }}" alt=""><span><input type="radio" name="gallery_primary" value="current" checked> الصورة الرئيسية الحالية</span></label>{% endif %}
+        {% for image in gallery_images %}<label class="cp-gallery-tile"><img src="{{ image.image.url }}" alt="{{ image.display_alt_text }}"><span><input type="radio" name="gallery_primary" value="existing:{{ image.pk }}"> تعيين كرئيسية</span></label>{% endfor %}
+      </div>
+      <div class="cp-gallery-grid" data-gallery-previews></div>
+    </div>
+  </section>
+  {% endif %}
   {% if product_content_fields %}
   <section class="cp-card cp-form-card">
     <header><div><span>تفاصيل المنتج</span><h2>المواصفات والضمان</h2><p>أدخل النص باللغتين، أو اختر قالبًا مشتركًا من صفحات المواصفات والضمانات المشتركة.</p></div><i data-lucide="list-checks"></i></header>
