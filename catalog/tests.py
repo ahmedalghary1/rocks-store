@@ -28,6 +28,30 @@ class CatalogTests(TestCase):
         self.assertContains(response, '"itemCondition":"https://schema.org/NewCondition"', html=False)
         self.assertContains(response, '"@type":"BreadcrumbList"', html=False)
 
+    def test_coming_soon_product_is_visible_but_not_available(self):
+        self.product.is_coming_soon = True
+        self.product.save(update_fields=("is_coming_soon",))
+        listing = self.client.get(reverse("catalog:list"))
+        self.assertContains(listing, "Fresh from ROCKS · Coming soon")
+        self.assertContains(listing, "Coming soon")
+        self.assertNotContains(listing, f'action="{reverse("cart:add", args=[self.product.id])}"')
+        filtered = self.client.get(reverse("catalog:list"), {"available": "1"})
+        self.assertNotContains(filtered, "Test Lamp")
+        detail = self.client.get(self.product.get_absolute_url())
+        self.assertContains(detail, "A brand-new ROCKS creation is on its way")
+        self.assertNotContains(detail, 'id="detail-cart-form"')
+        self.assertContains(detail, '"availability":"https://schema.org/OutOfStock"', html=False)
+        quick = self.client.get(reverse("catalog:quick_view", args=[self.product.slug]))
+        self.assertContains(quick, "Coming soon")
+        self.assertNotContains(quick, f'action="{reverse("cart:add", args=[self.product.id])}"')
+
+    def test_coming_soon_copy_is_arabic_on_arabic_pages(self):
+        self.product.is_coming_soon = True
+        self.product.save(update_fields=("is_coming_soon",))
+        response = self.client.get("/ar" + self.product.get_absolute_url())
+        self.assertContains(response, "جديد من روكس · قريبًا")
+        self.assertContains(response, "إبداع جديد من روكس في الطريق")
+
     def test_filter_by_category(self):
         response = self.client.get(reverse("catalog:list"), {"category": "lights"})
         self.assertRedirects(response, self.category.get_absolute_url(), status_code=301)

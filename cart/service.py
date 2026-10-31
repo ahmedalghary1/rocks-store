@@ -43,6 +43,8 @@ class Cart:
 
     def add(self, product_id, quantity=1, variant_id=None):
         product = Product.objects.get(pk=product_id, is_active=True)
+        if product.is_coming_soon:
+            raise ValueError("This product is coming soon.")
         variant = None
         if variant_id:
             variant = ProductVariant.objects.get(pk=variant_id, product=product, is_active=True)
@@ -70,6 +72,9 @@ class Cart:
             self.remove(item_key)
             return
         product = Product.objects.get(pk=product_id, is_active=True)
+        if product.is_coming_soon:
+            self.remove(item_key)
+            raise ValueError("This product is coming soon.")
         variant = ProductVariant.objects.get(pk=variant_id, product=product, is_active=True) if variant_id else None
         available = variant.stock_quantity if variant else product.stock_quantity
         if available <= 0:
@@ -104,7 +109,7 @@ class Cart:
         for key, product_id, variant_id in parsed:
             variant = variants.get(variant_id) if variant_id else None
             product = variant.product if variant else products.get(product_id)
-            if not product or (variant and variant.product_id != product_id):
+            if not product or product.is_coming_soon or (variant and variant.product_id != product_id):
                 stale.append(key)
                 continue
             available = variant.stock_quantity if variant else product.stock_quantity

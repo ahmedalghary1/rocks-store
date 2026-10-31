@@ -125,7 +125,7 @@ def index(request):
         "pending_orders": order_qs.filter(status__in=("pending", "confirmed", "processing")).count(),
         "monthly_revenue": completed.filter(created_at__date__gte=month_start).aggregate(value=Sum("total"))["value"] or 0,
         "active_products": product_qs.filter(is_active=True).count(),
-        "low_stock": product_qs.filter(is_active=True, stock_quantity__lte=5).count(),
+        "low_stock": product_qs.filter(is_active=True, is_coming_soon=False, stock_quantity__lte=5).count(),
         "unread_messages": messages_qs.filter(is_read=False).count(),
     }
     recent_orders = list(order_qs.order_by("-created_at")[:7])
@@ -151,7 +151,7 @@ def index(request):
         page_title="نظرة عامة",
         stats=stats,
         recent_orders=recent_orders,
-        low_stock_products=product_qs.filter(is_active=True, stock_quantity__lte=5).order_by("stock_quantity")[:6],
+        low_stock_products=product_qs.filter(is_active=True, is_coming_soon=False, stock_quantity__lte=5).order_by("stock_quantity")[:6],
         recent_messages=messages_qs.order_by("-created_at")[:5],
         status_counts=status_counts,
         dashboard_access=access,

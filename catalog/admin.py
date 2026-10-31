@@ -28,8 +28,8 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ("name", "sku", "category", "price", "stock_quantity", "is_active", "thumbnail")
-    list_filter = ("category", "is_active", "is_featured", "is_best_seller", "is_new")
+    list_display = ("name", "sku", "category", "price", "stock_quantity", "is_coming_soon", "is_active", "thumbnail")
+    list_filter = ("category", "is_active", "is_featured", "is_best_seller", "is_new", "is_coming_soon")
     search_fields = ("name", "sku", "description")
     prepopulated_fields = {"slug": ("name",)}
     autocomplete_fields = ("category",)

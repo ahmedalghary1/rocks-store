@@ -21,7 +21,7 @@ def product_list(request, slug=None):
     if query:
         products = products.filter(Q(name__icontains=query) | Q(name_ar__icontains=query) | Q(short_description__icontains=query) | Q(short_description_ar__icontains=query) | Q(sku__icontains=query))
     if request.GET.get("available") == "1":
-        products = products.filter(
+        products = products.filter(is_coming_soon=False).filter(
             Q(variants__isnull=True, stock_quantity__gt=0)
             | Q(variants__is_active=True, variants__stock_quantity__gt=0)
         ).distinct()

@@ -119,6 +119,7 @@ class Product(OptimizedImageFieldsMixin, models.Model):
     is_featured = models.BooleanField(default=False)
     is_best_seller = models.BooleanField(default=False)
     is_new = models.BooleanField(default=False)
+    is_coming_soon = models.BooleanField(default=False, verbose_name="قريبًا — منتج جديد قيد التجهيز")
     is_active = models.BooleanField(default=True)
     stock_quantity = models.PositiveIntegerField(default=0)
     meta_title = models.CharField(max_length=180, blank=True)
@@ -195,6 +196,8 @@ class Product(OptimizedImageFieldsMixin, models.Model):
 
     @property
     def in_stock(self):
+        if self.is_coming_soon:
+            return False
         prefetched = getattr(self, "_prefetched_objects_cache", {}).get("variants")
         if prefetched is not None:
             quantities = [variant.stock_quantity for variant in prefetched if variant.is_active]

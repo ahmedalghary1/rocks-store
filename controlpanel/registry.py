@@ -19,7 +19,7 @@ RESOURCES = OrderedDict({
     "shipping-zones": {"model": ShippingZone, "label": "مناطق الشحن", "singular": "منطقة شحن", "icon": "truck", "group": "sales", "list": ("name", "name_ar", "shipping_cost", "free_shipping_threshold", "is_active", "sort_order"), "search": ("name", "name_ar"), "filters": ("is_active",)},
     "notifications": {"model": OrderNotification, "label": "إشعارات الطلبات", "singular": "إشعار طلب", "icon": "bell-ring", "group": "sales", "list": ("order", "status", "attempts", "last_attempt_at", "sent_at"), "search": ("order__order_number", "last_error"), "filters": ("status",), "select": ("order",)},
 
-    "products": {"model": Product, "label": "المنتجات", "singular": "منتج", "icon": "package-open", "group": "catalog", "list": ("main_image", "name", "sku", "category", "price", "stock_quantity", "is_active", "updated_at"), "search": ("name", "name_ar", "sku", "description", "description_ar"), "filters": ("category", "is_active", "is_featured", "is_best_seller", "is_new"), "select": ("category",)},
+    "products": {"model": Product, "label": "المنتجات", "singular": "منتج", "icon": "package-open", "group": "catalog", "list": ("main_image", "name", "sku", "category", "price", "stock_quantity", "is_coming_soon", "is_active", "updated_at"), "search": ("name", "name_ar", "sku", "description", "description_ar"), "filters": ("category", "is_active", "is_featured", "is_best_seller", "is_new", "is_coming_soon"), "select": ("category",)},
     "homepage-products": {"model": HomepageProduct, "label": "منتجات الصفحة الرئيسية", "singular": "منتج في الرئيسية", "icon": "gallery-thumbnails", "group": "catalog", "list": ("product", "sort_order", "is_active"), "search": ("product__name", "product__name_ar", "product__sku"), "filters": ("is_active",), "select": ("product",)},
     "categories": {"model": Category, "label": "التصنيفات", "singular": "تصنيف", "icon": "layout-grid", "group": "catalog", "list": ("image", "name", "name_ar", "parent", "is_active", "sort_order"), "search": ("name", "name_ar", "description", "description_ar", "meta_title", "meta_title_ar", "meta_description", "meta_description_ar"), "filters": ("parent", "is_active"), "select": ("parent",)},
     "variants": {"model": ProductVariant, "label": "خيارات المنتجات", "singular": "خيار منتج", "icon": "boxes", "group": "catalog", "list": ("product", "label", "sku", "price", "stock_quantity", "is_active"), "search": ("product__name", "label", "label_ar", "sku"), "filters": ("product", "is_active"), "select": ("product",)},
@@ -60,7 +60,7 @@ FIELD_LABELS = {
     "mobile_image": "صورة الهاتف", "alt_text": "النص البديل", "alt_text_ar": "النص البديل بالعربية",
     "icon": "الأيقونة", "sku": "رمز المنتج", "price": "السعر", "old_price": "السعر قبل الخصم",
     "stock_quantity": "الكمية بالمخزون", "is_active": "نشط", "is_featured": "مميز",
-    "is_best_seller": "الأكثر مبيعًا", "is_new": "جديد", "sort_order": "ترتيب العرض",
+    "is_best_seller": "الأكثر مبيعًا", "is_new": "جديد", "is_coming_soon": "قريبًا — منتج جديد قيد التجهيز", "sort_order": "ترتيب العرض",
     "meta_title": "عنوان محركات البحث", "meta_title_ar": "عنوان محركات البحث بالعربية",
     "meta_description": "وصف محركات البحث", "meta_description_ar": "وصف محركات البحث بالعربية",
     "product": "المنتج", "variant": "الخيار", "label": "الطول / اسم الخيار", "label_ar": "الطول / اسم الخيار بالعربية",

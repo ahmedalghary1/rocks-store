@@ -89,7 +89,7 @@ def product_schema(request, product):
     def offer(price, stock, sku):
         return {"@type": "Offer", "sku": sku, "price": str(price), "priceCurrency": currency,
                 "url": url, "itemCondition": "https://schema.org/NewCondition",
-                "availability": "https://schema.org/InStock" if stock else "https://schema.org/OutOfStock",
+                "availability": "https://schema.org/InStock" if stock and not product.is_coming_soon else "https://schema.org/OutOfStock",
                 "seller": {"@id": absolute_url(request, "/") + "#store"}}
 
     variants = [variant for variant in product.variants.all() if variant.is_active]

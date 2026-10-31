@@ -168,12 +168,12 @@ class RocksAdminSite(admin.AdminSite):
                 "pending_orders": order_queryset.filter(status__in=("pending", "confirmed", "processing")).count(),
                 "monthly_revenue": monthly.aggregate(value=Sum("total"))["value"] or 0,
                 "active_products": product_queryset.filter(is_active=True).count(),
-                "low_stock": product_queryset.filter(is_active=True, stock_quantity__lte=5).count(),
+                "low_stock": product_queryset.filter(is_active=True, is_coming_soon=False, stock_quantity__lte=5).count(),
                 "customers": User.objects.filter(is_staff=False).count() if access["customers"] else 0,
                 "unread_messages": ContactMessage.objects.filter(is_read=False).count() if access["messages"] else 0,
             },
             "recent_orders": order_queryset.select_related("user").order_by("-created_at")[:7],
-            "low_stock_products": product_queryset.filter(is_active=True, stock_quantity__lte=5).order_by("stock_quantity")[:6],
+            "low_stock_products": product_queryset.filter(is_active=True, is_coming_soon=False, stock_quantity__lte=5).order_by("stock_quantity")[:6],
         }
         for order in extra_context["recent_orders"]:
             order.dashboard_status = CHOICE_LABELS.get(order.status, order.get_status_display())

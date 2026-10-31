@@ -33,6 +33,17 @@ class CartTests(TestCase):
         self.assertRedirects(response, reverse("cart:detail"))
         self.assertEqual(self.client.session.get("cart", {}), {})
 
+    def test_coming_soon_product_cannot_be_added_and_is_removed_from_existing_cart(self):
+        self.client.post(reverse("cart:add", args=[self.product.id]), {"quantity": 1})
+        self.product.is_coming_soon = True
+        self.product.save(update_fields=("is_coming_soon",))
+        response = self.client.get(reverse("cart:detail"))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.client.session["cart"], {})
+        response = self.client.post(reverse("cart:add", args=[self.product.id]), {"quantity": 1})
+        self.assertRedirects(response, reverse("cart:detail"))
+        self.assertEqual(self.client.session["cart"], {})
+
     def test_variant_has_independent_stock(self):
         variant = ProductVariant.objects.create(product=self.product, sku="T-1-B", label="Large", price=175, stock_quantity=2)
         self.client.post(reverse("cart:add", args=[self.product.id]), {"quantity": 5, "variant_id": variant.id})
