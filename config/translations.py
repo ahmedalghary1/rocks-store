@@ -121,7 +121,7 @@ AR_TRANSLATIONS = {
     "VISIT OUR": "زوروا جناحنا", "EXHIBITION BOOTH": "في المعرض", "Modern design": "تصميم حديث",
     "Live product display": "عرض مباشر للمنتجات", "Technical support": "دعم فني", "Business opportunities": "فرص أعمال",
     "Contact us": "تواصل معنا", "View collection": "عرض المجموعة", "This collection is being prepared.": "يجري تجهيز هذه المجموعة.",
-    "NEW · COMING SOON": "منتج جديد · قريبًا", "NEW PRODUCT": "منتج جديد", "Fresh from ROCKS · Coming soon": "جديد من روكس · قريبًا", "Coming soon": "قريبًا", "A brand-new ROCKS creation is on its way. Stay tuned!": "إبداع جديد من روكس في الطريق. ترقبوه!", "Made to spark something new. The reveal is coming soon.": "صنعناه ليضيف طاقة جديدة. انتظروا الكشف عنه قريبًا!", "See what's coming": "اكتشفوا القادم",
+    "A fresh ROCKS creation is almost here. Get a first look.": "إبداع جديد من روكس يقترب. اكتشفه قبل الجميع.", "Discover the latest from ROCKS.": "اكتشف أحدث إبداعات روكس.", "NEW · COMING SOON": "منتج جديد · قريبًا", "NEW PRODUCT": "منتج جديد", "Fresh from ROCKS · Coming soon": "جديد من روكس · قريبًا", "Coming soon": "قريبًا", "A brand-new ROCKS creation is on its way. Stay tuned!": "إبداع جديد من روكس في الطريق. ترقبوه!", "Made to spark something new. The reveal is coming soon.": "صنعناه ليضيف طاقة جديدة. انتظروا الكشف عنه قريبًا!", "See what's coming": "اكتشفوا القادم",
     "NEW": "جديد", "Quick view": "عرض سريع", "In stock": "متوفر", "Out of stock": "نفد المخزون", "Add to cart": "أضف إلى السلة",
     "Add to wishlist": "أضف إلى المفضلة", "Quantity": "الكمية", "View full details": "عرض التفاصيل كاملة", "Currently unavailable": "غير متوفر حاليًا",
     "Shopping cart": "سلة التسوق", "Your cart.": "سلة التسوق.", "Continue shopping": "متابعة التسوق", "Update": "تحديث",
