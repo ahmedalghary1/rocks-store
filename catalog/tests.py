@@ -32,8 +32,9 @@ class CatalogTests(TestCase):
         self.product.is_coming_soon = True
         self.product.save(update_fields=("is_coming_soon",))
         listing = self.client.get(reverse("catalog:list"))
-        self.assertContains(listing, "NEW · COMING SOON")
-        self.assertContains(listing, "<strong>NEW · COMING SOON</strong>", html=True)
+        self.assertContains(listing, 'class="product-launch-graphic"')
+        self.assertContains(listing, "coming-soon-flame.jpeg")
+        self.assertNotContains(listing, 'class="new-product-ribbon"')
         self.assertContains(listing, "Coming soon")
         self.assertContains(listing, "A fresh ROCKS creation is almost here. Get a first look.")
         self.assertContains(listing, "See what's coming")
@@ -55,16 +56,15 @@ class CatalogTests(TestCase):
         self.assertContains(response, "جديد من روكس · قريبًا")
         self.assertContains(response, "إبداع جديد من روكس في الطريق")
         listing = self.client.get("/ar/products/")
-        self.assertContains(listing, "منتج جديد · قريبًا")
+        self.assertContains(listing, "coming-soon-flame.jpeg")
         self.assertContains(listing, "إبداع جديد من روكس يقترب. اكتشفه قبل الجميع.")
-        self.assertContains(listing, "<strong>منتج جديد · قريبًا</strong>", html=True)
 
-    def test_new_product_has_top_ribbon_in_both_languages(self):
+    def test_available_new_product_has_small_badge_in_both_languages(self):
         self.product.is_new = True
         self.product.save(update_fields=("is_new",))
         english = self.client.get(reverse("catalog:list"))
         arabic = self.client.get("/ar/products/")
-        self.assertContains(english, 'class="new-product-ribbon"')
+        self.assertContains(english, 'class="new-product-pill"')
         self.assertContains(english, "NEW PRODUCT")
         self.assertContains(english, "Discover the latest from ROCKS.")
         self.assertContains(arabic, "منتج جديد")
