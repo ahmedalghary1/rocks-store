@@ -1,0 +1,3298 @@
+openapi: 3.0.3
+info:
+  title: ROCKS ELECTRIC API
+  version: 1.0.0
+  description: Complete professional REST API for ROCKS ELECTRIC (روكس للكهرباء /
+    روكس الوسام) - EV charging products, electrical equipment, categories, products,
+    shopping cart, checkout (COD), order tracking, customer accounts, marketing banners,
+    newsletter, contact inquiries, and staff administration.
+paths:
+  /api/v1/admin/contact-messages/:
+    get:
+      operationId: v1_admin_contact_messages_list
+      description: List customer contact submissions with read/unread filter
+      parameters:
+      - in: query
+        name: is_read
+        schema:
+          type: boolean
+        description: Filter by read status (true/false)
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - Admin Management
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedContactMessageList'
+          description: ''
+  /api/v1/admin/contact-messages/{id}/:
+    get:
+      operationId: v1_admin_contact_messages_retrieve
+      description: Retrieve contact message details
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this رسائل التواصل.
+        required: true
+      tags:
+      - Admin Management
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactMessage'
+          description: ''
+  /api/v1/admin/contact-messages/{id}/set-read/:
+    patch:
+      operationId: v1_admin_contact_messages_set_read_partial_update
+      description: Mark customer message as read or unread
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this رسائل التواصل.
+        required: true
+      tags:
+      - Admin Management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminContactMessageStatusRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminContactMessageStatusRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminContactMessageStatusRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactMessage'
+          description: ''
+  /api/v1/admin/metrics/:
+    get:
+      operationId: v1_admin_metrics_retrieve
+      description: 'Get dashboard KPIs: orders, revenue, inventory alerts, and unread
+        customer messages'
+      tags:
+      - Admin Management
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminDashboardMetrics'
+          description: ''
+  /api/v1/admin/orders/:
+    get:
+      operationId: v1_admin_orders_list
+      description: List all customer orders with filtering by status and search
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: payment_status
+        schema:
+          type: string
+        description: Filter by payment status (unpaid, pending, paid, refunded)
+      - in: query
+        name: search
+        schema:
+          type: string
+        description: Search by order number, customer name, phone, or email
+      - in: query
+        name: status
+        schema:
+          type: string
+        description: Filter by status (pending, confirmed, processing, shipped, delivered,
+          cancelled)
+      tags:
+      - Admin Management
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedOrderList'
+          description: ''
+  /api/v1/admin/orders/{id}/:
+    get:
+      operationId: v1_admin_orders_retrieve
+      description: Retrieve detailed order breakdown by ID
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this الطلبات.
+        required: true
+      tags:
+      - Admin Management
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+  /api/v1/admin/orders/{id}/update-status/:
+    patch:
+      operationId: v1_admin_orders_update_status_partial_update
+      description: Update order fulfillment status or payment status. When transitioning
+        to 'cancelled', stock is automatically restored.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this الطلبات.
+        required: true
+      tags:
+      - Admin Management
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminOrderUpdateStatusRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminOrderUpdateStatusRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminOrderUpdateStatusRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+  /api/v1/auth/addresses/:
+    get:
+      operationId: v1_auth_addresses_list
+      description: List user saved delivery addresses
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - Addresses
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAddressList'
+          description: ''
+    post:
+      operationId: v1_auth_addresses_create
+      description: Create a new saved delivery address
+      tags:
+      - Addresses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddressRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AddressRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AddressRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Address'
+          description: ''
+  /api/v1/auth/addresses/{id}/:
+    get:
+      operationId: v1_auth_addresses_retrieve
+      description: Retrieve address details
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this عناوين العملاء.
+        required: true
+      tags:
+      - Addresses
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Address'
+          description: ''
+    put:
+      operationId: v1_auth_addresses_update
+      description: Update delivery address
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this عناوين العملاء.
+        required: true
+      tags:
+      - Addresses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddressRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AddressRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AddressRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Address'
+          description: ''
+    patch:
+      operationId: v1_auth_addresses_partial_update
+      description: Partially update delivery address
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this عناوين العملاء.
+        required: true
+      tags:
+      - Addresses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAddressRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAddressRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAddressRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Address'
+          description: ''
+    delete:
+      operationId: v1_auth_addresses_destroy
+      description: Delete saved delivery address
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this عناوين العملاء.
+        required: true
+      tags:
+      - Addresses
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/auth/addresses/{id}/set-default/:
+    post:
+      operationId: v1_auth_addresses_set_default_create
+      description: Set address as default delivery address
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this عناوين العملاء.
+        required: true
+      tags:
+      - Addresses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddressRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AddressRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AddressRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Address'
+          description: ''
+  /api/v1/auth/change-password/:
+    post:
+      operationId: v1_auth_change_password_create
+      tags:
+      - Authentication & Account
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/v1/auth/favorites/:
+    get:
+      operationId: v1_auth_favorites_list
+      description: List the signed-in customer's favorite products
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - Favorites
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProductListList'
+          description: ''
+    post:
+      operationId: v1_auth_favorites_create
+      description: Save an active product to favorites
+      tags:
+      - Favorites
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                product_id:
+                  type: integer
+              required:
+              - product_id
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductList'
+          description: ''
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductList'
+          description: ''
+  /api/v1/auth/favorites/{id}/:
+    delete:
+      operationId: v1_auth_favorites_destroy
+      description: Remove a favorite by product ID
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^[0-9]+$
+        required: true
+      tags:
+      - Favorites
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/auth/logout/:
+    post:
+      operationId: v1_auth_logout_create
+      description: |-
+        Takes a token and blacklists it. Must be used with the
+        `rest_framework_simplejwt.token_blacklist` app installed.
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenBlacklistRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenBlacklistRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenBlacklistRequest'
+        required: true
+      responses:
+        '200':
+          description: No response body
+  /api/v1/auth/me/:
+    get:
+      operationId: v1_auth_me_retrieve
+      tags:
+      - Authentication & Account
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    put:
+      operationId: v1_auth_me_update
+      tags:
+      - Authentication & Account
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    patch:
+      operationId: v1_auth_me_partial_update
+      tags:
+      - Authentication & Account
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+  /api/v1/auth/register/:
+    post:
+      operationId: v1_auth_register_create
+      tags:
+      - Authentication & Account
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Register'
+          description: ''
+  /api/v1/auth/token/:
+    post:
+      operationId: v1_auth_token_create
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenObtainPair'
+          description: ''
+  /api/v1/auth/token/refresh/:
+    post:
+      operationId: v1_auth_token_refresh_create
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/v1/cart/:
+    get:
+      operationId: v1_cart_retrieve
+      description: Retrieve current shopping cart items, subtotal, shipping, and totals
+      tags:
+      - Shopping Cart
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+          description: ''
+  /api/v1/cart/clear/:
+    post:
+      operationId: v1_cart_clear_create
+      description: Empty the shopping cart completely
+      tags:
+      - Shopping Cart
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+          description: ''
+  /api/v1/cart/coupon/:
+    post:
+      operationId: v1_cart_coupon_create
+      description: Apply discount coupon code to current cart
+      tags:
+      - Shopping Cart
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplyCouponRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ApplyCouponRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ApplyCouponRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+          description: ''
+    delete:
+      operationId: v1_cart_coupon_destroy
+      description: Remove applied coupon from cart
+      tags:
+      - Shopping Cart
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/v1/cart/items/:
+    post:
+      operationId: v1_cart_items_create
+      description: Add a product or variant to shopping cart
+      tags:
+      - Shopping Cart
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddToCartRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AddToCartRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AddToCartRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+          description: ''
+  /api/v1/cart/items/{item_key}/:
+    patch:
+      operationId: v1_cart_items_partial_update
+      description: Update cart item quantity by item key (e.g. '1' or '1:2'). Set
+        quantity=0 to remove.
+      parameters:
+      - in: path
+        name: item_key
+        schema:
+          type: string
+        required: true
+      tags:
+      - Shopping Cart
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateCartItemRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateCartItemRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUpdateCartItemRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cart'
+          description: ''
+    delete:
+      operationId: v1_cart_items_destroy
+      description: Remove item from shopping cart by item key
+      parameters:
+      - in: path
+        name: item_key
+        schema:
+          type: string
+        required: true
+      tags:
+      - Shopping Cart
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/v1/catalog/categories/:
+    get:
+      operationId: v1_catalog_categories_list
+      description: List all active product categories
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - 'Catalog: Categories'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCategoryList'
+          description: ''
+  /api/v1/catalog/categories/{slug}/:
+    get:
+      operationId: v1_catalog_categories_retrieve
+      description: Retrieve category details by slug
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+          title: الرابط المختصر
+        required: true
+      tags:
+      - 'Catalog: Categories'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+          description: ''
+  /api/v1/catalog/homepage/:
+    get:
+      operationId: v1_catalog_homepage_retrieve
+      description: Homepage showcased data (hero banner and curated homepage products)
+      tags:
+      - 'Catalog: Products'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HomepageResponse'
+          description: ''
+  /api/v1/catalog/products/:
+    get:
+      operationId: v1_catalog_products_list
+      description: Search, filter, order, and paginate active products
+      parameters:
+      - in: query
+        name: category
+        schema:
+          type: string
+        description: Category slug
+      - in: query
+        name: in_stock
+        schema:
+          type: boolean
+        description: Filter by availability
+      - in: query
+        name: is_best_seller
+        schema:
+          type: boolean
+      - in: query
+        name: is_coming_soon
+        schema:
+          type: boolean
+      - in: query
+        name: is_featured
+        schema:
+          type: boolean
+      - in: query
+        name: is_new
+        schema:
+          type: boolean
+      - in: query
+        name: max_price
+        schema:
+          type: number
+          format: double
+        description: Maximum price filter
+      - in: query
+        name: min_price
+        schema:
+          type: number
+          format: double
+        description: Minimum price filter
+      - in: query
+        name: ordering
+        schema:
+          type: string
+        description: Ordering (e.g. -created_at, price, -price, name)
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - in: query
+        name: search
+        schema:
+          type: string
+        description: Search by name, SKU, or description
+      tags:
+      - 'Catalog: Products'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedProductListList'
+          description: ''
+  /api/v1/catalog/products/{slug}/:
+    get:
+      operationId: v1_catalog_products_retrieve
+      description: Retrieve product full details, gallery images, specifications,
+        and variants by slug
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+          title: الرابط المختصر
+        required: true
+      tags:
+      - 'Catalog: Products'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDetail'
+          description: ''
+  /api/v1/catalog/products/suggest/:
+    get:
+      operationId: v1_catalog_products_suggest_retrieve
+      description: Quick autocomplete suggestions for search bar (returns top matching
+        products)
+      parameters:
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Query keyword
+        required: true
+      tags:
+      - 'Catalog: Products'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductList'
+          description: ''
+  /api/v1/core/contact/:
+    post:
+      operationId: v1_core_contact_create
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ContactMessageRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ContactMessageRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ContactMessageRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ContactMessage'
+          description: ''
+  /api/v1/core/settings/:
+    get:
+      operationId: v1_core_settings_retrieve
+      description: Retrieve site branding, contact info, WhatsApp number, social links,
+        and messages
+      tags:
+      - Storefront & Settings
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SiteSettings'
+          description: ''
+  /api/v1/marketing/banners/:
+    get:
+      operationId: v1_marketing_banners_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Banner'
+          description: ''
+  /api/v1/marketing/newsletter/:
+    post:
+      operationId: v1_marketing_newsletter_create
+      description: Subscribe email to newsletter
+      tags:
+      - Marketing
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewsletterSubscriberRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NewsletterSubscriberRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/NewsletterSubscriberRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          description: Subscribed successfully
+  /api/v1/orders/checkout/:
+    post:
+      operationId: v1_orders_checkout_create
+      description: Place an order (Cash on delivery) with stock validation, coupon
+        verification, and notification dispatch
+      tags:
+      - Shipping & Checkout
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OrderCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OrderCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+  /api/v1/orders/my-orders/:
+    get:
+      operationId: v1_orders_my_orders_list
+      description: List all past orders for the authenticated customer
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - User Orders
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedOrderList'
+          description: ''
+  /api/v1/orders/my-orders/{order_number}/:
+    get:
+      operationId: v1_orders_my_orders_retrieve
+      description: Retrieve detailed order breakdown by order number
+      parameters:
+      - in: path
+        name: order_number
+        schema:
+          type: string
+          title: رقم الطلب
+        required: true
+      tags:
+      - User Orders
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+  /api/v1/orders/receipt/{public_token}/:
+    get:
+      operationId: v1_orders_receipt_retrieve
+      description: View order receipt and item breakdown by public UUID token
+      parameters:
+      - in: path
+        name: public_token
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - Shipping & Checkout
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+          description: ''
+  /api/v1/orders/shipping-zones/:
+    get:
+      operationId: v1_orders_shipping_zones_list
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ShippingZone'
+          description: ''
+  /api/v1/orders/track/:
+    post:
+      operationId: v1_orders_track_create
+      description: Publicly track order status by order number and phone number
+      tags:
+      - Shipping & Checkout
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderTrackInputRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OrderTrackInputRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/OrderTrackInputRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderTrackResponse'
+          description: ''
+  /api/v1/orders/validate-coupon/:
+    post:
+      operationId: v1_orders_validate_coupon_create
+      description: Check if a coupon code is valid for a given subtotal
+      tags:
+      - Shipping & Checkout
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CouponValidateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CouponValidateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CouponValidateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CouponValidateResponse'
+          description: ''
+components:
+  schemas:
+    AddToCartRequest:
+      type: object
+      properties:
+        product_id:
+          type: integer
+        variant_id:
+          type: integer
+          nullable: true
+        quantity:
+          type: integer
+          minimum: 1
+          default: 1
+      required:
+      - product_id
+    Address:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        label:
+          type: string
+          title: التسمية
+          maxLength: 60
+        recipient_name:
+          type: string
+          title: اسم المستلم
+          maxLength: 160
+        phone:
+          type: string
+          title: رقم الهاتف
+          maxLength: 30
+        governorate:
+          type: string
+          title: المحافظة
+          maxLength: 80
+        city:
+          type: string
+          title: المدينة
+          maxLength: 80
+        address_line:
+          type: string
+          title: العنوان التفصيلي
+          maxLength: 255
+        is_default:
+          type: boolean
+          title: العنوان الافتراضي
+      required:
+      - address_line
+      - city
+      - governorate
+      - id
+      - phone
+      - recipient_name
+    AddressRequest:
+      type: object
+      properties:
+        label:
+          type: string
+          minLength: 1
+          title: التسمية
+          maxLength: 60
+        recipient_name:
+          type: string
+          minLength: 1
+          title: اسم المستلم
+          maxLength: 160
+        phone:
+          type: string
+          minLength: 1
+          title: رقم الهاتف
+          maxLength: 30
+        governorate:
+          type: string
+          minLength: 1
+          title: المحافظة
+          maxLength: 80
+        city:
+          type: string
+          minLength: 1
+          title: المدينة
+          maxLength: 80
+        address_line:
+          type: string
+          minLength: 1
+          title: العنوان التفصيلي
+          maxLength: 255
+        is_default:
+          type: boolean
+          title: العنوان الافتراضي
+      required:
+      - address_line
+      - city
+      - governorate
+      - phone
+      - recipient_name
+    AdminDashboardMetrics:
+      type: object
+      properties:
+        total_orders:
+          type: integer
+        pending_orders:
+          type: integer
+        confirmed_orders:
+          type: integer
+        processing_orders:
+          type: integer
+        shipped_orders:
+          type: integer
+        delivered_orders:
+          type: integer
+        cancelled_orders:
+          type: integer
+        total_revenue:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        month_revenue:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,12}(?:\.\d{0,2})?$
+        total_products:
+          type: integer
+        out_of_stock_products:
+          type: integer
+        low_stock_products:
+          type: integer
+        total_customers:
+          type: integer
+        unread_messages:
+          type: integer
+      required:
+      - cancelled_orders
+      - confirmed_orders
+      - delivered_orders
+      - low_stock_products
+      - month_revenue
+      - out_of_stock_products
+      - pending_orders
+      - processing_orders
+      - shipped_orders
+      - total_customers
+      - total_orders
+      - total_products
+      - total_revenue
+      - unread_messages
+    ApplyCouponRequest:
+      type: object
+      properties:
+        code:
+          type: string
+          minLength: 1
+          maxLength: 40
+      required:
+      - code
+    Banner:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          title: العنوان
+          maxLength: 160
+        title_ar:
+          type: string
+          title: العنوان بالعربية
+          maxLength: 160
+        display_title:
+          type: string
+          readOnly: true
+        subtitle:
+          type: string
+          title: العنوان الفرعي
+          maxLength: 255
+        subtitle_ar:
+          type: string
+          title: العنوان الفرعي بالعربية
+          maxLength: 255
+        display_subtitle:
+          type: string
+          readOnly: true
+        image:
+          type: string
+          format: uri
+          title: الصورة
+        mobile_image:
+          type: string
+          format: uri
+          title: صورة الهاتف
+        link:
+          type: string
+          title: الرابط
+          maxLength: 255
+        button_text:
+          type: string
+          title: نص الزر
+          maxLength: 60
+        button_text_ar:
+          type: string
+          title: نص الزر بالعربية
+          maxLength: 60
+        display_button_text:
+          type: string
+          readOnly: true
+        location:
+          allOf:
+          - $ref: '#/components/schemas/LocationEnum'
+          title: مكان الظهور
+        sort_order:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: ترتيب العرض
+      required:
+      - display_button_text
+      - display_subtitle
+      - display_title
+      - id
+      - title
+    Cart:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartItem'
+          readOnly: true
+        count:
+          type: integer
+          readOnly: true
+        subtotal:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
+        shipping:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
+        free_shipping_threshold:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
+        coupon:
+          allOf:
+          - $ref: '#/components/schemas/CartCoupon'
+          readOnly: true
+          nullable: true
+        discount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
+        total:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
+      required:
+      - count
+      - coupon
+      - discount
+      - free_shipping_threshold
+      - items
+      - shipping
+      - subtotal
+      - total
+    CartCoupon:
+      type: object
+      properties:
+        code:
+          type: string
+          readOnly: true
+        discount_type:
+          type: string
+          readOnly: true
+        value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
+        discount_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
+      required:
+      - code
+      - discount_amount
+      - discount_type
+      - value
+    CartItem:
+      type: object
+      properties:
+        key:
+          type: string
+          readOnly: true
+        product_id:
+          type: integer
+          readOnly: true
+        product_name:
+          type: string
+          readOnly: true
+        product_name_ar:
+          type: string
+          readOnly: true
+        display_product_name:
+          type: string
+          readOnly: true
+        product_slug:
+          type: string
+          readOnly: true
+        product_image:
+          type: string
+          readOnly: true
+          nullable: true
+        variant_id:
+          type: integer
+          readOnly: true
+          nullable: true
+        variant_label:
+          type: string
+          readOnly: true
+          nullable: true
+        variant_label_ar:
+          type: string
+          readOnly: true
+          nullable: true
+        display_variant_label:
+          type: string
+          readOnly: true
+          nullable: true
+        sku:
+          type: string
+          readOnly: true
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
+        quantity:
+          type: integer
+          readOnly: true
+        stock_quantity:
+          type: integer
+          readOnly: true
+        total:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
+      required:
+      - display_product_name
+      - display_variant_label
+      - key
+      - price
+      - product_id
+      - product_image
+      - product_name
+      - product_name_ar
+      - product_slug
+      - quantity
+      - sku
+      - stock_quantity
+      - total
+      - variant_id
+      - variant_label
+      - variant_label_ar
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          title: الاسم
+          maxLength: 120
+        name_ar:
+          type: string
+          title: الاسم بالعربية
+          maxLength: 120
+        slug:
+          type: string
+          title: الرابط المختصر
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        description:
+          type: string
+          title: الوصف
+        description_ar:
+          type: string
+          title: الوصف بالعربية
+        meta_title:
+          type: string
+          title: عنوان محركات البحث
+          maxLength: 160
+        meta_title_ar:
+          type: string
+          title: عنوان محركات البحث بالعربية
+          maxLength: 160
+        meta_description:
+          type: string
+          title: وصف محركات البحث
+          maxLength: 260
+        meta_description_ar:
+          type: string
+          title: وصف محركات البحث بالعربية
+          maxLength: 260
+        image:
+          type: string
+          format: uri
+          title: الصورة
+        icon:
+          type: string
+          title: الأيقونة
+          maxLength: 40
+        parent:
+          type: integer
+          nullable: true
+          title: التصنيف الرئيسي
+        is_active:
+          type: boolean
+          title: نشط
+        sort_order:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: ترتيب العرض
+        display_name:
+          type: string
+          readOnly: true
+        display_description:
+          type: string
+          readOnly: true
+        products_count:
+          type: integer
+          readOnly: true
+          default: 0
+      required:
+      - display_description
+      - display_name
+      - id
+      - name
+      - products_count
+      - slug
+    CategoryMinimal:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          title: الاسم
+          maxLength: 120
+        name_ar:
+          type: string
+          title: الاسم بالعربية
+          maxLength: 120
+        slug:
+          type: string
+          title: الرابط المختصر
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        display_name:
+          type: string
+          readOnly: true
+      required:
+      - display_name
+      - id
+      - name
+      - slug
+    ChangePasswordRequest:
+      type: object
+      properties:
+        old_password:
+          type: string
+          writeOnly: true
+          minLength: 1
+        new_password:
+          type: string
+          writeOnly: true
+          minLength: 1
+        confirm_password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - confirm_password
+      - new_password
+      - old_password
+    ContactMessage:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          title: الاسم
+          maxLength: 120
+        phone:
+          type: string
+          title: رقم الهاتف
+          maxLength: 30
+        email:
+          type: string
+          format: email
+          title: البريد الإلكتروني
+          maxLength: 254
+        subject:
+          type: string
+          title: الموضوع
+          maxLength: 160
+        message:
+          type: string
+          title: الرسالة
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: تاريخ الإنشاء
+      required:
+      - created_at
+      - id
+      - message
+      - name
+      - phone
+      - subject
+    ContactMessageRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: الاسم
+          maxLength: 120
+        phone:
+          type: string
+          minLength: 1
+          title: رقم الهاتف
+          maxLength: 30
+        email:
+          type: string
+          format: email
+          title: البريد الإلكتروني
+          maxLength: 254
+        subject:
+          type: string
+          minLength: 1
+          title: الموضوع
+          maxLength: 160
+        message:
+          type: string
+          minLength: 1
+          title: الرسالة
+      required:
+      - message
+      - name
+      - phone
+      - subject
+    CouponValidateRequest:
+      type: object
+      properties:
+        code:
+          type: string
+          minLength: 1
+        subtotal:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+      required:
+      - code
+      - subtotal
+    CouponValidateResponse:
+      type: object
+      properties:
+        valid:
+          type: boolean
+        code:
+          type: string
+        discount_type:
+          type: string
+        value:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        discount_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        message:
+          type: string
+      required:
+      - code
+      - discount_amount
+      - message
+      - valid
+    DirectOrderItemInputRequest:
+      type: object
+      properties:
+        product_id:
+          type: integer
+        variant_id:
+          type: integer
+          nullable: true
+        quantity:
+          type: integer
+          minimum: 1
+          default: 1
+      required:
+      - product_id
+    HomepageResponse:
+      type: object
+      properties:
+        hero_banner:
+          type: object
+          additionalProperties: {}
+          nullable: true
+        featured_products:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductList'
+      required:
+      - featured_products
+      - hero_banner
+    LocationEnum:
+      enum:
+      - hero
+      - offer
+      - promo
+      type: string
+      description: |-
+        * `hero` - Home hero
+        * `offer` - Offer
+        * `promo` - Promotional
+    NewsletterSubscriberRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          minLength: 1
+          title: البريد الإلكتروني
+          maxLength: 254
+      required:
+      - email
+    Order:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        order_number:
+          type: string
+          title: رقم الطلب
+          maxLength: 40
+        public_token:
+          type: string
+          format: uuid
+          readOnly: true
+          title: رمز التتبع العام
+        customer_name:
+          type: string
+          title: اسم العميل
+          maxLength: 160
+        phone:
+          type: string
+          title: رقم الهاتف
+          maxLength: 30
+        second_phone:
+          type: string
+          title: هاتف بديل
+          maxLength: 30
+        email:
+          type: string
+          format: email
+          title: البريد الإلكتروني
+          maxLength: 254
+        governorate:
+          type: string
+          title: المحافظة
+          maxLength: 80
+        city:
+          type: string
+          title: المدينة
+          maxLength: 80
+        address:
+          type: string
+          title: العنوان
+          maxLength: 255
+        notes:
+          type: string
+          title: ملاحظات
+        subtotal:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          title: إجمالي المنتجات
+        shipping_cost:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          title: تكلفة الشحن
+        discount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          title: الخصم
+        total:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          title: الإجمالي
+        status:
+          allOf:
+          - $ref: '#/components/schemas/StatusEnum'
+          title: الحالة
+        status_display:
+          type: string
+          readOnly: true
+        payment_method:
+          allOf:
+          - $ref: '#/components/schemas/PaymentMethodEnum'
+          title: طريقة الدفع
+        payment_status:
+          allOf:
+          - $ref: '#/components/schemas/PaymentStatusEnum'
+          title: حالة الدفع
+        payment_status_display:
+          type: string
+          readOnly: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: تاريخ الإنشاء
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: آخر تحديث
+      required:
+      - address
+      - city
+      - created_at
+      - customer_name
+      - governorate
+      - id
+      - items
+      - order_number
+      - payment_status_display
+      - phone
+      - public_token
+      - status_display
+      - subtotal
+      - total
+      - updated_at
+    OrderCreateRequest:
+      type: object
+      properties:
+        customer_name:
+          type: string
+          minLength: 1
+          maxLength: 160
+        phone:
+          type: string
+          minLength: 1
+          maxLength: 30
+        second_phone:
+          type: string
+          default: ''
+          maxLength: 30
+        email:
+          type: string
+          format: email
+          default: ''
+        governorate:
+          type: string
+          minLength: 1
+          maxLength: 80
+        city:
+          type: string
+          minLength: 1
+          maxLength: 80
+        address:
+          type: string
+          minLength: 1
+          maxLength: 255
+        notes:
+          type: string
+          default: ''
+        checkout_token:
+          type: string
+          format: uuid
+        coupon_code:
+          type: string
+          default: ''
+          maxLength: 40
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/DirectOrderItemInputRequest'
+      required:
+      - address
+      - city
+      - customer_name
+      - governorate
+      - phone
+    OrderItem:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        product:
+          type: integer
+          nullable: true
+          title: المنتج
+        variant:
+          type: integer
+          nullable: true
+          title: المتغير
+        product_name:
+          type: string
+          title: اسم المنتج وقت الطلب
+          maxLength: 180
+        product_name_ar:
+          type: string
+          maxLength: 180
+        display_product_name:
+          type: string
+          readOnly: true
+        sku:
+          type: string
+          title: رمز المنتج
+          maxLength: 60
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          title: السعر
+        quantity:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: الكمية
+        total:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          title: الإجمالي
+      required:
+      - display_product_name
+      - id
+      - price
+      - product_name
+      - quantity
+      - sku
+      - total
+    OrderTrackInputRequest:
+      type: object
+      properties:
+        order_number:
+          type: string
+          minLength: 1
+          maxLength: 40
+        phone:
+          type: string
+          minLength: 1
+          maxLength: 30
+      required:
+      - order_number
+      - phone
+    OrderTrackResponse:
+      type: object
+      properties:
+        order_number:
+          type: string
+          title: رقم الطلب
+          maxLength: 40
+        public_token:
+          type: string
+          format: uuid
+          readOnly: true
+          title: رمز التتبع العام
+        customer_name:
+          type: string
+          title: اسم العميل
+          maxLength: 160
+        governorate:
+          type: string
+          title: المحافظة
+          maxLength: 80
+        city:
+          type: string
+          title: المدينة
+          maxLength: 80
+        status:
+          allOf:
+          - $ref: '#/components/schemas/StatusEnum'
+          title: الحالة
+        status_display:
+          type: string
+          readOnly: true
+        total:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          title: الإجمالي
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: تاريخ الإنشاء
+        items_count:
+          type: integer
+          readOnly: true
+      required:
+      - city
+      - created_at
+      - customer_name
+      - governorate
+      - items_count
+      - order_number
+      - public_token
+      - status_display
+      - total
+    PaginatedAddressList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Address'
+    PaginatedCategoryList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Category'
+    PaginatedContactMessageList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ContactMessage'
+    PaginatedOrderList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Order'
+    PaginatedProductListList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductList'
+    PatchedAddressRequest:
+      type: object
+      properties:
+        label:
+          type: string
+          minLength: 1
+          title: التسمية
+          maxLength: 60
+        recipient_name:
+          type: string
+          minLength: 1
+          title: اسم المستلم
+          maxLength: 160
+        phone:
+          type: string
+          minLength: 1
+          title: رقم الهاتف
+          maxLength: 30
+        governorate:
+          type: string
+          minLength: 1
+          title: المحافظة
+          maxLength: 80
+        city:
+          type: string
+          minLength: 1
+          title: المدينة
+          maxLength: 80
+        address_line:
+          type: string
+          minLength: 1
+          title: العنوان التفصيلي
+          maxLength: 255
+        is_default:
+          type: boolean
+          title: العنوان الافتراضي
+    PatchedAdminContactMessageStatusRequest:
+      type: object
+      properties:
+        is_read:
+          type: boolean
+    PatchedAdminOrderUpdateStatusRequest:
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/StatusEnum'
+        payment_status:
+          $ref: '#/components/schemas/PaymentStatusEnum'
+    PatchedUpdateCartItemRequest:
+      type: object
+      properties:
+        quantity:
+          type: integer
+          minimum: 0
+    PatchedUserRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 1
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: البريد الإلكتروني
+          maxLength: 254
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+    PaymentMethodEnum:
+      enum:
+      - cod
+      type: string
+      description: '* `cod` - Cash on delivery'
+    PaymentStatusEnum:
+      enum:
+      - unpaid
+      - pending
+      - paid
+      - refunded
+      type: string
+      description: |-
+        * `unpaid` - Unpaid
+        * `pending` - Under review
+        * `paid` - Paid
+        * `refunded` - Refunded
+    ProductDetail:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          title: الاسم
+          maxLength: 180
+        name_ar:
+          type: string
+          title: الاسم بالعربية
+          maxLength: 180
+        slug:
+          type: string
+          title: الرابط المختصر
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        sku:
+          type: string
+          title: رمز المنتج
+          maxLength: 60
+        category:
+          allOf:
+          - $ref: '#/components/schemas/CategoryMinimal'
+          readOnly: true
+        short_description:
+          type: string
+          title: الوصف المختصر
+          maxLength: 260
+        short_description_ar:
+          type: string
+          title: الوصف المختصر بالعربية
+          maxLength: 260
+        description:
+          type: string
+          title: الوصف
+        description_ar:
+          type: string
+          title: الوصف بالعربية
+        specifications_text:
+          type: string
+          title: المواصفات بالإنجليزية
+        specifications_text_ar:
+          type: string
+          title: المواصفات بالعربية
+        warranty_text:
+          type: string
+          title: الضمان بالإنجليزية
+        warranty_text_ar:
+          type: string
+          title: الضمان بالعربية
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+          title: السعر
+        old_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+          title: السعر قبل الخصم
+        discount_percentage:
+          type: integer
+          readOnly: true
+        main_image:
+          type: string
+          format: uri
+          title: الصورة الرئيسية
+        is_featured:
+          type: boolean
+          title: منتج مميز
+        is_best_seller:
+          type: boolean
+          title: الأكثر مبيعًا
+        is_new:
+          type: boolean
+          title: منتج جديد
+        is_coming_soon:
+          type: boolean
+          title: قريبًا — منتج جديد قيد التجهيز
+        in_stock:
+          type: boolean
+          readOnly: true
+        stock_quantity:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: الكمية بالمخزون
+        has_variant_price:
+          type: boolean
+          readOnly: true
+        has_price_options:
+          type: boolean
+          readOnly: true
+        display_name:
+          type: string
+          readOnly: true
+        display_short_description:
+          type: string
+          readOnly: true
+        display_description:
+          type: string
+          readOnly: true
+        display_specifications_text:
+          type: string
+          readOnly: true
+        display_warranty_text:
+          type: string
+          readOnly: true
+        display_meta_title:
+          type: string
+          readOnly: true
+        display_meta_description:
+          type: string
+          readOnly: true
+        meta_title:
+          type: string
+          title: عنوان محركات البحث
+          maxLength: 180
+        meta_title_ar:
+          type: string
+          title: عنوان محركات البحث بالعربية
+          maxLength: 180
+        meta_description:
+          type: string
+          title: وصف محركات البحث
+          maxLength: 260
+        meta_description_ar:
+          type: string
+          title: وصف محركات البحث بالعربية
+          maxLength: 260
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductImage'
+          readOnly: true
+        specifications:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductSpecification'
+          readOnly: true
+        variants:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductVariant'
+          readOnly: true
+        related_products:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductList'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: تاريخ الإنشاء
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: آخر تحديث
+      required:
+      - category
+      - created_at
+      - description
+      - discount_percentage
+      - display_description
+      - display_meta_description
+      - display_meta_title
+      - display_name
+      - display_short_description
+      - display_specifications_text
+      - display_warranty_text
+      - has_price_options
+      - has_variant_price
+      - id
+      - images
+      - in_stock
+      - name
+      - related_products
+      - short_description
+      - sku
+      - slug
+      - specifications
+      - updated_at
+      - variants
+    ProductImage:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        image:
+          type: string
+          format: uri
+          title: الصورة
+        alt_text:
+          type: string
+          title: النص البديل
+          maxLength: 180
+        alt_text_ar:
+          type: string
+          title: النص البديل بالعربية
+          maxLength: 180
+        display_alt_text:
+          type: string
+          readOnly: true
+        sort_order:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: ترتيب العرض
+      required:
+      - alt_text
+      - display_alt_text
+      - id
+      - image
+    ProductList:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          title: الاسم
+          maxLength: 180
+        name_ar:
+          type: string
+          title: الاسم بالعربية
+          maxLength: 180
+        slug:
+          type: string
+          title: الرابط المختصر
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        sku:
+          type: string
+          title: رمز المنتج
+          maxLength: 60
+        category:
+          allOf:
+          - $ref: '#/components/schemas/CategoryMinimal'
+          readOnly: true
+        short_description:
+          type: string
+          title: الوصف المختصر
+          maxLength: 260
+        short_description_ar:
+          type: string
+          title: الوصف المختصر بالعربية
+          maxLength: 260
+        display_name:
+          type: string
+          readOnly: true
+        display_short_description:
+          type: string
+          readOnly: true
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+          title: السعر
+        old_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+          title: السعر قبل الخصم
+        discount_percentage:
+          type: integer
+          readOnly: true
+        main_image:
+          type: string
+          format: uri
+          title: الصورة الرئيسية
+        is_featured:
+          type: boolean
+          title: منتج مميز
+        is_best_seller:
+          type: boolean
+          title: الأكثر مبيعًا
+        is_new:
+          type: boolean
+          title: منتج جديد
+        is_coming_soon:
+          type: boolean
+          title: قريبًا — منتج جديد قيد التجهيز
+        in_stock:
+          type: boolean
+          readOnly: true
+        has_variant_price:
+          type: boolean
+          readOnly: true
+        has_price_options:
+          type: boolean
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          title: تاريخ الإنشاء
+      required:
+      - category
+      - created_at
+      - discount_percentage
+      - display_name
+      - display_short_description
+      - has_price_options
+      - has_variant_price
+      - id
+      - in_stock
+      - name
+      - short_description
+      - sku
+      - slug
+    ProductSpecification:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          title: الاسم
+          maxLength: 100
+        name_ar:
+          type: string
+          title: اسم الخاصية بالعربية
+          maxLength: 100
+        value:
+          type: string
+          title: القيمة
+          maxLength: 180
+        value_ar:
+          type: string
+          title: القيمة بالعربية
+          maxLength: 180
+        display_name:
+          type: string
+          readOnly: true
+        display_value:
+          type: string
+          readOnly: true
+        sort_order:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: ترتيب العرض
+      required:
+      - display_name
+      - display_value
+      - id
+      - name
+      - value
+    ProductVariant:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        sku:
+          type: string
+          title: رمز المنتج
+          maxLength: 60
+        label:
+          type: string
+          title: التسمية
+          maxLength: 120
+        label_ar:
+          type: string
+          title: اسم الخيار بالعربية
+          maxLength: 120
+        display_label:
+          type: string
+          readOnly: true
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+          title: السعر
+        stock_quantity:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: الكمية بالمخزون
+        attributes:
+          title: الخصائص
+        is_active:
+          type: boolean
+          title: نشط
+        in_stock:
+          type: boolean
+          readOnly: true
+      required:
+      - display_label
+      - id
+      - in_stock
+      - label
+      - sku
+    Register:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          type: string
+          format: email
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        tokens:
+          allOf:
+          - $ref: '#/components/schemas/TokenPair'
+          readOnly: true
+      required:
+      - email
+      - id
+      - tokens
+      - username
+    RegisterRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 1
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          minLength: 1
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+        password_confirm:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - email
+      - password
+      - password_confirm
+      - username
+    ShippingZone:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          title: الاسم
+          maxLength: 80
+        name_ar:
+          type: string
+          title: اسم المحافظة بالعربية
+          maxLength: 80
+        display_name:
+          type: string
+          readOnly: true
+        shipping_cost:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          title: تكلفة الشحن
+        free_shipping_threshold:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+          title: حد الشحن المجاني
+        sort_order:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+          title: ترتيب العرض
+      required:
+      - display_name
+      - id
+      - name
+      - shipping_cost
+    SiteSettings:
+      type: object
+      properties:
+        company_name:
+          type: string
+          title: اسم الشركة
+          maxLength: 120
+        phone:
+          type: string
+          title: رقم الهاتف
+          maxLength: 30
+        whatsapp:
+          type: string
+          title: واتساب
+          maxLength: 30
+        email:
+          type: string
+          format: email
+          title: البريد الإلكتروني
+          maxLength: 254
+        address:
+          type: string
+          title: العنوان
+          maxLength: 255
+        address_ar:
+          type: string
+          title: العنوان بالعربية
+          maxLength: 255
+        display_address:
+          type: string
+          readOnly: true
+        facebook:
+          type: string
+          format: uri
+          title: فيسبوك
+          maxLength: 200
+        instagram:
+          type: string
+          format: uri
+          title: إنستجرام
+          maxLength: 200
+        tiktok:
+          type: string
+          format: uri
+          title: تيك توك
+          maxLength: 200
+        footer_text:
+          type: string
+          title: نص الفوتر
+          maxLength: 255
+        footer_text_ar:
+          type: string
+          title: نص التذييل بالعربية
+          maxLength: 255
+        display_footer_text:
+          type: string
+          readOnly: true
+        shipping_message:
+          type: string
+          title: رسالة الشحن
+          maxLength: 160
+        shipping_message_ar:
+          type: string
+          title: رسالة الشحن بالعربية
+          maxLength: 160
+        display_shipping_message:
+          type: string
+          readOnly: true
+        currency:
+          type: string
+          title: العملة
+          maxLength: 12
+      required:
+      - display_address
+      - display_footer_text
+      - display_shipping_message
+    StatusEnum:
+      enum:
+      - pending
+      - confirmed
+      - processing
+      - shipped
+      - delivered
+      - cancelled
+      type: string
+      description: |-
+        * `pending` - Under review
+        * `confirmed` - Confirmed
+        * `processing` - Processing
+        * `shipped` - Shipped
+        * `delivered` - Delivered
+        * `cancelled` - Cancelled
+    TokenBlacklistRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - refresh
+    TokenObtainPair:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          readOnly: true
+      required:
+      - access
+      - refresh
+    TokenObtainPairRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          writeOnly: true
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - password
+      - username
+    TokenPair:
+      type: object
+      properties:
+        access:
+          type: string
+        refresh:
+          type: string
+      required:
+      - access
+      - refresh
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+      required:
+      - access
+      - refresh
+    TokenRefreshRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          minLength: 1
+      required:
+      - refresh
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: البريد الإلكتروني
+          maxLength: 254
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        is_staff:
+          type: boolean
+          readOnly: true
+          title: Staff status
+          description: Designates whether the user can log into this admin site.
+        date_joined:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - date_joined
+      - id
+      - is_staff
+      - username
+    UserRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          minLength: 1
+          description: Required. 150 characters or fewer. Letters, digits and @/./+/-/_
+            only.
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          title: البريد الإلكتروني
+          maxLength: 254
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+      required:
+      - username
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

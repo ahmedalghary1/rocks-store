@@ -1,5 +1,6 @@
 import os
 import sys
+from datetime import timedelta
 from pathlib import Path
 from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
@@ -46,10 +47,18 @@ if SITE_URL:
 INSTALLED_APPS = [
     "django.contrib.admin", "django.contrib.auth", "django.contrib.contenttypes",
     "django.contrib.sessions", "django.contrib.messages", "django.contrib.staticfiles",
+    "corsheaders",
+    "rest_framework",
+    "rest_framework_simplejwt",
+    "rest_framework_simplejwt.token_blacklist",
+    "drf_spectacular",
+    "django_filters",
     "core", "catalog", "cart", "orders", "accounts", "marketing", "controlpanel",
+    "api.apps.ApiConfig",
 ]
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "config.middleware.SecurityHeadersMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -163,7 +172,7 @@ FREE_SHIPPING_THRESHOLD = os.getenv("FREE_SHIPPING_THRESHOLD", "1500.00")
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.filebased.FileBasedCache',
-        'LOCATION': '/home/rocksev/rocks-store/.cache',
+        'LOCATION': os.getenv("CACHE_DIR", str((BASE_DIR / ".cache").resolve())),
     }
 }
 TRUST_PROXY_HEADERS = env_bool("TRUST_PROXY_HEADERS", False)
@@ -184,3 +193,55 @@ if ERROR_NOTIFICATION_EMAIL:
         "class": "django.utils.log.AdminEmailHandler", "level": "ERROR", "include_html": False,
     }
     LOGGING["loggers"]["django.request"]["handlers"].append("mail_admins")
+
+# ==============================================================================
+# Django REST Framework & API Configuration
+# ==============================================================================
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    ),
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.AllowAny",
+    ),
+    "DEFAULT_PAGINATION_CLASS": "api.pagination.StandardResultsSetPagination",
+    "PAGE_SIZE": 20,
+    "DEFAULT_FILTER_BACKENDS": (
+        "django_filters.rest_framework.DjangoFilterBackend",
+        "rest_framework.filters.SearchFilter",
+        "rest_framework.filters.OrderingFilter",
+    ),
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "AUTH_HEADER_TYPES": ("Bearer",),
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "ROCKS ELECTRIC API",
+    "DESCRIPTION": (
+        "Complete professional REST API for ROCKS ELECTRIC (روكس للكهرباء / روكس الوسام) - "
+        "EV charging products, electrical equipment, categories, products, shopping cart, "
+        "checkout (COD), order tracking, customer accounts, marketing banners, newsletter, "
+        "contact inquiries, and staff administration."
+    ),
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "COMPONENT_SPLIT_REQUEST": True,
+}
+
+# ==============================================================================
+# CORS Configuration
+# ==============================================================================
+CORS_ALLOW_ALL_ORIGINS = DEBUG or env_bool("CORS_ALLOW_ALL_ORIGINS", False)
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https?://localhost(:[0-9]+)?$",
+    r"^https?://127\.0\.0\.1(:[0-9]+)?$",
+]

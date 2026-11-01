@@ -1,5 +1,9 @@
 # ROCKS ELECTRIC
 
+## Mobile API
+
+The versioned REST API is available at `/api/v1/`, with Swagger UI at `/api/docs/` and the live OpenAPI schema at `/api/schema/`. See [the mobile integration handoff](docs/MOBILE_API_HANDOFF.md) and [the exportable OpenAPI file](api/openapi.yaml). Run `python manage.py migrate` after deploying API changes.
+
 ## PythonAnywhere uploaded images
 
 Uploaded product, category and banner images are stored in `MEDIA_ROOT`. New uploads keep their original pixel dimensions, are stripped of metadata, compressed as WebP, and saved without retaining the original file. Replaced and deleted database images are also removed from storage.

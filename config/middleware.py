@@ -16,8 +16,12 @@ class DefaultEnglishLocaleMiddleware(LocaleMiddleware):
         language = translation.get_language_from_path(request.path_info)
         if not language:
             # Public URLs have a stable language even when cookies differ.
-            private = request.path.startswith(("/cart/", "/checkout/", "/account/", "/auth/", "/dashboard/", "/admin/"))
-            language = request.COOKIES.get(settings.LANGUAGE_COOKIE_NAME, settings.LANGUAGE_CODE) if private else settings.LANGUAGE_CODE
+            private = request.path.startswith(("/cart/", "/checkout/", "/account/", "/auth/", "/dashboard/", "/admin/", "/api/"))
+            if request.path.startswith("/api/"):
+                lang_param = request.GET.get("lang") or request.headers.get("Accept-Language", "").split(",")[0].split("-")[0].strip().lower()
+                language = lang_param if lang_param in {"ar", "en"} else request.COOKIES.get(settings.LANGUAGE_COOKIE_NAME, settings.LANGUAGE_CODE)
+            else:
+                language = request.COOKIES.get(settings.LANGUAGE_COOKIE_NAME, settings.LANGUAGE_CODE) if private else settings.LANGUAGE_CODE
         supported = {code for code, _name in settings.LANGUAGES}
         if language not in supported:
             language = settings.LANGUAGE_CODE
@@ -34,7 +38,7 @@ class DefaultEnglishLocaleMiddleware(LocaleMiddleware):
 class SecurityHeadersMiddleware:
     """Small, dependency-free baseline for browser security headers."""
 
-    private_prefixes = ("/admin/", "/dashboard/", "/cart/", "/checkout/", "/account/", "/auth/", "/wishlist/", "/health/")
+    private_prefixes = ("/admin/", "/dashboard/", "/cart/", "/checkout/", "/account/", "/auth/", "/wishlist/", "/health/", "/api/")
 
     def __init__(self, get_response):
         self.get_response = get_response
@@ -42,11 +46,16 @@ class SecurityHeadersMiddleware:
     def __call__(self, request):
         request.csp_nonce = secrets.token_urlsafe(18)
         response = self.get_response(request)
+        docs_page = request.path in {"/api/docs/", "/api/redoc/"}
+        script_sources = ("'self' 'unsafe-inline' https://cdn.jsdelivr.net" if docs_page
+                          else f"'self' 'nonce-{request.csp_nonce}'")
+        style_sources = ("'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net" if docs_page
+                         else "'self' 'unsafe-inline' https://fonts.googleapis.com")
         response.setdefault(
             "Content-Security-Policy",
             "default-src 'self'; "
-            f"script-src 'self' 'nonce-{request.csp_nonce}'; "
-            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+            f"script-src {script_sources}; "
+            f"style-src {style_sources}; "
             "font-src 'self' https://fonts.gstatic.com; "
             "img-src 'self' data: https:; "
             "connect-src 'self'; "
@@ -61,7 +70,11 @@ class SecurityHeadersMiddleware:
 
 
 class SensitivePostRateLimitMiddleware:
-    protected_paths = {"/admin/login/", "/auth/login/", "/account/register/", "/auth/password_reset/"}
+    protected_paths = {
+        "/admin/login/", "/auth/login/", "/account/register/", "/auth/password_reset/",
+        "/api/v1/auth/register/", "/api/v1/auth/token/", "/api/v1/auth/token/refresh/",
+        "/api/v1/orders/track/",
+    }
     limit = 5
     window = 60
 
@@ -112,7 +125,7 @@ class StorefrontTranslationMiddleware:
 
     def __call__(self, request):
         response = self.get_response(request)
-        if request.path.startswith(("/admin/", "/dashboard/")):
+        if request.path.startswith(("/admin/", "/dashboard/", "/api/")):
             return response
         content_type = response.get("Content-Type", "")
         if not (content_type.startswith("text/html") or content_type.startswith("application/json")):
