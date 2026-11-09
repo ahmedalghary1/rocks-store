@@ -1,0 +1,634 @@
+{% extends 'controlpanel/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="cp-traffic-page">
+  <!-- Top Header & Actions -->
+  <section class="cp-welcome" style="margin-bottom: 20px;">
+    <div>
+      <span>سجل الزيارات والتحليلات المباشرة</span>
+      <h2>متابعة دقيقة لحركة الموقع، الزوار، المسجلين، والروبوتات</h2>
+      <p>تحليل فوري للمشاهدات، الزوار الفريدين، والتمييز الذكي بين المستخدمين الحقيقيين وعناكب الأرشفة.</p>
+    </div>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+      <a class="cp-secondary" href="{% url 'controlpanel:traffic_export_csv' %}{% if preserved_query %}?{{ preserved_query }}{% endif %}">
+        <i data-lucide="download"></i>تصدير إلى CSV
+      </a>
+      <a class="cp-primary" href="{% url 'controlpanel:traffic_analytics' %}">
+        <i data-lucide="rotate-cw"></i>تحديث البيانات
+      </a>
+    </div>
+  </section>
+
+  <!-- Filter Card -->
+  <section class="cp-card" style="margin-bottom: 24px; padding: 20px 24px;">
+    <form method="get" action="{% url 'controlpanel:traffic_analytics' %}" id="trafficFilterForm">
+      <!-- Quick Period Pills -->
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 18px; border-bottom: 1px solid var(--cp-line); padding-bottom: 16px;">
+        <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+          <span style="font-size: 0.75rem; font-weight: 700; color: var(--cp-muted); margin-inline-end: 4px;">الفترة الزمنية:</span>
+          <button type="submit" name="period" value="today" class="cp-filter-pill {% if period == 'today' %}active{% endif %}">اليوم</button>
+          <button type="submit" name="period" value="yesterday" class="cp-filter-pill {% if period == 'yesterday' %}active{% endif %}">أمس</button>
+          <button type="submit" name="period" value="7days" class="cp-filter-pill {% if period == '7days' %}active{% endif %}">آخر 7 أيام</button>
+          <button type="submit" name="period" value="30days" class="cp-filter-pill {% if period == '30days' %}active{% endif %}">آخر 30 يوم</button>
+          <button type="submit" name="period" value="month" class="cp-filter-pill {% if period == 'month' %}active{% endif %}">هذا الشهر</button>
+          <button type="submit" name="period" value="all" class="cp-filter-pill {% if period == 'all' %}active{% endif %}">كل الأوقات</button>
+        </div>
+        <div style="font-size: 0.72rem; color: var(--cp-muted);">
+          <span>الفترة الحالية: <strong>{{ period_label }}</strong></span>
+        </div>
+      </div>
+
+      <!-- Advanced Filters Row -->
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; align-items: flex-end;">
+        <div>
+          <label style="display: block; font-size: 0.7rem; font-weight: 700; margin-bottom: 6px; color: var(--cp-ink);">نوع الزائر</label>
+          <select name="user_type" style="width: 100%; height: 42px; border: 1px solid var(--cp-line); border-radius: 10px; padding: 0 12px; background: #fff; font-size: 0.76rem;">
+            <option value="all" {% if user_type == 'all' %}selected{% endif %}>جميع الزيارات</option>
+            <option value="human" {% if user_type == 'human' %}selected{% endif %}>مستخدمون حقيقيون فقط (بشر)</option>
+            <option value="registered" {% if user_type == 'registered' %}selected{% endif %}>مستخدمون مسجلون فقط</option>
+            <option value="guest" {% if user_type == 'guest' %}selected{% endif %}>زوار غير مسجلين (ضيوف)</option>
+            <option value="bot" {% if user_type == 'bot' %}selected{% endif %}>روبوتات وعناكب بحث فقط</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="display: block; font-size: 0.7rem; font-weight: 700; margin-bottom: 6px; color: var(--cp-ink);">نطاق المسار</label>
+          <select name="path_type" style="width: 100%; height: 42px; border: 1px solid var(--cp-line); border-radius: 10px; padding: 0 12px; background: #fff; font-size: 0.76rem;">
+            <option value="all" {% if path_type == 'all' %}selected{% endif %}>كافة المسارات</option>
+            <option value="storefront" {% if path_type == 'storefront' %}selected{% endif %}>صفحات المتجر فقط</option>
+            <option value="admin" {% if path_type == 'admin' %}selected{% endif %}>لوحة التحكم والإدارة</option>
+            <option value="api" {% if path_type == 'api' %}selected{% endif %}>واجهة البرمجة (API)</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="display: block; font-size: 0.7rem; font-weight: 700; margin-bottom: 6px; color: var(--cp-ink);">الجهاز</label>
+          <select name="device" style="width: 100%; height: 42px; border: 1px solid var(--cp-line); border-radius: 10px; padding: 0 12px; background: #fff; font-size: 0.76rem;">
+            <option value="all" {% if device == 'all' %}selected{% endif %}>جميع الأجهزة</option>
+            <option value="Desktop" {% if device == 'Desktop' %}selected{% endif %}>كمبيوتر مكتبي (Desktop)</option>
+            <option value="Mobile" {% if device == 'Mobile' %}selected{% endif %}>هاتف محمول (Mobile)</option>
+            <option value="Tablet" {% if device == 'Tablet' %}selected{% endif %}>جهاز لوحي (Tablet)</option>
+            <option value="Bot" {% if device == 'Bot' %}selected{% endif %}>روبوت / زاحف (Bot)</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="display: block; font-size: 0.7rem; font-weight: 700; margin-bottom: 6px; color: var(--cp-ink);">كود الاستجابة</label>
+          <select name="status" style="width: 100%; height: 42px; border: 1px solid var(--cp-line); border-radius: 10px; padding: 0 12px; background: #fff; font-size: 0.76rem;">
+            <option value="all" {% if status == 'all' %}selected{% endif %}>جميع الأكواد</option>
+            <option value="200" {% if status == '200' %}selected{% endif %}>200 (نجاح OK)</option>
+            <option value="404" {% if status == '404' %}selected{% endif %}>404 (غير موجود Not Found)</option>
+            <option value="500" {% if status == '500' %}selected{% endif %}>500 (أخطاء الخادم Server Error)</option>
+            <option value="3xx" {% if status == '3xx' %}selected{% endif %}>3xx (تحويلات Redirect)</option>
+          </select>
+        </div>
+
+        <div>
+          <label style="display: block; font-size: 0.7rem; font-weight: 700; margin-bottom: 6px; color: var(--cp-ink);">من تاريخ</label>
+          <input type="date" name="start_date" value="{{ start_date }}" style="width: 100%; height: 42px; border: 1px solid var(--cp-line); border-radius: 10px; padding: 0 10px; background: #fff; font-size: 0.74rem;">
+        </div>
+
+        <div>
+          <label style="display: block; font-size: 0.7rem; font-weight: 700; margin-bottom: 6px; color: var(--cp-ink);">إلى تاريخ</label>
+          <input type="date" name="end_date" value="{{ end_date }}" style="width: 100%; height: 42px; border: 1px solid var(--cp-line); border-radius: 10px; padding: 0 10px; background: #fff; font-size: 0.74rem;">
+        </div>
+      </div>
+
+      <!-- Search & Submit Bar -->
+      <div style="display: flex; gap: 10px; margin-top: 14px; align-items: center; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 220px; position: relative;">
+          <input type="text" name="q" value="{{ search_query }}" placeholder="بحث بعنوان IP، المسار، اسم المستخدم، اسم الروبوت، أو المصدر..." style="width: 100%; height: 42px; border: 1px solid var(--cp-line); border-radius: 10px; padding: 0 14px 0 38px; background: #fff; font-size: 0.78rem;">
+          <i data-lucide="search" style="position: absolute; left: 12px; top: 11px; color: var(--cp-muted); width: 18px; height: 18px;"></i>
+        </div>
+        <button type="submit" class="cp-primary" style="height: 42px; padding: 0 20px;">
+          <i data-lucide="filter"></i>تطبيق الفلترة
+        </button>
+        <a href="{% url 'controlpanel:traffic_analytics' %}" class="cp-secondary" style="height: 42px; padding: 0 16px;">
+          إلغاء الفلترة
+        </a>
+      </div>
+    </form>
+  </section>
+
+  <!-- KPI Metrics Cards Grid -->
+  <section class="cp-stats" style="grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); margin-bottom: 24px;" aria-label="إحصائيات حركة المرور">
+    <!-- Card 1: Page Views -->
+    <article>
+      <span class="cp-stat-icon green"><i data-lucide="eye"></i></span>
+      <div>
+        <small>إجمالي المشاهدات</small>
+        <strong>{{ stats.total_views }}</strong>
+        <em>{{ stats.human_views }} بشرية ({{ stats.human_pct }}%) · {{ stats.bot_hits }} روبوت</em>
+      </div>
+    </article>
+
+    <!-- Card 2: Unique Visitors -->
+    <article>
+      <span class="cp-stat-icon blue"><i data-lucide="users"></i></span>
+      <div>
+        <small>الزوار الفريدون</small>
+        <strong>{{ stats.unique_visitors }}</strong>
+        <em>{{ stats.human_visitors }} زائر بشري حقيقي</em>
+      </div>
+    </article>
+
+    <!-- Card 3: Registered Users -->
+    <article>
+      <span class="cp-stat-icon amber"><i data-lucide="user-check"></i></span>
+      <div>
+        <small>المستخدمون المسجلون</small>
+        <strong>{{ stats.registered_users }}</strong>
+        <em>{{ stats.registered_views }} مشاهدة مسجلة ({{ stats.reg_pct }}%)</em>
+      </div>
+    </article>
+
+    <!-- Card 4: Guest Visitors -->
+    <article>
+      <span class="cp-stat-icon violet"><i data-lucide="user-x"></i></span>
+      <div>
+        <small>الزوار غير المسجلين (ضيوف)</small>
+        <strong>{{ stats.guest_visitors }}</strong>
+        <em>{{ stats.guest_views }} مشاهدة ({{ stats.guest_pct }}%)</em>
+      </div>
+    </article>
+
+    <!-- Card 5: Bots & Crawlers -->
+    <article>
+      <span class="cp-stat-icon red"><i data-lucide="bot"></i></span>
+      <div>
+        <small>الروبوتات وعناكب البحث</small>
+        <strong>{{ stats.bot_hits }}</strong>
+        <em>{{ stats.bot_crawlers }} روبوت مختلف ({{ stats.bot_pct }}%)</em>
+      </div>
+    </article>
+
+    <!-- Card 6: Human Ratio -->
+    <article>
+      <span class="cp-stat-icon cyan"><i data-lucide="shield-check"></i></span>
+      <div>
+        <small>معدل التفاعل البشري</small>
+        <strong>{{ stats.human_pct }}%</strong>
+        <em>{{ stats.human_visitors }} زائر فعلي من أصل {{ stats.unique_visitors }}</em>
+      </div>
+    </article>
+  </section>
+
+  <!-- Visual Analytics Section (Grid) -->
+  <div class="cp-dashboard-grid" style="margin-bottom: 24px;">
+    <!-- Timeline Chart -->
+    <section class="cp-card cp-card--wide">
+      <header>
+        <div>
+          <span>نشاط الزيارات الزمني</span>
+          <h2>حركة المشاهدات والزوار الفريدين</h2>
+        </div>
+        <div style="display: flex; gap: 12px; font-size: 0.65rem; color: var(--cp-muted);">
+          <span style="display: flex; align-items: center; gap: 5px;"><i style="width: 10px; height: 10px; border-radius: 3px; background: var(--cp-green); display: inline-block;"></i> المشاهدات</span>
+          <span style="display: flex; align-items: center; gap: 5px;"><i style="width: 10px; height: 10px; border-radius: 3px; background: #2563eb; display: inline-block;"></i> الزوار الفريدين</span>
+          <span style="display: flex; align-items: center; gap: 5px;"><i style="width: 10px; height: 10px; border-radius: 3px; background: #f97316; display: inline-block;"></i> الروبوتات</span>
+        </div>
+      </header>
+      <div style="padding: 24px 20px;">
+        <div class="cp-timeline-bars" style="display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; height: 180px; border-bottom: 2px solid var(--cp-line); padding-bottom: 8px;">
+          {% for point in timeline %}
+            <div style="flex: 1; display: flex; flex-direction: column; align-items: center; height: 100%; justify-content: flex-end; min-width: 24px;">
+              <div title="{{ point.date }}: {{ point.views }} مشاهدة ({{ point.visitors }} زائر فريد، {{ point.bots }} روبوت)" style="width: 100%; max-width: 32px; height: {{ point.height|default:4 }}%; background: linear-gradient(180deg, var(--cp-green), rgba(89, 225, 59, 0.4)); border-radius: 6px 6px 0 0; min-height: 6px; transition: height 0.3s; position: relative;">
+                {% if point.views > 0 %}
+                  <span style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 0.65rem; font-weight: 700; color: var(--cp-ink);">{{ point.views }}</span>
+                {% endif %}
+              </div>
+              <span style="font-size: 0.62rem; color: var(--cp-muted); margin-top: 8px;">{{ point.label }}</span>
+            </div>
+          {% empty %}
+            <div class="cp-empty" style="width: 100%;">لا توجد بيانات حركة مرور مسجلة لهذه الفترة.</div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <!-- Visitor Type Distribution -->
+    <section class="cp-card">
+      <header>
+        <div>
+          <span>مقارنة الهوية</span>
+          <h2>توزيع فئات الزوار</h2>
+        </div>
+      </header>
+      <div class="cp-bars" style="padding: 20px;">
+        <div>
+          <p>
+            <span><i data-lucide="user-check" style="width: 14px; height: 14px; vertical-align: middle; margin-inline-end: 4px; color: #d97706;"></i> مستخدمون مسجلون</span>
+            <b>{{ stats.registered_views }} ({{ stats.reg_pct }}%)</b>
+          </p>
+          <i><u style="width: {{ stats.reg_pct }}%; background: #d97706;"></u></i>
+        </div>
+        <div>
+          <p>
+            <span><i data-lucide="user-x" style="width: 14px; height: 14px; vertical-align: middle; margin-inline-end: 4px; color: #8b5cf6;"></i> زوار غير مسجلين (ضيوف)</span>
+            <b>{{ stats.guest_views }} ({{ stats.guest_pct }}%)</b>
+          </p>
+          <i><u style="width: {{ stats.guest_pct }}%; background: #8b5cf6;"></u></i>
+        </div>
+        <div>
+          <p>
+            <span><i data-lucide="bot" style="width: 14px; height: 14px; vertical-align: middle; margin-inline-end: 4px; color: #ef4444;"></i> روبوتات وعناكب بحث</span>
+            <b>{{ stats.bot_hits }} ({{ stats.bot_pct }}%)</b>
+          </p>
+          <i><u style="width: {{ stats.bot_pct }}%; background: #ef4444;"></u></i>
+        </div>
+        <div style="margin-top: 15px; padding-top: 12px; border-top: 1px dashed var(--cp-line); font-size: 0.72rem; color: var(--cp-muted);">
+          <span>إجمالي المستخدمين المسجلين الفعليين: <strong>{{ stats.registered_users }} مستخدم</strong></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Top Pages Visited -->
+    <section class="cp-card">
+      <header>
+        <div>
+          <span>المحتوى الأكثر رواجاً</span>
+          <h2>أكثر الصفحات مشاهدة</h2>
+        </div>
+      </header>
+      <div class="cp-bars" style="padding: 16px 20px;">
+        {% for page in top_pages %}
+          <div style="margin-bottom: 12px;">
+            <p>
+              <a href="{{ page.path }}" target="_blank" rel="noopener" style="font-weight: 700; color: var(--cp-ink); max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; direction: ltr; text-align: right;">{{ page.path }}</a>
+              <b>{{ page.views }} مشاهدة <small style="color: var(--cp-muted); font-size: 0.65rem;">({{ page.visitors }} زائر)</small></b>
+            </p>
+            <i><u style="width: {{ page.pct }}%;"></u></i>
+          </div>
+        {% empty %}
+          <div class="cp-empty">لا توجد صفحات مسجلة حتى الآن.</div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- Top Traffic Referrers -->
+    <section class="cp-card">
+      <header>
+        <div>
+          <span>مصادر الحركة</span>
+          <h2>المُحيلات ومصادر الزيارات</h2>
+        </div>
+      </header>
+      <div class="cp-bars" style="padding: 16px 20px;">
+        {% for ref in top_referrers %}
+          <div style="margin-bottom: 12px;">
+            <p>
+              <span style="direction: ltr; text-align: right; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ ref.url }}</span>
+              <b>{{ ref.count }} زيارة</b>
+            </p>
+            <i><u style="width: {{ ref.pct }}%; background: #3b82f6;"></u></i>
+          </div>
+        {% empty %}
+          <div class="cp-empty">معظم الزيارات مباشرة أو لم يُحدد مصدر لها.</div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <!-- Devices & Operating Systems -->
+    <section class="cp-card">
+      <header>
+        <div>
+          <span>بيئة التصفح</span>
+          <h2>الأجهزة والمتصفحات</h2>
+        </div>
+      </header>
+      <div style="padding: 16px 20px;">
+        <h4 style="margin: 0 0 10px; font-size: 0.72rem; color: var(--cp-muted);">أنواع الأجهزة (بشري)</h4>
+        <div class="cp-bars" style="margin-bottom: 16px;">
+          {% for dev in device_counts %}
+            <div>
+              <p><span>{{ dev.device_type }}</span><b>{{ dev.count }} ({{ dev.pct }}%)</b></p>
+              <i><u style="width: {{ dev.pct }}%; background: #10b981;"></u></i>
+            </div>
+          {% empty %}
+            <div class="cp-empty">لا توجد بيانات.</div>
+          {% endfor %}
+        </div>
+
+        <h4 style="margin: 16px 0 10px; font-size: 0.72rem; color: var(--cp-muted); border-top: 1px dashed var(--cp-line); padding-top: 12px;">أبرز المتصفحات</h4>
+        <div class="cp-bars">
+          {% for br in browser_counts %}
+            <div>
+              <p><span>{{ br.browser }}</span><b>{{ br.count }} ({{ br.pct }}%)</b></p>
+              <i><u style="width: {{ br.pct }}%; background: #6366f1;"></u></i>
+            </div>
+          {% empty %}
+            <div class="cp-empty">لا توجد بيانات.</div>
+          {% endfor %}
+        </div>
+      </div>
+    </section>
+
+    <!-- Top Bots Breakdown -->
+    <section class="cp-card">
+      <header>
+        <div>
+          <span>عناكب البحث والأدوات</span>
+          <h2>أكثر الروبوتات نشاطاً</h2>
+        </div>
+      </header>
+      <div class="cp-bars" style="padding: 16px 20px;">
+        {% for bot in top_bots %}
+          <div style="margin-bottom: 12px;">
+            <p>
+              <span><i data-lucide="bot" style="width: 14px; height: 14px; vertical-align: middle; margin-inline-end: 4px; color: #ef4444;"></i> {{ bot.bot_name }}</span>
+              <b>{{ bot.count }} زيارة</b>
+            </p>
+            <i><u style="width: {{ bot.pct }}%; background: #ef4444;"></u></i>
+          </div>
+        {% empty %}
+          <div class="cp-empty">لم يتم رصد أي روبوتات في الفترة المحددة.</div>
+        {% endfor %}
+      </div>
+    </section>
+  </div>
+
+  <!-- Detailed Log Table Section -->
+  <section class="cp-card cp-card--wide" style="margin-bottom: 30px;">
+    <header style="align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+      <div>
+        <span>السجل اللحظي</span>
+        <h2>جدول الزيارات المفصل ({{ filtered_count }} سجل مطابق)</h2>
+      </div>
+      <div>
+        <a class="cp-secondary" href="{% url 'controlpanel:traffic_export_csv' %}{% if preserved_query %}?{{ preserved_query }}{% endif %}" style="font-size: 0.72rem;">
+          <i data-lucide="download"></i>تصدير النتائج (CSV)
+        </a>
+      </div>
+    </header>
+
+    <div class="cp-table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>الوقت والتاريخ</th>
+            <th>نوع الزائر</th>
+            <th>عنوان IP</th>
+            <th>المسار / الصفحة</th>
+            <th>طريقة الطلب والكود</th>
+            <th>الجهاز والمتصفح</th>
+            <th>المصدر المُحيل</th>
+            <th style="text-align: center;">تفاصيل</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for log in page_obj %}
+            <tr>
+              <td>
+                <b style="display: block; font-size: 0.74rem;">{{ log.created_at|date:"Y-m-d H:i" }}</b>
+                <small style="color: var(--cp-muted);">{{ log.created_at|timesince }} مضت</small>
+              </td>
+              <td>
+                {% if log.is_bot %}
+                  <span class="cp-badge cp-badge--bot" title="روبوت أو زاحف">
+                    <i data-lucide="bot" style="width: 13px; height: 13px;"></i>
+                    {{ log.bot_name|default:"روبوت" }}
+                  </span>
+                {% elif log.is_authenticated %}
+                  <span class="cp-badge cp-badge--registered" title="مستخدم مسجل">
+                    <i data-lucide="user-check" style="width: 13px; height: 13px;"></i>
+                    {% if log.user %}
+                      <a href="{% url 'controlpanel:edit' 'users' log.user.pk %}" style="color: inherit; text-decoration: underline;">
+                        {{ log.user.username }}
+                      </a>
+                    {% else %}
+                      مستخدم مسجل
+                    {% endif %}
+                  </span>
+                {% else %}
+                  <span class="cp-badge cp-badge--guest" title="زائر غير مسجل">
+                    <i data-lucide="user-x" style="width: 13px; height: 13px;"></i>
+                    زائر ضيف
+                  </span>
+                {% endif %}
+              </td>
+              <td>
+                <a href="?period={{ period }}&q={{ log.ip_address }}" title="تصفية بهذا الـ IP" style="font-family: monospace; font-size: 0.75rem; color: var(--cp-ink); text-decoration: underline;">
+                  {{ log.ip_address|default:"—" }}
+                </a>
+              </td>
+              <td>
+                <a href="{{ log.path }}" target="_blank" rel="noopener" style="direction: ltr; display: inline-block; text-align: left; max-width: 260px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.74rem; font-weight: 600;">
+                  {{ log.path }}
+                </a>
+                {% if log.path_type != 'storefront' %}
+                  <small style="display: block; font-size: 0.6rem; color: var(--cp-muted);">{{ log.get_path_type_display }}</small>
+                {% endif %}
+              </td>
+              <td>
+                <span class="cp-status cp-status--{% if log.status_code < 300 %}delivered{% elif log.status_code < 400 %}confirmed{% else %}cancelled{% endif %}">
+                  {{ log.method }} {{ log.status_code }}
+                </span>
+                {% if log.response_time_ms %}
+                  <small style="display: block; font-size: 0.62rem; color: var(--cp-muted); margin-top: 2px;">{{ log.response_time_ms }} ms</small>
+                {% endif %}
+              </td>
+              <td>
+                <div style="font-size: 0.72rem;">
+                  <strong>{{ log.device_type }}</strong>
+                  <small style="display: block; color: var(--cp-muted);">{{ log.browser }} · {{ log.os }}</small>
+                </div>
+              </td>
+              <td>
+                <span style="font-size: 0.68rem; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; direction: ltr; text-align: right;" title="{{ log.referer }}">
+                  {{ log.referer_domain }}
+                </span>
+              </td>
+              <td style="text-align: center;">
+                <button type="button" class="cp-log-inspect-btn" data-log-id="{{ log.pk }}" title="عرض التفاصيل الكاملة">
+                  <i data-lucide="info"></i>
+                </button>
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="8" class="cp-empty">لا توجد سجلات زيارات تطابق معايير الفلترة المحددة.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination Controls -->
+    {% if page_obj.has_other_pages %}
+      <div class="cp-pagination" style="display: flex; align-items: center; justify-content: space-between; padding: 18px 24px; border-top: 1px solid var(--cp-line); flex-wrap: wrap; gap: 12px;">
+        <span style="font-size: 0.72rem; color: var(--cp-muted);">
+          الصفحة {{ page_obj.number }} من {{ page_obj.paginator.num_pages }} (إجمالي {{ page_obj.paginator.count }} زيارة)
+        </span>
+        <div style="display: flex; gap: 6px;">
+          {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% if preserved_query %}&{{ preserved_query }}{% endif %}" class="cp-secondary" style="height: 36px; padding: 0 12px; font-size: 0.72rem;">
+              السابق
+            </a>
+          {% endif %}
+          {% for num in page_obj.paginator.page_range %}
+            {% if num >= page_obj.number|add:-2 and num <= page_obj.number|add:2 %}
+              <a href="?page={{ num }}{% if preserved_query %}&{{ preserved_query }}{% endif %}" class="{% if page_obj.number == num %}cp-primary{% else %}cp-secondary{% endif %}" style="height: 36px; width: 36px; padding: 0; display: grid; place-items: center; font-size: 0.72rem;">
+                {{ num }}
+              </a>
+            {% endif %}
+          {% endfor %}
+          {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}{% if preserved_query %}&{{ preserved_query }}{% endif %}" class="cp-secondary" style="height: 36px; padding: 0 12px; font-size: 0.72rem;">
+              التالي
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+  </section>
+</div>
+
+<!-- Log Details Modal -->
+<div id="logDetailModal" class="cp-modal-backdrop" style="display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100; backdrop-filter: blur(4px); place-items: center; padding: 20px;">
+  <div class="cp-card" style="width: min(100%, 650px); max-height: 90vh; overflow-y: auto; padding: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.3); border-radius: 18px; position: relative;">
+    <button type="button" id="closeLogModal" style="position: absolute; top: 16px; left: 16px; border: 0; background: #f0f3f1; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; cursor: pointer;">
+      <i data-lucide="x"></i>
+    </button>
+    <div style="margin-bottom: 20px; border-bottom: 1px solid var(--cp-line); padding-bottom: 14px;">
+      <span style="font-size: 0.7rem; color: var(--cp-muted);">تفاصيل السجل الكاملة</span>
+      <h3 style="margin: 4px 0 0; font-size: 1.1rem; font-weight: 800;">سجل زيارة #<span id="m_id"></span></h3>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; font-size: 0.76rem;" id="modalBody">
+      <div><strong>التاريخ والوقت:</strong> <p id="m_time" style="margin: 4px 0; color: var(--cp-muted);"></p></div>
+      <div><strong>عنوان IP:</strong> <p id="m_ip" style="margin: 4px 0; font-family: monospace;"></p></div>
+      <div><strong>نوع الزائر:</strong> <p id="m_type" style="margin: 4px 0;"></p></div>
+      <div><strong>المستخدم:</strong> <p id="m_user" style="margin: 4px 0; font-weight: 700;"></p></div>
+      <div><strong>طريقة وكود الطلب:</strong> <p id="m_code" style="margin: 4px 0;"></p></div>
+      <div><strong>وقت الاستجابة:</strong> <p id="m_duration" style="margin: 4px 0;"></p></div>
+      <div style="grid-column: 1 / -1;"><strong>المسار (Path):</strong> <p id="m_path" style="margin: 4px 0; direction: ltr; text-align: left; background: #f6f8f7; padding: 8px 12px; border-radius: 8px; font-family: monospace;"></p></div>
+      <div style="grid-column: 1 / -1;"><strong>المصدر (Referer):</strong> <p id="m_referer" style="margin: 4px 0; direction: ltr; text-align: left; background: #f6f8f7; padding: 8px 12px; border-radius: 8px; font-size: 0.72rem; word-break: break-all;"></p></div>
+      <div><strong>الجهاز ونظام التشغيل:</strong> <p id="m_device" style="margin: 4px 0;"></p></div>
+      <div><strong>المتصفح:</strong> <p id="m_browser" style="margin: 4px 0;"></p></div>
+      <div style="grid-column: 1 / -1;"><strong>معرّف المتصفح الكامل (User-Agent):</strong> <p id="m_ua" style="margin: 4px 0; direction: ltr; text-align: left; background: #f6f8f7; padding: 8px 12px; border-radius: 8px; font-size: 0.68rem; font-family: monospace; word-break: break-all;"></p></div>
+      <div style="grid-column: 1 / -1;"><strong>رمز الزائر الفريد (Visitor Token):</strong> <p id="m_vid" style="margin: 4px 0; font-family: monospace; font-size: 0.68rem; color: var(--cp-muted);"></p></div>
+    </div>
+  </div>
+</div>
+
+<style>
+.cp-filter-pill {
+  padding: 6px 14px;
+  border: 1px solid var(--cp-line);
+  border-radius: 20px;
+  background: #fff;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--cp-ink);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.cp-filter-pill:hover {
+  border-color: var(--cp-green-dark);
+  color: var(--cp-green-dark);
+}
+.cp-filter-pill.active {
+  background: var(--cp-ink);
+  color: #fff;
+  border-color: var(--cp-ink);
+}
+.cp-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+.cp-badge--registered {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+.cp-badge--guest {
+  background: #ede9fe;
+  color: #5b21b6;
+  border: 1px solid #ddd6fe;
+}
+.cp-badge--bot {
+  background: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+.cp-stat-icon.red {
+  background: #fee2e2;
+  color: #dc2626;
+}
+.cp-stat-icon.cyan {
+  background: #ecfeff;
+  color: #0891b2;
+}
+.cp-log-inspect-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--cp-line);
+  background: #fff;
+  color: var(--cp-muted);
+  display: inline-grid;
+  place-items: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.cp-log-inspect-btn:hover {
+  background: var(--cp-ink);
+  color: #fff;
+  border-color: var(--cp-ink);
+}
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const modal = document.getElementById("logDetailModal");
+  const closeBtn = document.getElementById("closeLogModal");
+
+  document.querySelectorAll(".cp-log-inspect-btn").forEach(btn => {
+    btn.addEventListener("click", function() {
+      const logId = this.getAttribute("data-log-id");
+      fetch(`/dashboard/traffic/${logId}/`)
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById("m_id").textContent = data.id;
+          document.getElementById("m_time").textContent = data.created_at;
+          document.getElementById("m_ip").textContent = data.ip_address;
+          document.getElementById("m_type").textContent = data.is_bot ? `روبوت (${data.bot_name})` : (data.is_authenticated ? 'مستخدم مسجل' : 'زائر ضيف');
+          document.getElementById("m_user").textContent = data.user || '—';
+          document.getElementById("m_code").textContent = `${data.method} ${data.status_code}`;
+          document.getElementById("m_duration").textContent = `${data.response_time_ms} ms`;
+          document.getElementById("m_path").textContent = data.path;
+          document.getElementById("m_referer").textContent = data.referer;
+          document.getElementById("m_device").textContent = `${data.device_type} (${data.os})`;
+          document.getElementById("m_browser").textContent = `${data.browser} ${data.browser_version || ''}`;
+          document.getElementById("m_ua").textContent = data.user_agent;
+          document.getElementById("m_vid").textContent = data.visitor_id;
+
+          modal.style.display = "grid";
+          if (window.lucide) { window.lucide.createIcons(); }
+        })
+        .catch(err => {
+          console.error("Failed to fetch log details", err);
+        });
+    });
+  });
+
+  if (closeBtn) {
+    closeBtn.addEventListener("click", function() {
+      modal.style.display = "none";
+    });
+  }
+
+  window.addEventListener("click", function(e) {
+    if (e.target === modal) {
+      modal.style.display = "none";
+    }
+  });
+});
+</script>
+{% endblock %}
+

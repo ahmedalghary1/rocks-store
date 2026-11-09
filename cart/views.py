@@ -1,10 +1,23 @@
 from django.contrib import messages
 from django.http import JsonResponse
+from django.middleware.csrf import get_token
 from django.shortcuts import redirect, render
 from django.utils.http import url_has_allowed_host_and_scheme
-from django.views.decorators.http import require_POST
+from django.views.decorators.cache import never_cache
+from django.views.decorators.http import require_GET, require_POST
 from catalog.models import Product, ProductVariant
 from .service import Cart
+
+
+@never_cache
+@require_GET
+def session(request):
+    """Refresh a WebView's CSRF cookie after a cached/prefetched page fails."""
+    # Bootstrap the guest session before retrying its first mutation.
+    request.session.get("cart")
+    if not request.session.session_key:
+        request.session.create()
+    return JsonResponse({"csrfToken": get_token(request)})
 
 
 def detail(request):

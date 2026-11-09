@@ -23,7 +23,7 @@
       {% for group in panel_groups %}
         <p>{{ group.label }}</p>
         {% for entry in group.entries %}
-          <a class="{% if active_resource == entry.key %}active{% endif %}" href="{% url 'controlpanel:list' entry.key %}"><i data-lucide="{{ entry.icon }}"></i><span>{{ entry.label }}</span>{% if entry.key == 'messages' and unread_message_count %}<b>{{ unread_message_count }}</b>{% endif %}</a>
+          <a class="{% if active_resource == entry.key %}active{% endif %}" href="{{ entry.url|default:'#' }}"><i data-lucide="{{ entry.icon }}"></i><span>{{ entry.label }}</span>{% if entry.key == 'messages' and unread_message_count %}<b>{{ unread_message_count }}</b>{% endif %}</a>
         {% endfor %}
       {% endfor %}
     </nav>

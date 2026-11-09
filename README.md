@@ -1,5 +1,20 @@
 # ROCKS ELECTRIC
 
+## السلة والمفضلة داخل فيسبوك
+
+طلبات السلة والمفضلة تستخدم رمز الحماية الموجود في الصفحة عندما يتعذر على
+JavaScript قراءة الكوكيز. عند رفض رمز قديم أو فقد كوكيز صفحة محمّلة مسبقًا، يجدد
+الموقع الرمز والجلسة عبر `/cart/session/` ثم يعيد الطلب مرة واحدة فقط. لا يعيد
+طلبات الإضافة عند انقطاع الشبكة، لتجنب تكرار الكمية.
+
+لنشر هذا الإصلاح، ارفع ملفات Python والقوالب وJavaScript معًا، وشغّل
+`python manage.py collectstatic --noinput` ثم أعد تحميل تطبيق PythonAnywhere.
+لا يحتاج الإصلاح إلى migration جديدة. استثنِ `/cart/*` و`/wishlist/*` من أي
+قاعدة كاش إجبارية في Cloudflare، وكذلك `/ar/wishlist/*`.
+
+اختبارات هذا المسار: `python manage.py test cart` و
+`node --test cart/storefront_requests.test.cjs`.
+
 ## Mobile API
 
 The versioned REST API is available at `/api/v1/`, with Swagger UI at `/api/docs/` and the live OpenAPI schema at `/api/schema/`. See [the mobile integration handoff](docs/MOBILE_API_HANDOFF.md) and [the exportable OpenAPI file](api/openapi.yaml). Run `python manage.py migrate` after deploying API changes.

@@ -12,6 +12,50 @@
   <article><span class="cp-stat-icon violet"><i data-lucide="mail-open"></i></span><div><small>رسائل غير مقروءة</small><strong>{{ stats.unread_messages }}</strong><em>بحاجة للمتابعة</em></div></article>
 </section>
 
+<section class="cp-card cp-card--wide" style="margin-bottom: 24px;">
+  <header>
+    <div>
+      <span>حركة المرور والزوار اليوم</span>
+      <h2>نشاط الموقع المباشر (اليوم)</h2>
+    </div>
+    <a href="{% url 'controlpanel:traffic_analytics' %}">تقرير الزيارات والتحليلات المفصل <i data-lucide="arrow-left"></i></a>
+  </header>
+  <div class="cp-stats" style="padding: 16px 20px 20px; border: 0; background: transparent; margin: 0; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+    <article>
+      <span class="cp-stat-icon green"><i data-lucide="eye"></i></span>
+      <div>
+        <small>مشاهدات اليوم</small>
+        <strong>{{ traffic_stats.views_today }}</strong>
+        <em>إجمالي الصفحات المطلوبة</em>
+      </div>
+    </article>
+    <article>
+      <span class="cp-stat-icon blue"><i data-lucide="users"></i></span>
+      <div>
+        <small>الزوار الفعليون اليوم</small>
+        <strong>{{ traffic_stats.visitors_today }}</strong>
+        <em>زوار بشريون فريدون</em>
+      </div>
+    </article>
+    <article>
+      <span class="cp-stat-icon amber"><i data-lucide="user-check"></i></span>
+      <div>
+        <small>المستخدمون المسجلون</small>
+        <strong>{{ traffic_stats.registered_today }}</strong>
+        <em>{{ traffic_stats.guests_today }} زائر ضيف</em>
+      </div>
+    </article>
+    <article>
+      <span class="cp-stat-icon violet"><i data-lucide="bot"></i></span>
+      <div>
+        <small>روبوتات وعناكب البحث</small>
+        <strong>{{ traffic_stats.bots_today }}</strong>
+        <em>زحف محركات البحث والأدوات</em>
+      </div>
+    </article>
+  </div>
+</section>
+
 <div class="cp-dashboard-grid">
   {% if dashboard_access.orders %}<section class="cp-card cp-card--wide">
     <header><div><span>آخر النشاطات</span><h2>الطلبات الحديثة</h2></div><a href="{% url 'controlpanel:list' 'orders' %}">عرض الكل <i data-lucide="arrow-left"></i></a></header>

@@ -8,7 +8,7 @@ from accounts.models import Address
 from catalog.admin import CategoryAdmin, ProductAdmin, ProductImageInline, ProductSpecificationInline, ProductVariantInline
 from catalog.models import Category, Product, ProductAttribute, ProductImage, ProductSpecification, ProductVariant
 from core.admin import ContactMessageAdmin, SiteSettingsAdmin
-from core.models import ContactMessage, SiteSettings
+from core.models import ContactMessage, SiteSettings, VisitLog
 from marketing.admin import BannerAdmin, SubscriberAdmin
 from marketing.models import Banner, Subscriber
 from orders.admin import OrderAdmin, OrderItemInline, OrderNotificationAdmin
@@ -33,6 +33,7 @@ MODEL_LABELS = {
     "shippingzone": "مناطق وتكاليف الشحن", "ordernotification": "إشعارات الطلبات",
     "sitesettings": "إعدادات الموقع", "contactmessage": "رسائل التواصل",
     "banner": "البانرات الإعلانية", "subscriber": "مشتركو النشرة البريدية",
+    "visitlog": "سجل الزيارات والتحليلات",
 }
 
 FIELD_LABELS = {
@@ -357,10 +358,17 @@ class ArabicShippingZoneAdmin(BasicArabicAdmin):
     ordering = ("sort_order", "name")
 
 
+class ArabicVisitLogAdmin(BasicArabicAdmin):
+    list_display = ("created_at", "ip_address", "user", "is_authenticated", "is_bot", "bot_name", "path", "status_code", "device_type", "browser")
+    list_filter = ("is_bot", "is_authenticated", "device_type", "status_code", "path_type")
+    search_fields = ("ip_address", "path", "user__username", "bot_name", "referer")
+    ordering = ("-created_at",)
+
+
 MANAGED_MODELS = (
     User, Group, Address, Category, Product, ProductAttribute, ProductImage,
     ProductSpecification, ProductVariant, Order, OrderItem, Coupon, ShippingZone,
-    OrderNotification, SiteSettings, ContactMessage, Banner, Subscriber,
+    OrderNotification, SiteSettings, ContactMessage, Banner, Subscriber, VisitLog,
 )
 for model in MANAGED_MODELS:
     model_name = model._meta.model_name
@@ -389,3 +397,4 @@ rocks_admin_site.register(SiteSettings, ArabicSiteSettingsAdmin)
 rocks_admin_site.register(ContactMessage, ArabicContactAdmin)
 rocks_admin_site.register(Banner, ArabicBannerAdmin)
 rocks_admin_site.register(Subscriber, ArabicSubscriberAdmin)
+rocks_admin_site.register(VisitLog, ArabicVisitLogAdmin)

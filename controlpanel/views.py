@@ -1,4 +1,5 @@
 import csv
+from datetime import datetime, timedelta
 from pathlib import Path
 
 from django.contrib import messages
@@ -11,7 +12,7 @@ from django.core.paginator import Paginator
 from django.db import models, transaction
 from django.db.models import Max, Q, Sum
 from django.db.models.deletion import ProtectedError
-from django.http import Http404, HttpResponse
+from django.http import Http404, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
@@ -19,7 +20,7 @@ from django.utils.formats import date_format
 
 from catalog.models import Product, ProductImage, SpecificationTemplate, WarrantyTemplate
 from catalog.validators import MAX_IMAGE_SIZE, validate_image_size
-from core.models import ContactMessage
+from core.models import ContactMessage, VisitLog
 from orders.models import Order
 from orders.services import restore_order_stock, send_order_notifications
 
@@ -48,6 +49,8 @@ def _config_or_404(resource):
 
 
 def _allowed(request, config, action="view"):
+    if config.get("allow_all_staff") and request.user.is_staff:
+        return True
     if config["model"] in (User, Group) and action != "view" and not request.user.is_superuser:
         return False
     return request.user.has_perm(permission_name(config, action))
@@ -64,7 +67,12 @@ def _panel_context(request, active=None, **extra):
         entries = []
         for key, config in RESOURCES.items():
             if config["group"] == group_key and config.get("nav", True) and _allowed(request, config):
-                entries.append({"key": key, **config})
+                entry_data = {"key": key, **config}
+                if config.get("url_name"):
+                    entry_data["url"] = reverse(config["url_name"])
+                else:
+                    entry_data["url"] = reverse("controlpanel:list", args=[key])
+                entries.append(entry_data)
         if entries:
             groups.append({"key": group_key, "label": group_label, "entries": entries})
     return {
@@ -150,10 +158,19 @@ def index(request):
         "messages": request.user.has_perm("core.view_contactmessage"),
         "add_product": request.user.has_perm("catalog.add_product"),
     }
+    today_traffic = VisitLog.objects.filter(created_at__date=today)
+    traffic_stats = {
+        "views_today": today_traffic.count(),
+        "visitors_today": today_traffic.filter(is_bot=False).values("visitor_id").distinct().count(),
+        "registered_today": today_traffic.filter(is_authenticated=True).values("user").distinct().count(),
+        "guests_today": today_traffic.filter(is_bot=False, is_authenticated=False).values("visitor_id").distinct().count(),
+        "bots_today": today_traffic.filter(is_bot=True).count(),
+    }
     context = _panel_context(
         request,
         page_title="نظرة عامة",
         stats=stats,
+        traffic_stats=traffic_stats,
         recent_orders=recent_orders,
         low_stock_products=product_qs.filter(is_active=True, is_coming_soon=False, stock_quantity__lte=5).order_by("stock_quantity")[:6],
         recent_messages=messages_qs.order_by("-created_at")[:5],
@@ -161,6 +178,412 @@ def index(request):
         dashboard_access=access,
     )
     return render(request, "controlpanel/index.html", context)
+
+
+@staff_required
+def traffic_analytics(request):
+    now = timezone.now()
+    today = timezone.localdate()
+
+    period = request.GET.get("period", "7days").strip()
+    start_date_str = request.GET.get("start_date", "").strip()
+    end_date_str = request.GET.get("end_date", "").strip()
+
+    qs = VisitLog.objects.all().select_related("user")
+
+    if period == "today":
+        qs = qs.filter(created_at__date=today)
+        period_label = "اليوم"
+    elif period == "yesterday":
+        yesterday = today - timedelta(days=1)
+        qs = qs.filter(created_at__date=yesterday)
+        period_label = "أمس"
+    elif period == "7days":
+        qs = qs.filter(created_at__gte=now - timedelta(days=7))
+        period_label = "آخر 7 أيام"
+    elif period == "30days":
+        qs = qs.filter(created_at__gte=now - timedelta(days=30))
+        period_label = "آخر 30 يوم"
+    elif period == "month":
+        qs = qs.filter(created_at__date__gte=today.replace(day=1))
+        period_label = "هذا الشهر"
+    elif period == "custom":
+        period_label = "فترة مخصصة"
+        if start_date_str:
+            try:
+                s_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+                qs = qs.filter(created_at__date__gte=s_date)
+            except ValueError:
+                pass
+        if end_date_str:
+            try:
+                e_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
+                qs = qs.filter(created_at__date__lte=e_date)
+            except ValueError:
+                pass
+    elif period == "all":
+        period_label = "كل الأوقات"
+    else:
+        period = "7days"
+        qs = qs.filter(created_at__gte=now - timedelta(days=7))
+        period_label = "آخر 7 أيام"
+
+    base_qs = qs
+
+    path_type = request.GET.get("path_type", "").strip()
+    if path_type and path_type != "all":
+        qs = qs.filter(path_type=path_type)
+
+    user_type = request.GET.get("user_type", "all").strip()
+    if user_type == "human":
+        qs = qs.filter(is_bot=False)
+    elif user_type == "registered":
+        qs = qs.filter(is_authenticated=True)
+    elif user_type == "guest":
+        qs = qs.filter(is_bot=False, is_authenticated=False)
+    elif user_type == "bot":
+        qs = qs.filter(is_bot=True)
+
+    device = request.GET.get("device", "").strip()
+    if device and device != "all":
+        qs = qs.filter(device_type=device)
+
+    status = request.GET.get("status", "").strip()
+    if status == "200":
+        qs = qs.filter(status_code=200)
+    elif status == "404":
+        qs = qs.filter(status_code=404)
+    elif status == "500":
+        qs = qs.filter(status_code__gte=500)
+    elif status == "3xx":
+        qs = qs.filter(status_code__gte=300, status_code__lt=400)
+
+    q = request.GET.get("q", "").strip()
+    if q:
+        qs = qs.filter(
+            Q(ip_address__icontains=q)
+            | Q(path__icontains=q)
+            | Q(user__username__icontains=q)
+            | Q(bot_name__icontains=q)
+            | Q(referer__icontains=q)
+        )
+
+    # Calculate overall KPIs on base_qs
+    total_views = base_qs.count()
+    unique_visitors = base_qs.values("visitor_id").distinct().count()
+
+    human_views = base_qs.filter(is_bot=False).count()
+    human_visitors = base_qs.filter(is_bot=False).values("visitor_id").distinct().count()
+
+    registered_views = base_qs.filter(is_authenticated=True).count()
+    registered_users = base_qs.filter(is_authenticated=True).values("user").distinct().count()
+
+    guest_views = base_qs.filter(is_bot=False, is_authenticated=False).count()
+    guest_visitors = base_qs.filter(is_bot=False, is_authenticated=False).values("visitor_id").distinct().count()
+
+    bot_hits = base_qs.filter(is_bot=True).count()
+    bot_crawlers = base_qs.filter(is_bot=True).values("bot_name").distinct().count()
+
+    human_pct = round((human_views / total_views * 100) if total_views else 0, 1)
+    bot_pct = round((bot_hits / total_views * 100) if total_views else 0, 1)
+    reg_pct = round((registered_views / total_views * 100) if total_views else 0, 1)
+    guest_pct = round((guest_views / total_views * 100) if total_views else 0, 1)
+
+    # Top Visited Pages
+    top_pages = list(
+        base_qs.filter(is_bot=False)
+        .values("path")
+        .annotate(views=models.Count("id"), visitors=models.Count("visitor_id", distinct=True))
+        .order_by("-views")[:10]
+    )
+    max_page_views = top_pages[0]["views"] if top_pages else 1
+    for p in top_pages:
+        p["pct"] = round((p["views"] / max_page_views) * 100)
+
+    # Top Referrers
+    raw_referrers = list(
+        base_qs.filter(is_bot=False)
+        .exclude(referer="")
+        .values("referer")
+        .annotate(count=models.Count("id"))
+        .order_by("-count")[:10]
+    )
+    top_referrers = []
+    max_ref = raw_referrers[0]["count"] if raw_referrers else 1
+    for r in raw_referrers:
+        top_referrers.append({
+            "url": r["referer"],
+            "count": r["count"],
+            "pct": round((r["count"] / max_ref) * 100),
+        })
+
+    # Devices & Browsers
+    device_counts = list(
+        base_qs.filter(is_bot=False)
+        .values("device_type")
+        .annotate(count=models.Count("id"))
+        .order_by("-count")
+    )
+    max_dev = sum(d["count"] for d in device_counts) or 1
+    for d in device_counts:
+        d["pct"] = round((d["count"] / max_dev) * 100, 1)
+
+    browser_counts = list(
+        base_qs.filter(is_bot=False)
+        .values("browser")
+        .annotate(count=models.Count("id"))
+        .order_by("-count")[:6]
+    )
+    max_br = sum(b["count"] for b in browser_counts) or 1
+    for b in browser_counts:
+        b["pct"] = round((b["count"] / max_br) * 100, 1)
+
+    # Top Bots
+    top_bots = list(
+        base_qs.filter(is_bot=True)
+        .values("bot_name")
+        .annotate(count=models.Count("id"))
+        .order_by("-count")[:8]
+    )
+    max_bot = top_bots[0]["count"] if top_bots else 1
+    for b in top_bots:
+        b["pct"] = round((b["count"] / max_bot) * 100)
+
+    # Timeline points
+    timeline_days = 7 if period in ("today", "yesterday", "7days") else 14
+    timeline_start = today - timedelta(days=timeline_days - 1)
+
+    day_views = {
+        row["created_at__date"]: row["views"]
+        for row in base_qs.filter(created_at__date__gte=timeline_start)
+        .values("created_at__date")
+        .annotate(views=models.Count("id"))
+    }
+    day_visitors = {
+        row["created_at__date"]: row["visitors"]
+        for row in base_qs.filter(created_at__date__gte=timeline_start, is_bot=False)
+        .values("created_at__date")
+        .annotate(visitors=models.Count("visitor_id", distinct=True))
+    }
+    day_bots = {
+        row["created_at__date"]: row["bots"]
+        for row in base_qs.filter(created_at__date__gte=timeline_start, is_bot=True)
+        .values("created_at__date")
+        .annotate(bots=models.Count("id"))
+    }
+
+    timeline = []
+    max_t_views = max(day_views.values(), default=1)
+    for i in range(timeline_days):
+        d = timeline_start + timedelta(days=i)
+        v = day_views.get(d, 0)
+        u = day_visitors.get(d, 0)
+        b = day_bots.get(d, 0)
+        timeline.append({
+            "date": d,
+            "label": d.strftime("%m/%d"),
+            "views": v,
+            "visitors": u,
+            "bots": b,
+            "height": round((v / max_t_views) * 100) if max_t_views else 0,
+        })
+
+    # Pagination
+    filtered_count = qs.count()
+    paginator = Paginator(qs, 30)
+    page_number = request.GET.get("page", 1)
+    page_obj = paginator.get_page(page_number)
+
+    query_params = request.GET.copy()
+    if "page" in query_params:
+        query_params.pop("page")
+    preserved_query = query_params.urlencode()
+
+    context = _panel_context(
+        request,
+        active="traffic",
+        page_title="سجل الزيارات والتحليلات",
+        period=period,
+        period_label=period_label,
+        start_date=start_date_str,
+        end_date=end_date_str,
+        user_type=user_type,
+        path_type=path_type,
+        device=device,
+        status=status,
+        search_query=q,
+        preserved_query=preserved_query,
+        stats={
+            "total_views": total_views,
+            "unique_visitors": unique_visitors,
+            "human_views": human_views,
+            "human_visitors": human_visitors,
+            "registered_views": registered_views,
+            "registered_users": registered_users,
+            "guest_views": guest_views,
+            "guest_visitors": guest_visitors,
+            "bot_hits": bot_hits,
+            "bot_crawlers": bot_crawlers,
+            "human_pct": human_pct,
+            "bot_pct": bot_pct,
+            "reg_pct": reg_pct,
+            "guest_pct": guest_pct,
+        },
+        top_pages=top_pages,
+        top_referrers=top_referrers,
+        device_counts=device_counts,
+        browser_counts=browser_counts,
+        top_bots=top_bots,
+        timeline=timeline,
+        page_obj=page_obj,
+        filtered_count=filtered_count,
+    )
+    return render(request, "controlpanel/traffic_analytics.html", context)
+
+
+@staff_required
+def traffic_export_csv(request):
+    now = timezone.now()
+    today = timezone.localdate()
+
+    period = request.GET.get("period", "7days").strip()
+    start_date_str = request.GET.get("start_date", "").strip()
+    end_date_str = request.GET.get("end_date", "").strip()
+
+    qs = VisitLog.objects.all().select_related("user")
+
+    if period == "today":
+        qs = qs.filter(created_at__date=today)
+    elif period == "yesterday":
+        yesterday = today - timedelta(days=1)
+        qs = qs.filter(created_at__date=yesterday)
+    elif period == "7days":
+        qs = qs.filter(created_at__gte=now - timedelta(days=7))
+    elif period == "30days":
+        qs = qs.filter(created_at__gte=now - timedelta(days=30))
+    elif period == "month":
+        qs = qs.filter(created_at__date__gte=today.replace(day=1))
+    elif period == "custom":
+        if start_date_str:
+            try:
+                qs = qs.filter(created_at__date__gte=datetime.strptime(start_date_str, "%Y-%m-%d").date())
+            except ValueError:
+                pass
+        if end_date_str:
+            try:
+                qs = qs.filter(created_at__date__lte=datetime.strptime(end_date_str, "%Y-%m-%d").date())
+            except ValueError:
+                pass
+
+    path_type = request.GET.get("path_type", "").strip()
+    if path_type and path_type != "all":
+        qs = qs.filter(path_type=path_type)
+
+    user_type = request.GET.get("user_type", "all").strip()
+    if user_type == "human":
+        qs = qs.filter(is_bot=False)
+    elif user_type == "registered":
+        qs = qs.filter(is_authenticated=True)
+    elif user_type == "guest":
+        qs = qs.filter(is_bot=False, is_authenticated=False)
+    elif user_type == "bot":
+        qs = qs.filter(is_bot=True)
+
+    device = request.GET.get("device", "").strip()
+    if device and device != "all":
+        qs = qs.filter(device_type=device)
+
+    status = request.GET.get("status", "").strip()
+    if status == "200":
+        qs = qs.filter(status_code=200)
+    elif status == "404":
+        qs = qs.filter(status_code=404)
+    elif status == "500":
+        qs = qs.filter(status_code__gte=500)
+    elif status == "3xx":
+        qs = qs.filter(status_code__gte=300, status_code__lt=400)
+
+    q = request.GET.get("q", "").strip()
+    if q:
+        qs = qs.filter(
+            Q(ip_address__icontains=q)
+            | Q(path__icontains=q)
+            | Q(user__username__icontains=q)
+            | Q(bot_name__icontains=q)
+            | Q(referer__icontains=q)
+        )
+
+    response = HttpResponse(content_type="text/csv; charset=utf-8")
+    response.write("\ufeff")
+    response["Content-Disposition"] = f'attachment; filename="traffic_logs_{today}.csv"'
+    writer = csv.writer(response)
+
+    writer.writerow([
+        "التاريخ والوقت",
+        "عنوان IP",
+        "نوع الزائر",
+        "اسم المستخدم",
+        "اسم الروبوت",
+        "المسار",
+        "طريقة الطلب",
+        "كود الاستجابة",
+        "نوع الجهاز",
+        "المتصفح",
+        "نظام التشغيل",
+        "المصدر",
+        "وقت الاستجابة (ms)",
+        "معرف الزائر",
+    ])
+
+    for row in qs.order_by("-created_at")[:5000]:
+        v_type = "روبوت" if row.is_bot else ("مسجل" if row.is_authenticated else "ضيف")
+        u_name = row.user.username if row.user else ""
+        writer.writerow([
+            date_format(timezone.localtime(row.created_at), "Y-m-d H:i:s"),
+            row.ip_address or "",
+            v_type,
+            u_name,
+            row.bot_name or "",
+            row.path,
+            row.method,
+            row.status_code,
+            row.device_type,
+            row.browser,
+            row.os,
+            row.referer or "",
+            row.response_time_ms or "",
+            row.visitor_id or "",
+        ])
+
+    return response
+
+
+@staff_required
+def traffic_log_detail(request, pk):
+    log = get_object_or_404(VisitLog.objects.select_related("user"), pk=pk)
+    return JsonResponse({
+        "id": log.pk,
+        "created_at": date_format(timezone.localtime(log.created_at), "Y-m-d H:i:s"),
+        "ip_address": log.ip_address or "—",
+        "visitor_id": log.visitor_id or "—",
+        "user": log.user.username if log.user else None,
+        "is_authenticated": log.is_authenticated,
+        "is_bot": log.is_bot,
+        "bot_name": log.bot_name or "—",
+        "path": log.path,
+        "method": log.method,
+        "status_code": log.status_code,
+        "referer": log.referer or "—",
+        "query_string": log.query_string or "—",
+        "device_type": log.device_type,
+        "browser": log.browser or "—",
+        "browser_version": log.browser_version or "—",
+        "os": log.os or "—",
+        "user_agent": log.user_agent or "—",
+        "path_type": log.get_path_type_display(),
+        "response_time_ms": log.response_time_ms or "—",
+    })
+
 
 
 def _apply_filters(request, queryset, config):

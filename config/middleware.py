@@ -1,5 +1,7 @@
-import secrets
 import hashlib
+import logging
+import secrets
+import time
 from django.conf import settings
 from django.core.cache import cache
 from django.http import HttpResponse
@@ -125,7 +127,8 @@ class StorefrontTranslationMiddleware:
 
     def __call__(self, request):
         response = self.get_response(request)
-        if request.path.startswith(("/admin/", "/dashboard/", "/api/")):
+        # Session bootstrap contains opaque CSRF tokens, never display copy.
+        if request.path.startswith(("/admin/", "/dashboard/", "/api/", "/cart/session/")):
             return response
         content_type = response.get("Content-Type", "")
         if not (content_type.startswith("text/html") or content_type.startswith("application/json")):
@@ -140,3 +143,80 @@ class StorefrontTranslationMiddleware:
         if response.has_header("Content-Length"):
             response["Content-Length"] = str(len(response.content))
         return response
+
+
+class TrafficTrackingMiddleware:
+    """
+    Safely logs visitor requests, differentiating
+    authenticated users, guest visitors, and automated search engine bots.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+        self.logger = logging.getLogger("traffic")
+
+    def __call__(self, request):
+        from core.traffic_tracker import (
+            determine_path_type,
+            get_client_ip,
+            get_or_create_visitor_id,
+            parse_user_agent,
+            should_ignore_request,
+        )
+
+        if should_ignore_request(request):
+            return self.get_response(request)
+
+        start_time = time.perf_counter()
+        visitor_id, is_new_vid = get_or_create_visitor_id(request)
+        request.visitor_id = visitor_id
+
+        response = self.get_response(request)
+
+        duration_ms = round((time.perf_counter() - start_time) * 1000, 2)
+
+        # Attach cookie for tracking unique visitors across pages
+        if is_new_vid:
+            response.set_cookie(
+                "rocks_vid",
+                visitor_id,
+                max_age=365 * 24 * 60 * 60,
+                httponly=True,
+                samesite="Lax",
+            )
+
+        try:
+            from core.models import VisitLog
+
+            user_agent = request.META.get("HTTP_USER_AGENT", "")
+            ua_info = parse_user_agent(user_agent)
+            user = request.user if getattr(request, "user", None) and request.user.is_authenticated else None
+            is_authenticated = bool(user)
+
+            raw_path = request.path_info or request.path or "/"
+
+            VisitLog.objects.create(
+                ip_address=get_client_ip(request),
+                visitor_id=visitor_id,
+                user=user,
+                is_authenticated=is_authenticated,
+                path=raw_path[:500],
+                method=request.method[:10],
+                status_code=response.status_code,
+                referer=(request.META.get("HTTP_REFERER", ""))[:500],
+                query_string=(request.META.get("QUERY_STRING", ""))[:500],
+                is_bot=ua_info["is_bot"],
+                bot_name=ua_info["bot_name"],
+                device_type=ua_info["device_type"],
+                browser=ua_info["browser"],
+                browser_version=ua_info["browser_version"],
+                os=ua_info["os"],
+                user_agent=user_agent[:1000],
+                path_type=determine_path_type(raw_path),
+                response_time_ms=duration_ms,
+            )
+        except Exception:
+            self.logger.debug("Visit logging skipped due to error", exc_info=True)
+
+        return response
+

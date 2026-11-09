@@ -4,7 +4,7 @@ from django.contrib.auth.models import Group, User
 
 from accounts.models import Address
 from catalog.models import Category, HomepageProduct, Product, ProductAttribute, ProductImage, ProductSpecification, ProductVariant, SpecificationTemplate, WarrantyTemplate
-from core.models import ContactMessage, SiteSettings
+from core.models import ContactMessage, SiteSettings, VisitLog
 from marketing.models import Banner, Subscriber
 from orders.models import Coupon, Order, OrderItem, OrderNotification, ShippingZone
 
@@ -37,9 +37,11 @@ RESOURCES = OrderedDict({
     "users": {"model": User, "label": "المستخدمون", "singular": "مستخدم", "icon": "users", "group": "people", "list": ("username", "email", "first_name", "last_name", "is_staff", "is_active", "date_joined"), "search": ("username", "email", "first_name", "last_name"), "filters": ("is_staff", "is_active")},
     "groups": {"model": Group, "label": "مجموعات الصلاحيات", "singular": "مجموعة صلاحيات", "icon": "shield-check", "group": "people", "list": ("name",), "search": ("name",)},
     "addresses": {"model": Address, "label": "عناوين العملاء", "singular": "عنوان عميل", "icon": "map-pin", "group": "people", "list": ("user", "label", "recipient_name", "phone", "governorate", "city", "is_default"), "search": ("user__username", "recipient_name", "phone", "governorate", "city"), "filters": ("is_default",), "select": ("user",)},
+    "traffic": {"model": VisitLog, "label": "سجل الزيارات والتحليلات", "singular": "سجل زيارة", "icon": "activity", "group": "traffic", "url_name": "controlpanel:traffic_analytics", "allow_all_staff": True, "list": ("created_at", "ip_address", "user", "path", "status_code", "is_bot", "device_type", "browser"), "search": ("ip_address", "path", "user__username", "bot_name", "referer"), "filters": ("is_bot", "is_authenticated", "device_type", "status_code")},
 })
 
 GROUPS = (
+    ("traffic", "الزيارات والتحليلات"),
     ("sales", "المبيعات والطلبات"),
     ("catalog", "المنتجات والمخزون"),
     ("content", "الموقع والتسويق"),
@@ -85,6 +87,10 @@ FIELD_LABELS = {
     "first_name": "الاسم الأول", "last_name": "اسم العائلة", "is_staff": "موظف", "is_superuser": "مدير كامل",
     "groups": "مجموعات الصلاحيات", "user_permissions": "الصلاحيات المباشرة", "password": "كلمة المرور",
     "date_joined": "تاريخ الانضمام", "created_at": "تاريخ الإنشاء", "updated_at": "آخر تحديث",
+    "ip_address": "عنوان IP", "visitor_id": "معرف الزائر", "path": "المسار", "method": "طريقة الطلب",
+    "status_code": "كود الاستجابة", "referer": "المصدر", "is_bot": "روبوت", "bot_name": "اسم الروبوت",
+    "device_type": "نوع الجهاز", "browser": "المتصفح", "os": "نظام التشغيل", "path_type": "نطاق المسار",
+    "response_time_ms": "وقت الاستجابة (ms)", "is_authenticated": "مسجل",
 }
 
 

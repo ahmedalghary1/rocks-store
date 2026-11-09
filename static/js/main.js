@@ -2,25 +2,73 @@ const $ = (selector, scope = document) => scope.querySelector(selector);
 const $$ = (selector, scope = document) => [...scope.querySelectorAll(selector)];
 const isArabic = document.documentElement.lang === 'ar';
 const t = (english, arabic) => isArabic ? arabic : english;
-const csrf = () => document.cookie.split('; ').find(row => row.startsWith('csrftoken='))?.split('=')[1] || '';
+const csrf = () => {
+  // WebViews can deny JavaScript access to cookies even when requests send them.
+  try {
+    const cookie = document.cookie.split(';').map(value => value.trim()).find(value => value.startsWith('csrftoken='));
+    if (cookie) return decodeURIComponent(cookie.slice('csrftoken='.length));
+  } catch { /* Use Django's masked token from the page instead. */ }
+  return document.body.dataset.csrfToken || $('[name="csrfmiddlewaretoken"]')?.value || '';
+};
 const escapeHtml = value => String(value).replace(/[&<>'"]/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' })[char]);
 const renderIcons = (root = document) => window.lucide?.createIcons({ root, attrs: { 'stroke-width': 1.8, 'aria-hidden': 'true' } });
 const iconMarkup = (name) => `<i data-lucide="${name}" aria-hidden="true"></i>`;
-const requestData = async (url, options = {}, format = 'json') => {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 15000);
+const sendRequest = async (url, options = {}, format = 'json') => {
+  const controller = typeof AbortController === 'function' ? new AbortController() : null;
+  const timeout = controller ? setTimeout(() => controller.abort(), 15000) : null;
   try {
-    const response = await fetch(url, { ...options, signal: controller.signal });
-    const data = await response[format]();
+    const response = await fetch(url, {
+      ...options, mode: 'same-origin', credentials: 'same-origin',
+      ...(controller ? { signal: controller.signal } : {}),
+    });
+    let data;
+    try {
+      data = await response[format]();
+    } catch {
+      // A proxy/CSRF HTML error page must not appear as a JSON syntax error.
+      throw new Error(t('The store could not process the request. Please try again.', 'تعذر تنفيذ الطلب. يرجى المحاولة مرة أخرى.'));
+    }
     return { response, data };
   } catch (error) {
-    if (controller.signal.aborted) {
+    if (controller?.signal.aborted) {
       throw new Error(t('The connection timed out. Please try again.', 'انتهت مهلة الاتصال. حاول مرة أخرى.'));
     }
     throw error;
   } finally {
     clearTimeout(timeout);
   }
+};
+let mutationPending = Promise.resolve();
+const requestData = (url, options = {}, format = 'json') => {
+  if (/^(GET|HEAD|OPTIONS)$/i.test(options.method || 'GET')) return sendRequest(url, options, format);
+  const run = async () => {
+    const send = token => {
+      // Django checks the form field before the header. Refresh both so a
+      // prefetched page or a back/forward restoration cannot submit an old token.
+      if (options.body instanceof FormData) options.body.set('csrfmiddlewaretoken', token);
+      return sendRequest(url, {
+        ...options, cache: 'no-store',
+        headers: { ...options.headers, 'X-CSRFToken': token },
+      }, format);
+    };
+    let result = await send(csrf());
+    const sessionUrl = document.body.dataset.sessionUrl;
+    if (result.response.status === 403 && result.data.code === 'csrf_failed' && sessionUrl) {
+      const fresh = await sendRequest(sessionUrl, { cache: 'no-store' });
+      if (!fresh.response.ok || !fresh.data.csrfToken) throw new Error(fresh.data.message || t('Please reload the page and try again.', 'يرجى تحديث الصفحة والمحاولة مرة أخرى.'));
+      const token = fresh.data.csrfToken;
+      document.body.dataset.csrfToken = token;
+      $$('[name="csrfmiddlewaretoken"]').forEach(input => { input.value = token; });
+      // Only an explicit CSRF rejection is safe to retry: the view did not run.
+      result = await send(token);
+    }
+    return result;
+  };
+  // Serialize session writes, including the first cart/wishlist click. Without
+  // this, simultaneous first requests can create separate guest sessions.
+  const pending = mutationPending.then(run);
+  mutationPending = pending.catch(() => {});
+  return pending;
 };
 const parseLocalizedNumber = value => {
   let normalized = String(value ?? '').trim()
@@ -112,10 +160,10 @@ setTimeout(() => $$('.toast').forEach(el => el.remove()), 3800);
 $$('.ajax-cart').forEach(form => form.addEventListener('submit', async event => {
   event.preventDefault(); const button = $('button[type=submit]', form); button.disabled = true;
   try {
-    const { response, data } = await requestData(form.action, { method: 'POST', body: new FormData(form), headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': csrf() } });
+    const { response, data } = await requestData(form.action, { method: 'POST', body: new FormData(form), headers: { 'X-Requested-With': 'XMLHttpRequest' } });
     if (!response.ok) throw new Error(data.message || 'Could not add this product.');
     $$('[data-cart-count]').forEach(el => el.textContent = data.count); toast(data.message);
-    button.animate([{ transform: 'scale(.9)' }, { transform: 'scale(1.08)' }, { transform: 'scale(1)' }], { duration: 380 });
+    button.animate?.([{ transform: 'scale(.9)' }, { transform: 'scale(1.08)' }, { transform: 'scale(1)' }], { duration: 380 });
   } catch (error) { toast(error.message || 'Could not add this product. Please try again.'); } finally { button.disabled = false; }
 }));
 
@@ -129,7 +177,7 @@ const updateCartForm = form => {
     try {
       const { response, data } = await requestData(form.action, {
         method: 'POST', body: new FormData(form),
-        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': csrf() },
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
       });
       if (!response.ok) throw new Error(data.message || 'Could not update the quantity.');
       input.value = data.quantity;
@@ -184,12 +232,14 @@ $('.cart-checkout-link')?.addEventListener('click', async event => {
 });
 
 $$('[data-wishlist]').forEach(button => button.addEventListener('click', async () => {
+  button.disabled = true;
   try {
-    const { response, data } = await requestData(button.dataset.url, { method: 'POST', headers: { 'X-CSRFToken': csrf(), 'X-Requested-With': 'XMLHttpRequest' } });
-    if (!response.ok) throw new Error('Wishlist request failed');
+    const { response, data } = await requestData(button.dataset.url, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+    if (!response.ok) throw new Error(data.message || t('Could not update your wishlist.', 'تعذر تحديث المفضلة.'));
     button.classList.toggle('active', data.active); button.setAttribute('aria-pressed', String(data.active));
     toast(data.active ? t('Product added to wishlist.', 'تمت إضافة المنتج إلى المفضلة.') : t('Product removed from wishlist.', 'تمت إزالة المنتج من المفضلة.'));
-  } catch { toast(t('Could not update your wishlist.', 'تعذر تحديث المفضلة.')); }
+  } catch (error) { toast(error.message || t('Could not update your wishlist.', 'تعذر تحديث المفضلة.')); }
+  finally { button.disabled = false; }
 }));
 
 const modal = $('#quickModal');
@@ -212,7 +262,7 @@ $$('[data-quick]').forEach(button => button.addEventListener('click', async () =
     if (form) form.addEventListener('submit', async event => {
       event.preventDefault();
       try {
-        const { response, data } = await requestData(form.action, { method:'POST', body:new FormData(form), headers:{'X-Requested-With':'XMLHttpRequest','X-CSRFToken':csrf()} });
+        const { response, data } = await requestData(form.action, { method:'POST', body:new FormData(form), headers:{'X-Requested-With':'XMLHttpRequest'} });
         if (!response.ok) throw new Error(`Cart request failed: ${response.status}`);
         $$('[data-cart-count]').forEach(el => el.textContent = data.count);
         toast(data.message);
