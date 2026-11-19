@@ -3,6 +3,9 @@
   @media (max-width: 900px) {
     .product-detail-page .whatsapp { display: none; }
   }
+  @media (max-width: 600px) {
+    .mobile-add { bottom: 70px; }
+  }
 </style>
 {% endblock %}{% block body_class %}product-detail-page{% endblock %}{% block content %}
 <section class="product-page section"><div class="container"><nav class="breadcrumb" aria-label="Breadcrumb"><a href="{% url 'core:home' %}">Home</a><span aria-hidden="true">›</span><a href="{% url 'catalog:list' %}">Products</a><span aria-hidden="true">›</span><a href="{{ product.category.get_absolute_url }}">{{ product.category.display_name }}</a><span aria-hidden="true">›</span><b>{{ product.display_name }}</b></nav>
@@ -13,5 +16,8 @@
 <div class="secondary-actions">{% if site_settings.whatsapp %}<a href="https://wa.me/{{ site_settings.whatsapp }}?text={{ product.display_name|urlencode }}" target="_blank" rel="noopener noreferrer">Order via WhatsApp</a>{% endif %}<button data-wishlist="{{ product.id }}" data-url="{% url 'core:wishlist_toggle' product.id %}"><i data-lucide="heart" aria-hidden="true"></i> Add to wishlist</button></div><div class="purchase-trust"><span>Cash on delivery</span><span>Easy exchange</span><span>ROCKS warranty</span></div></div></div></div></section>
 <section class="spec-section section"><div class="container"><div class="section-head"><div><span class="eyebrow">EVERYTHING YOU NEED TO KNOW</span><h2>Clear details before you buy.</h2></div></div><div class="detail-tabs"><div class="tab-buttons" role="tablist"><button class="active" data-tab="description">Description</button><button data-tab="specs">Specifications</button><button data-tab="warranty">Warranty &amp; use</button></div><div class="tab-panel active" id="description"><p class="product-copy">{{ product.display_description }}</p></div><div class="tab-panel" id="specs">{% if product.display_specifications_text %}<p class="product-copy">{{ product.display_specifications_text }}</p>{% endif %}<div class="spec-grid">{% for spec in product.specifications.all %}<div><span><bdi>{{ spec.display_name }}</bdi></span><b><bdi>{{ spec.display_value }}</bdi></b></div>{% empty %}{% if not product.display_specifications_text %}<div><span>Quality</span><b>ROCKS standards</b></div>{% endif %}{% endfor %}</div></div><div class="tab-panel" id="warranty">{% if product.display_warranty_text %}<p class="product-copy">{{ product.display_warranty_text }}</p>{% else %}<p class="product-copy">Use the product according to a qualified technician’s instructions and do not exceed the stated specifications. The ROCKS warranty covers manufacturing defects.</p>{% endif %}</div></div></div></section>
 {% include 'includes/product_section.html' with eyebrow="COMPLETE YOUR SETUP" title="You may also like" description="Related charging solutions selected for your needs." products=related_products %}
+{% endblock %}
+
+{% block mobile_purchase_bar %}
 {% if not product.is_coming_soon and product.has_price_options %}<div class="mobile-add">{% if product.price is not None %}<span><b data-mobile-price>{{ product.price|floatformat:2 }}</b> {{ site_settings.currency|default:"EGP" }}</span>{% endif %}<button class="btn btn-gold" type="submit" form="detail-cart-form" {% if product.variants.all %}disabled{% endif %}>Add to cart</button></div>{% endif %}
 {% endblock %}
